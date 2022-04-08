@@ -1,16 +1,16 @@
 {
-	"title": "Profectus",
-	"id": "profectus",
-	"author": "thepaperpilot",
+	"title": "Primordial Tree",
+	"id": "primordius",
+	"author": "Jacorb90",
 	"discordName": "The Paper Pilot Community",
 	"discordLink": "https://discord.gg/WzejVAx",
 
-	"versionNumber": "0.0",
-	"versionTitle": "Initial Commit",
+	"versionNumber": "0.1",
+	"versionTitle": "Basic Mechanics",
 
 	"allowGoBack": true,
 	"defaultShowSmall": false,
-	"defaultDecimalsShown": 2,
+	"defaultDecimalsShown": 0,
 	"useHeader": true,
 	"banner": null,
 	"logo": "",

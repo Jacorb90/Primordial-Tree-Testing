@@ -2,6 +2,7 @@ import Decimal, { DecimalSource, format, formatWhole } from "util/bignum";
 import { computed, ComputedRef, isRef, ref, Ref, watch } from "vue";
 import { globalBus } from "game/events";
 import { State, persistent } from "game/persistence";
+import { isResource } from "features/conversion";
 
 export interface Resource<T = DecimalSource> extends Ref<T> {
     displayName: string;
@@ -110,4 +111,15 @@ export function displayResource(resource: Resource, overrideAmount?: DecimalSour
         return formatWhole(amount);
     }
     return format(amount, resource.precision, resource.small);
+}
+
+export function displayResourceOrCompRef(
+    res: Resource | ComputedRef,
+    overrideAmount?: DecimalSource
+): string {
+    if (isResource(res)) return displayResource(res, overrideAmount);
+    else {
+        const amount = overrideAmount ?? res.value;
+        return format(amount);
+    }
 }

@@ -4,9 +4,9 @@ import {
     createClickable,
     GenericClickable
 } from "features/clickables/clickable";
-import { GenericConversion } from "features/conversion";
+import { GenericConversion, isResource } from "features/conversion";
 import { CoercableComponent, jsx, Replace, setDefault } from "features/feature";
-import { displayResource } from "features/resources/resource";
+import { displayResource, displayResourceOrCompRef } from "features/resources/resource";
 import {
     createTreeNode,
     GenericTree,
@@ -33,6 +33,7 @@ export interface ResetButtonOptions extends ClickableOptions {
     showNextAt?: Computable<boolean>;
     display?: Computable<CoercableComponent>;
     canClick?: Computable<boolean>;
+    displayName?: string;
 }
 
 export type ResetButton<T extends ResetButtonOptions> = Replace<
@@ -87,11 +88,13 @@ export function createResetButton<T extends ClickableOptions & ResetButtonOption
                     <div v-show={unref(resetButton.showNextAt)}>
                         <br />
                         Next:{" "}
-                        {displayResource(
+                        {displayResourceOrCompRef(
                             resetButton.conversion.baseResource,
                             unref(resetButton.conversion.nextAt)
                         )}{" "}
-                        {resetButton.conversion.baseResource.displayName}
+                        {isResource(resetButton.conversion.baseResource)
+                            ? resetButton.conversion.baseResource.displayName
+                            : resetButton.displayName || ""}
                     </div>
                 </span>
             ));
@@ -120,7 +123,7 @@ export function createResetButton<T extends ClickableOptions & ResetButtonOption
 export interface LayerTreeNodeOptions extends TreeNodeOptions {
     layerID: string;
     color: Computable<string>; // marking as required
-    display?: Computable<string>;
+    display?: Computable<CoercableComponent>;
     append?: Computable<boolean>;
 }
 export type LayerTreeNode<T extends LayerTreeNodeOptions> = Replace<
@@ -148,7 +151,7 @@ export function createLayerTreeNode<T extends LayerTreeNodeOptions>(
         processComputable(options as T, "append");
         return {
             ...options,
-            display: options.layerID,
+            display: options.display,
             onClick: unref((options as unknown as GenericLayerTreeNode).append)
                 ? function () {
                       if (player.tabs.includes(options.layerID)) {

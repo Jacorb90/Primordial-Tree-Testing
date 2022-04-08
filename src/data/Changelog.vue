@@ -5,13 +5,11 @@
         </template>
         <template v-slot:body>
             <details open>
-                <summary>v0.0 Initial Commit - <time>2021-09-04</time></summary>
-                This is the first release :D
+                <summary>v0.1 Basic Mechanics - <time>2022-04-08</time></summary>
                 <ul>
-                    <li class="feature">Did everything</li>
-                    <li class="fix">Had some fun</li>
-                    <li class="breaking">Removed everything</li>
-                    <li class="balancing">Created some bugs to fix later</li>
+                    <li class="feature">Implemented Flame, Life, & Water layers</li>
+                    <li class="feature">Implemented Advancement 1</li>
+                    <li class="feature">Implemented Lightning layer</li>
                 </ul>
             </details>
         </template>

@@ -10,7 +10,7 @@ import {
     ProcessedComputable
 } from "util/computed";
 import { createLazyProxy } from "util/proxies";
-import { computed, isRef, Ref, unref } from "vue";
+import { computed, ComputedRef, isRef, Ref, unref } from "vue";
 import { Replace, setDefault } from "./feature";
 import { Resource } from "./resources/resource";
 
@@ -18,7 +18,7 @@ export interface ConversionOptions {
     scaling: ScalingFunction;
     currentGain?: Computable<DecimalSource>;
     nextAt?: Computable<DecimalSource>;
-    baseResource: Resource;
+    baseResource: Resource | ComputedRef<DecimalSource>;
     gainResource: Resource;
     buyMax?: Computable<boolean>;
     roundUpCost?: Computable<boolean>;
@@ -53,6 +53,10 @@ export type GenericConversion = Replace<
 export interface GainModifier {
     apply: (gain: DecimalSource) => DecimalSource;
     revert: (gain: DecimalSource) => DecimalSource;
+}
+
+export function isResource(base: Resource | ComputedRef): base is Resource {
+    return (base as Resource).precision !== undefined;
 }
 
 export function createConversion<T extends ConversionOptions>(
@@ -91,7 +95,7 @@ export function createConversion<T extends ConversionOptions>(
                     unref((conversion as GenericConversion).currentGain)
                 );
                 // TODO just subtract cost?
-                conversion.baseResource.value = 0;
+                if (isResource(conversion.baseResource)) conversion.baseResource.value = 0;
             };
         }
 
@@ -198,7 +202,7 @@ export function createIndependentConversion<S extends ConversionOptions>(
             // TODO just subtract cost?
             // Maybe by adding a cost function to scaling and nextAt just calls the cost function
             // with 1 + currentGain
-            conversion.baseResource.value = 0;
+            if (isResource(conversion.baseResource)) conversion.baseResource.value = 0;
         });
 
         return conversion;
