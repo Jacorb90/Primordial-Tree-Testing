@@ -13,6 +13,7 @@ import life from "./layers/Life";
 import aqua from "./layers/Aqua";
 import advancements from "./layers/Advancements";
 import lightning from "./layers/Lightning";
+import cryo from "./layers/Cryo";
 
 /**
  * @hidden
@@ -25,11 +26,12 @@ export const main = createLayer(() => {
     const baseGain = computed(() => {
         let gain = new Decimal(0);
 
-        if (flame.upgrades[0].bought.value) gain = gain.plus(flame.upgradeEffects[0].value);
-        gain = gain.plus(life.buyables[0].amount.value);
+        if (flame.upgradesR1[0].bought.value) gain = gain.plus(flame.upgradeEffects[0].value);
+        if (flame.upgradesR2[2].bought.value) gain = gain.plus(flame.upgradeEffects[5].value);
+        gain = gain.plus(life.buyableEffects[0].value);
         gain = gain.plus(Decimal.floor(aqua.bubbles.value));
         if (lightning.lightningSel.value == 0)
-            gain = gain.plus(lightning.clickableEffects.value[0]);
+            gain = gain.plus(lightning.clickableEffects[0].value);
 
         return gain;
     });
@@ -37,10 +39,12 @@ export const main = createLayer(() => {
     const particleGain = computed(() => {
         let gain = baseGain.value;
 
-        if (flame.upgrades[1].bought.value) gain = gain.times(flame.upgradeEffects[1].value);
-        gain = gain.times(life.buyableEffects.value[1]);
+        if (flame.upgradesR1[1].bought.value) gain = gain.times(flame.upgradeEffects[1].value);
+        gain = gain.times(life.buyableEffects[1].value);
         if (lightning.lightningSel.value == 1)
-            gain = gain.times(lightning.clickableEffects.value[1]);
+            gain = gain.times(lightning.clickableEffects[1].value);
+        if (lightning.lightningSel.value == 3)
+            gain = gain.times(lightning.clickableEffects[3].value);
 
         return gain;
     });
@@ -52,7 +56,7 @@ export const main = createLayer(() => {
 
     const row1 = [flame.treeNode, life.treeNode, aqua.treeNode];
     const tree = createTree(() => ({
-        nodes: [row1, [lightning.treeNode]],
+        nodes: [row1, [lightning.treeNode, cryo.treeNode]],
         leftSideNodes: [advancements.treeNode],
         branches: [],
         onReset() {
@@ -100,7 +104,7 @@ export const main = createLayer(() => {
 export const getInitialLayers = (
     /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
     player: Partial<PlayerData>
-): Array<GenericLayer> => [main, flame, life, aqua, advancements, lightning];
+): Array<GenericLayer> => [main, flame, life, aqua, advancements, lightning, cryo];
 
 export const hasWon = computed(() => {
     return false;

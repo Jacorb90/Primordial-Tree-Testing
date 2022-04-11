@@ -12,6 +12,14 @@
                     <li class="feature">Implemented Lightning layer</li>
                 </ul>
             </details>
+            <details open>
+                <summary>v0.2 Several Advancements - <time>2022-04-08</time></summary>
+                <ul>
+                    <li class="balancing">Balanced up to 43,000 Particles/s</li>
+                    <li class="feature">Implemented Advancements 2-6</li>
+                    <li class="feature">Implemented Cryo layer</li>
+                </ul>
+            </details>
         </template>
     </Modal>
 </template>

@@ -17,7 +17,10 @@ import { formatWhole } from "util/break_eternity";
 import { computed } from "vue";
 import { globalBus } from "game/events";
 import flame from "./Flame";
+import life from "./Life";
+import advancements from "./Advancements";
 import lightning from "./Lightning";
+import cryo from "./Cryo";
 
 const layer = createLayer(() => {
     const id = "a";
@@ -27,6 +30,8 @@ const layer = createLayer(() => {
     const aqua = createResource<DecimalSource>(0, "Aqua Particles");
     const best = trackBest(aqua);
 
+    const time = createResource<number>(0);
+
     const bubbleTime = createResource<DecimalSource>(0);
     const bubbles = computed(() => {
         return Decimal.log10(Decimal.add(bubbleTime.value, 1));
@@ -34,7 +39,8 @@ const layer = createLayer(() => {
     const bubbleSpeed = computed(() => {
         let speed = new Decimal(1);
 
-        if (flame.upgrades[2].bought.value) speed = speed.times(flame.upgradeEffects[2].value);
+        if (flame.upgradesR1[2].bought.value) speed = speed.times(flame.upgradeEffects[2].value);
+        speed = speed.times(life.buyableEffects[4].value);
 
         return speed;
     });
@@ -47,18 +53,28 @@ const layer = createLayer(() => {
     globalBus.on("update", diff => {
         bubbleTime.value = Decimal.add(
             bubbleTime.value,
-            Decimal.mul(aqua.value, diff).times(bubbleSpeed.value)
+            Decimal.mul(aqua.value, diff).times(bubbleSpeed.value).times(aquaBarSpeed.value)
         );
         waveTime.value = Decimal.add(
             waveTime.value,
-            Decimal.mul(Decimal.floor(bubbles.value), diff / 10)
+            Decimal.mul(Decimal.floor(bubbles.value), diff / 10).times(aquaBarSpeed.value)
         );
+
+        if (advancements.milestones[3].earned.value)
+            aqua.value = Decimal.mul(conversion.currentGain.value, diff).plus(aqua.value);
+
+        time.value += diff;
     });
 
     const baseAquaParticleReq = computed(() => {
+        if (cryo.challenges[2].active.value) return new Decimal(1 / 0);
+
         let req = new Decimal(10);
 
         req = req.div(Decimal.pow(2, Decimal.floor(waves.value)));
+
+        if (cryo.challenges[0].active.value)
+            req = req.pow(cryo.challenge1Data.aquaParticleCost.value);
 
         return req;
     });
@@ -67,7 +83,8 @@ const layer = createLayer(() => {
         let mult = Decimal.dOne;
 
         if (lightning.lightningSel.value == 2)
-            mult = mult.times(lightning.clickableEffects.value[2]);
+            mult = mult.times(lightning.clickableEffects[2].value);
+        if (advancements.milestones[4].earned.value && time.value <= 120) mult = mult.times(3);
 
         return mult;
     });
@@ -82,6 +99,17 @@ const layer = createLayer(() => {
             revert: gain => Decimal.div(gain, gainMult.value)
         }
     }));
+
+    const aquaBarSpeed = computed(() => {
+        let speed = Decimal.dOne;
+
+        speed = speed.times(cryo.challenge1Data.reward.value);
+
+        if (cryo.challenges[1].active.value)
+            speed = speed.div(cryo.challenge2Data.aquaBarDiv.value);
+
+        return speed;
+    });
 
     const bubbleBar = createBar(() => ({
         width: 300,
@@ -118,6 +146,7 @@ const layer = createLayer(() => {
         name,
         color,
         aqua,
+        time,
         bubbleTime,
         bubbles,
         waveTime,
