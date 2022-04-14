@@ -15,7 +15,7 @@ import { render } from "util/vue";
 import { jsx, Visibility } from "features/feature";
 import { createMilestone } from "features/milestones/milestone";
 import { computed } from "vue";
-import { format, formatWhole } from "util/break_eternity";
+import { formatWhole } from "util/break_eternity";
 
 const layer = createLayer(() => {
     const id = "adv";

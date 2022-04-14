@@ -4,7 +4,7 @@
  */
 import { main } from "data/projEntry";
 import { createCumulativeConversion, createPolynomialScaling } from "features/conversion";
-import { CoercableComponent, jsx, Visibility } from "features/feature";
+import { jsx, Visibility } from "features/feature";
 import { createReset } from "features/reset";
 import MainDisplay from "features/resources/MainDisplay.vue";
 import { createResource, trackBest } from "features/resources/resource";
@@ -13,7 +13,7 @@ import { DecimalSource } from "util/bignum";
 import { render } from "util/vue";
 import { createLayerTreeNode, createResetButton } from "../common";
 import { createClickable } from "features/clickables/clickable";
-import { computed, ref } from "vue";
+import { computed } from "vue";
 import advancements from "./Advancements";
 import Decimal from "lib/break_eternity";
 import { format } from "util/break_eternity";
