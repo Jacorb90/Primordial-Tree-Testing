@@ -9,18 +9,20 @@ import { createReset } from "features/reset";
 import MainDisplay from "features/resources/MainDisplay.vue";
 import { createResource, Resource, trackBest } from "features/resources/resource";
 import { createLayer } from "game/layers";
-import Decimal, { DecimalSource } from "util/bignum";
+import Decimal, { DecimalSource, formatWhole } from "util/bignum";
 import { render } from "util/vue";
 import { createLayerTreeNode, createResetButton } from "../common";
 import { createBuyable, Buyable, BuyableDisplay } from "features/buyable";
-import { computed } from "vue";
+import { computed, ComputedRef, unref } from "vue";
 import { format } from "util/break_eternity";
 import { Computable } from "util/computed";
 import advancements from "./Advancements";
 import flame from "./Flame";
 import lightning from "./Lightning";
 import cryo from "./Cryo";
+import air from "./Air";
 import { globalBus } from "game/events";
+import { createClickable } from "features/clickables/clickable";
 
 const layer = createLayer(() => {
     const id = "l";
@@ -37,8 +39,13 @@ const layer = createLayer(() => {
 
         if (lightning.lightningSel.value == 2)
             mult = mult.times(lightning.clickableEffects[2].value);
-        if (advancements.milestones[4].earned.value && time.value <= 120) mult = mult.times(3);
+        if (
+            advancements.milestones[4].earned.value &&
+            Decimal.lte(time.value, advancements.adv5time.value)
+        )
+            mult = mult.times(3);
         mult = mult.times(buyableEffects[3].value);
+        mult = mult.times(air.windEff.value);
 
         return mult;
     });
@@ -68,18 +75,23 @@ const layer = createLayer(() => {
         time.value += diff;
     });
 
-    const extraBuyableLevels = [
+    const extraBuyableLevelsAll = computed(() => {
+        return air.zephyrEff.value;
+    });
+
+    const extraBuyableLevels: ComputedRef<DecimalSource>[] = [
         computed(() => {
-            let lvl = Decimal.dZero;
+            let lvl = buyableEffects[5].value;
 
             if (flame.upgradesR2[0].bought.value) lvl = lvl.plus(flame.upgradeEffects[3].value);
 
-            return lvl;
+            return lvl.plus(extraBuyableLevelsAll.value);
         }),
-        computed(() => 0),
-        computed(() => 0),
-        computed(() => 0),
-        computed(() => 0)
+        computed(() => Decimal.add(buyableEffects[5].value, extraBuyableLevelsAll.value)),
+        computed(() => Decimal.add(buyableEffects[5].value, extraBuyableLevelsAll.value)),
+        computed(() => Decimal.add(buyableEffects[5].value, extraBuyableLevelsAll.value)),
+        computed(() => Decimal.add(buyableEffects[5].value, extraBuyableLevelsAll.value)),
+        computed(() => extraBuyableLevelsAll.value)
     ];
 
     const buyableEffects = {
@@ -95,6 +107,14 @@ const layer = createLayer(() => {
         ),
         4: computed(() =>
             Decimal.pow(2.25, Decimal.add(buyables[4].amount.value, extraBuyableLevels[4].value))
+        ),
+        5: computed(() =>
+            Decimal.add(main.particleGain.value, 1)
+                .log10()
+                .times(Decimal.add(buyables[5].amount.value, extraBuyableLevels[5].value))
+                .plus(1)
+                .log10()
+                .div(5)
         )
     };
 
@@ -116,6 +136,19 @@ const layer = createLayer(() => {
         return exp;
     });
 
+    const buyAll = createClickable(() => ({
+        visibility: () =>
+            advancements.milestones[10].earned.value ? Visibility.Visible : Visibility.None,
+        canClick: () => advancements.milestones[10].earned.value,
+        display: "Buy All",
+        small: true,
+        onClick: _ => {
+            for (let i = 0; i < buyables.length; i++) {
+                if (unref(buyables[i].canClick)) buyables[i].onClick();
+            }
+        }
+    }));
+
     const buyables: Array<
         Buyable<{
             visibility: () => Visibility.Visible | Visibility.None;
@@ -134,8 +167,9 @@ const layer = createLayer(() => {
             display: () => ({
                 title: "Regeneration",
                 description: "Generate 1 Particle/second.",
-                effectDisplay: "+" + format(buyableEffects[0].value)
-            })
+                effectDisplay: "+" + formatWhole(buyableEffects[0].value)
+            }),
+            keepRes: () => advancements.milestones[9].earned.value
         })),
         createBuyable(() => ({
             visibility: () =>
@@ -152,7 +186,8 @@ const layer = createLayer(() => {
                 title: "The Source",
                 description: "Double Particle gain.",
                 effectDisplay: format(buyableEffects[1].value) + "x"
-            })
+            }),
+            keepRes: () => advancements.milestones[9].earned.value
         })),
         createBuyable(() => ({
             visibility: () =>
@@ -168,8 +203,9 @@ const layer = createLayer(() => {
             display: () => ({
                 title: "Solar Warmth",
                 description: "Flame Upgrade 1's effect increases by 2.",
-                effectDisplay: "+" + format(buyableEffects[2].value)
-            })
+                effectDisplay: "+" + formatWhole(buyableEffects[2].value)
+            }),
+            keepRes: () => advancements.milestones[9].earned.value
         })),
         createBuyable(() => ({
             visibility: () =>
@@ -186,7 +222,8 @@ const layer = createLayer(() => {
                 title: "Existence Formula",
                 description: "Increase Life Particle gain by 15%.",
                 effectDisplay: format(buyableEffects[3].value, 2) + "x"
-            })
+            }),
+            keepRes: () => advancements.milestones[9].earned.value
         })),
         createBuyable(() => ({
             visibility: () =>
@@ -203,7 +240,26 @@ const layer = createLayer(() => {
                 title: "Water Lily",
                 description: "Make the Bubble bar 125% faster.",
                 effectDisplay: format(buyableEffects[4].value, 2) + "x"
-            })
+            }),
+            keepRes: () => advancements.milestones[9].earned.value
+        })),
+        createBuyable(() => ({
+            visibility: () =>
+                Decimal.gt(buyables[4].amount.value, 0) ? Visibility.Visible : Visibility.None,
+            cost() {
+                const amt = buyables[5].amount.value;
+                return Decimal.pow(2, Decimal.pow(2, amt))
+                    .times(1.2e4)
+                    .div(buyableCostDiv.value)
+                    .pow(buyableCostExp.value);
+            },
+            resource: life,
+            display: () => ({
+                title: "Purest Form",
+                description: "Add levels to all previous Life Buyables based on Particle gain.",
+                effectDisplay: "+" + format(buyableEffects[5].value, 2)
+            }),
+            keepRes: () => advancements.milestones[9].earned.value
         }))
     ];
 
@@ -237,6 +293,7 @@ const layer = createLayer(() => {
                 {render(resetButton)}
                 <br />
                 <br />
+                {render(buyAll)}
                 <table>
                     <tbody>
                         <tr>
@@ -247,6 +304,7 @@ const layer = createLayer(() => {
                         <tr>
                             <td>{render(buyables[3])}</td>
                             <td>{render(buyables[4])}</td>
+                            <td>{render(buyables[5])}</td>
                         </tr>
                     </tbody>
                 </table>

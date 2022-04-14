@@ -46,6 +46,7 @@ export interface BuyableOptions {
     small?: Computable<boolean>;
     display?: Computable<BuyableDisplay>;
     onPurchase?: (cost: DecimalSource) => void;
+    keepRes?: Computable<boolean>;
 }
 
 export interface BaseBuyable extends Persistent<DecimalSource> {
@@ -142,6 +143,11 @@ export function createBuyable<T extends BuyableOptions>(
             return currClasses;
         });
         processComputable(buyable as T, "canPurchase");
+        processComputable(buyable as T, "keepRes");
+
+        if (buyable.keepRes === undefined) buyable.keepRes = false;
+        const keepRes = buyable.keepRes as ProcessedComputable<boolean>;
+
         buyable.canClick = buyable.canPurchase as ProcessedComputable<boolean>;
         buyable.onClick = buyable.purchase = function () {
             const genericBuyable = buyable as GenericBuyable;
@@ -153,7 +159,8 @@ export function createBuyable<T extends BuyableOptions>(
                 return;
             }
             const cost = unref(genericBuyable.cost);
-            genericBuyable.resource.value = Decimal.sub(genericBuyable.resource.value, cost);
+            if (!unref(keepRes))
+                genericBuyable.resource.value = Decimal.sub(genericBuyable.resource.value, cost);
             genericBuyable.amount.value = Decimal.add(genericBuyable.amount.value, 1);
             this.onPurchase?.(cost);
         };

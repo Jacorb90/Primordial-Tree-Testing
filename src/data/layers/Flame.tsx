@@ -38,7 +38,11 @@ const layer = createLayer(() => {
         if (upgradesR2[1].bought.value) mult = mult.times(upgradeEffects[4].value);
         if (lightning.lightningSel.value == 2)
             mult = mult.times(lightning.clickableEffects[2].value);
-        if (advancements.milestones[4].earned.value && time.value <= 120) mult = mult.times(3);
+        if (
+            advancements.milestones[4].earned.value &&
+            Decimal.lte(time.value, advancements.adv5time.value)
+        )
+            mult = mult.times(3);
 
         return mult;
     });
@@ -174,7 +178,7 @@ const layer = createLayer(() => {
                     <br />
                     Flame Particles add levels to the first Life Buyable.
                     <br />
-                    Currently: +{format(upgradeEffects[3].value)}
+                    Currently: +{formatWhole(upgradeEffects[3].value)}
                     <br />
                     <br />
                     Cost: {displayResource(flame, unref(upgradesR2[0].cost))} {flame.displayName}

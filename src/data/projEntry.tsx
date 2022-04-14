@@ -1,5 +1,5 @@
 import Spacer from "components/layout/Spacer.vue";
-import { jsx } from "features/feature";
+import { jsx, Visibility } from "features/feature";
 import { createResource, trackBest, trackOOMPS, trackTotal } from "features/resources/resource";
 import { defaultResetPropagation, createTree, GenericTree } from "features/trees/tree";
 import { globalBus } from "game/events";
@@ -14,6 +14,7 @@ import aqua from "./layers/Aqua";
 import advancements from "./layers/Advancements";
 import lightning from "./layers/Lightning";
 import cryo from "./layers/Cryo";
+import air from "./layers/Air";
 
 /**
  * @hidden
@@ -36,8 +37,17 @@ export const main = createLayer(() => {
         return gain;
     });
 
+    const baseGainExp = computed(() => {
+        let exp = Decimal.dOne;
+
+        exp = exp.times(air.tornadoEff.value);
+
+        return exp;
+    });
+
     const particleGain = computed(() => {
-        let gain = baseGain.value;
+        const base = baseGain.value || new Decimal(0);
+        let gain = Decimal.pow(base, baseGainExp.value);
 
         if (flame.upgradesR1[1].bought.value) gain = gain.times(flame.upgradeEffects[1].value);
         gain = gain.times(life.buyableEffects[1].value);
@@ -45,6 +55,8 @@ export const main = createLayer(() => {
             gain = gain.times(lightning.clickableEffects[1].value);
         if (lightning.lightningSel.value == 3)
             gain = gain.times(lightning.clickableEffects[3].value);
+        if (advancements.milestones[7].earned.value)
+            gain = gain.times(Decimal.pow(1.2, Decimal.floor(aqua.torrents.value)));
 
         return gain;
     });
@@ -56,9 +68,27 @@ export const main = createLayer(() => {
 
     const row1 = [flame.treeNode, life.treeNode, aqua.treeNode];
     const tree = createTree(() => ({
-        nodes: [row1, [lightning.treeNode, cryo.treeNode]],
+        nodes: [row1, [lightning.treeNode, air.treeNode, cryo.treeNode]],
         leftSideNodes: [advancements.treeNode],
-        branches: [],
+        branches: () => {
+            const b = [];
+
+            if (cryo.treeNode.visibility.value == Visibility.Visible) {
+                b.push({
+                    startNode: aqua.treeNode,
+                    endNode: cryo.treeNode
+                });
+            }
+
+            if (air.treeNode.visibility.value == Visibility.Visible) {
+                b.push({
+                    startNode: life.treeNode,
+                    endNode: air.treeNode
+                });
+            }
+
+            return b;
+        },
         onReset() {
             particles.value = row1.some(tn => toRaw(this.resettingNode.value) === toRaw(tn))
                 ? 0
@@ -77,7 +107,7 @@ export const main = createLayer(() => {
             <>
                 <div v-show={player.devSpeed === 0}>Game Paused</div>
                 <div v-show={player.devSpeed && player.devSpeed !== 1}>
-                    Dev Speed: {format(player.devSpeed || 0)}x
+                    Dev Speed: {format(player.devSpeed || 0, 2)}x
                 </div>
                 <div v-show={player.offlineTime != undefined}>
                     Offline Time: {formatTime(player.offlineTime || 0)}
@@ -87,6 +117,18 @@ export const main = createLayer(() => {
                     <h2>{formatWhole(particles.value)}</h2>
                     <span v-show={Decimal.lt(particles.value, "1e1e6")}> particles</span>
                 </div>
+                <div
+                    v-show={
+                        Decimal.gt(baseGain.value, 0) &&
+                        Decimal.neq(baseGain.value, particleGain.value)
+                    }
+                >
+                    [Base Gain: {format(baseGain.value, 2)}/s
+                    <span v-show={Decimal.gt(baseGainExp.value, 1)}>
+                        &nbsp;&#x2192; {format(Decimal.pow(baseGain.value, baseGainExp.value), 2)}/s
+                    </span>
+                    ]
+                </div>
                 <div v-show={Decimal.gt(particleGain.value, 0)}>({oomps.value})</div>
                 <Spacer />
                 {render(tree)}
@@ -94,6 +136,8 @@ export const main = createLayer(() => {
         )),
         particles,
         particleGain,
+        baseGain,
+        baseGainExp,
         best,
         total,
         oomps,
@@ -104,7 +148,7 @@ export const main = createLayer(() => {
 export const getInitialLayers = (
     /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
     player: Partial<PlayerData>
-): Array<GenericLayer> => [main, flame, life, aqua, advancements, lightning, cryo];
+): Array<GenericLayer> => [main, flame, life, aqua, advancements, lightning, cryo, air];
 
 export const hasWon = computed(() => {
     return false;

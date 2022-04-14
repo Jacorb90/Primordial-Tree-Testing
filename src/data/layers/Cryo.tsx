@@ -8,7 +8,7 @@ import { createReset, Reset } from "features/reset";
 import MainDisplay from "features/resources/MainDisplay.vue";
 import { createResource, Resource, trackBest } from "features/resources/resource";
 import { createLayer } from "game/layers";
-import Decimal, { DecimalSource, format } from "util/bignum";
+import Decimal, { DecimalSource, format, formatWhole } from "util/bignum";
 import { render } from "util/vue";
 import { createLayerTreeNode, createResetButton } from "../common";
 import advancements from "./Advancements";
@@ -86,7 +86,7 @@ const layer = createLayer(() => {
         createChallenge(() => ({
             visibility: () => (Decimal.gte(best.value, 1) ? Visibility.Visible : Visibility.None),
             reset: challengeReset,
-            completionLimit: 100,
+            completionLimit: 10,
             resource: aqua.aqua,
             goal: () => {
                 const comps: DecimalSource = challenges[0].completions.value;
@@ -95,9 +95,9 @@ const layer = createLayer(() => {
             display: () => ({
                 title:
                     "Temperature Decrease (" +
-                    format(challenges[0].completions.value) +
+                    formatWhole(challenges[0].completions.value) +
                     "/" +
-                    format(challenges[0].completionLimit) +
+                    formatWhole(challenges[0].completionLimit) +
                     ")",
                 description:
                     "Disable the Flame layer" +
@@ -105,7 +105,7 @@ const layer = createLayer(() => {
                     format(challenge1Data.lifeBuyableCosts.value, 2) +
                     ", and Aqua Particle base cost is raised ^" +
                     format(challenge1Data.aquaParticleCost.value, 2),
-                goal: format(unref(challenges[0].goal)) + " Aqua Particles",
+                goal: formatWhole(unref(challenges[0].goal)) + " Aqua Particles",
                 reward: "All Aqua bars are faster based on Cryo Particles.",
                 effectDisplay: format(challenge1Data.reward.value, 2) + "x"
             })
@@ -116,7 +116,7 @@ const layer = createLayer(() => {
                     ? Visibility.Visible
                     : Visibility.None,
             reset: challengeReset,
-            completionLimit: 100,
+            completionLimit: 10,
             resource: aqua.aqua,
             goal: () => {
                 const comps: DecimalSource = challenges[1].completions.value;
@@ -125,16 +125,16 @@ const layer = createLayer(() => {
             display: () => ({
                 title:
                     "Full Freeze (" +
-                    format(challenges[1].completions.value) +
+                    formatWhole(challenges[1].completions.value) +
                     "/" +
-                    format(challenges[1].completionLimit) +
+                    formatWhole(challenges[1].completionLimit) +
                     ")",
                 description:
                     "Disable the Life layer" +
                     ", and Aqua bars are " +
                     format(challenge2Data.aquaBarDiv.value, 2) +
                     "x slower",
-                goal: format(unref(challenges[1].goal)) + " Aqua Particles",
+                goal: formatWhole(unref(challenges[1].goal)) + " Aqua Particles",
                 reward: "All Life Buyables are cheaper based on Cryo Particles.",
                 effectDisplay: "/" + format(challenge2Data.reward.value, 2)
             })
@@ -145,7 +145,7 @@ const layer = createLayer(() => {
                     ? Visibility.Visible
                     : Visibility.None,
             reset: challengeReset,
-            completionLimit: 100,
+            completionLimit: 10,
             resource: main.particles,
             goal: () => {
                 const comps: DecimalSource = challenges[2].completions.value;
@@ -154,15 +154,15 @@ const layer = createLayer(() => {
             display: () => ({
                 title:
                     "Absolute Zero (" +
-                    format(challenges[2].completions.value) +
+                    formatWhole(challenges[2].completions.value) +
                     "/" +
-                    format(challenges[2].completionLimit) +
+                    formatWhole(challenges[2].completionLimit) +
                     ")",
                 description:
                     "Disable the Aqua layer" +
                     ", and Fire Upgrade and Life Buyable costs are raised ^" +
                     format(challenge3Data.exp.value, 2),
-                goal: format(unref(challenges[2].goal)) + " Particles",
+                goal: formatWhole(unref(challenges[2].goal)) + " Particles",
                 reward: "Empower the first Flame upgrade.",
                 effectDisplay: "^" + format(challenge3Data.reward.value, 2)
             })

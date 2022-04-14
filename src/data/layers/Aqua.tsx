@@ -50,6 +50,11 @@ const layer = createLayer(() => {
         return Decimal.log10(Decimal.add(waveTime.value, 1));
     });
 
+    const torrentTime = createResource<DecimalSource>(0);
+    const torrents = computed(() => {
+        return Decimal.log10(Decimal.add(torrentTime.value, 1));
+    });
+
     globalBus.on("update", diff => {
         bubbleTime.value = Decimal.add(
             bubbleTime.value,
@@ -59,6 +64,13 @@ const layer = createLayer(() => {
             waveTime.value,
             Decimal.mul(Decimal.floor(bubbles.value), diff / 10).times(aquaBarSpeed.value)
         );
+
+        if (advancements.milestones[7].earned.value) {
+            torrentTime.value = Decimal.add(
+                torrentTime.value,
+                Decimal.mul(Decimal.floor(waveTime.value), diff / 2e6).times(aquaBarSpeed.value)
+            );
+        }
 
         if (advancements.milestones[3].earned.value)
             aqua.value = Decimal.mul(conversion.currentGain.value, diff).plus(aqua.value);
@@ -84,7 +96,11 @@ const layer = createLayer(() => {
 
         if (lightning.lightningSel.value == 2)
             mult = mult.times(lightning.clickableEffects[2].value);
-        if (advancements.milestones[4].earned.value && time.value <= 120) mult = mult.times(3);
+        if (
+            advancements.milestones[4].earned.value &&
+            Decimal.lte(time.value, advancements.adv5time.value)
+        )
+            mult = mult.times(3);
 
         return mult;
     });
@@ -123,6 +139,12 @@ const layer = createLayer(() => {
         direction: Direction.Right,
         progress: () => Decimal.sub(waves.value, Decimal.floor(waves.value))
     }));
+    const torrentBar = createBar(() => ({
+        width: 300,
+        height: 25,
+        direction: Direction.Right,
+        progress: () => Decimal.sub(torrents.value, Decimal.floor(torrents.value))
+    }));
 
     const reset = createReset(() => ({
         thingsToReset: (): Record<string, unknown>[] => [layer]
@@ -151,6 +173,8 @@ const layer = createLayer(() => {
         bubbles,
         waveTime,
         waves,
+        torrentTime,
+        torrents,
         display: jsx(() => {
             const bubbleDiv = Decimal.gt(best.value, 0) ? (
                 <>
@@ -174,6 +198,17 @@ const layer = createLayer(() => {
                 <div />
             );
 
+            const torrentDiv = advancements.milestones[7].earned.value ? (
+                <>
+                    {formatWhole(Decimal.floor(torrents.value))} Torrents, each increasing Point
+                    gain by 20%
+                    <br />
+                    {render(torrentBar)}
+                </>
+            ) : (
+                <div />
+            );
+
             return (
                 <>
                     <MainDisplay resource={aqua} color={color} />
@@ -183,6 +218,8 @@ const layer = createLayer(() => {
                     {bubbleDiv}
                     <br />
                     {waveDiv}
+                    <br />
+                    {torrentDiv}
                 </>
             );
         }),
