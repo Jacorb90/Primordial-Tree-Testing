@@ -1,6 +1,7 @@
 import Modal from "components/Modal.vue";
 import {
     CoercableComponent,
+    OptionsFunc,
     jsx,
     JSXFunction,
     Replace,
@@ -18,7 +19,7 @@ import { createLazyProxy } from "util/proxies";
 import { createNanoEvents, Emitter } from "nanoevents";
 import { InjectionKey, Ref, ref, unref } from "vue";
 import { globalBus } from "./events";
-import { persistent, PersistentRef } from "./persistence";
+import { Persistent, persistent } from "./persistence";
 import player from "./player";
 
 export interface FeatureNode {
@@ -58,7 +59,6 @@ export interface Position {
 }
 
 export interface LayerOptions {
-    id: string;
     color?: Computable<string>;
     display: Computable<CoercableComponent>;
     classes?: Computable<Record<string, boolean>>;
@@ -70,7 +70,8 @@ export interface LayerOptions {
 }
 
 export interface BaseLayer {
-    minimized: PersistentRef<boolean>;
+    id: string;
+    minimized: Persistent<boolean>;
     emitter: Emitter<LayerEvents>;
     on: OmitThisParameter<Emitter<LayerEvents>["on"]>;
     emit: <K extends keyof LayerEvents>(event: K, ...args: Parameters<LayerEvents[K]>) => void;
@@ -84,7 +85,7 @@ export type Layer<T extends LayerOptions> = Replace<
         display: GetComputableType<T["display"]>;
         classes: GetComputableType<T["classes"]>;
         style: GetComputableType<T["style"]>;
-        name: GetComputableTypeWithDefault<T["name"], T["id"]>;
+        name: GetComputableTypeWithDefault<T["name"], string>;
         minWidth: GetComputableTypeWithDefault<T["minWidth"], 600>;
         minimizable: GetComputableTypeWithDefault<T["minimizable"], true>;
         forceHideGoBack: GetComputableType<T["forceHideGoBack"]>;
@@ -100,8 +101,11 @@ export type GenericLayer = Replace<
     }
 >;
 
+export const persistentRefs: Record<string, Set<Persistent>> = {};
+export const addingLayers: string[] = [];
 export function createLayer<T extends LayerOptions>(
-    optionsFunc: (() => T) & ThisType<BaseLayer>
+    id: string,
+    optionsFunc: OptionsFunc<T, BaseLayer, BaseLayer>
 ): Layer<T> {
     return createLazyProxy(() => {
         const layer = {} as T & Partial<BaseLayer>;
@@ -109,10 +113,19 @@ export function createLayer<T extends LayerOptions>(
         layer.on = emitter.on.bind(emitter);
         layer.emit = emitter.emit.bind(emitter);
         layer.nodes = ref({});
+        layer.id = id;
 
+        addingLayers.push(id);
+        persistentRefs[id] = new Set();
         layer.minimized = persistent(false);
-
         Object.assign(layer, optionsFunc.call(layer));
+        if (
+            addingLayers[addingLayers.length - 1] == null ||
+            addingLayers[addingLayers.length - 1] !== id
+        ) {
+            throw `Adding layers stack in invalid state. This should not happen\nStack: ${addingLayers}\nTrying to pop ${layer.id}`;
+        }
+        addingLayers.pop();
 
         processComputable(layer as T, "color");
         processComputable(layer as T, "display");

@@ -22,7 +22,7 @@ import advancements from "./Advancements";
 import lightning from "./Lightning";
 import cryo from "./Cryo";
 
-const layer = createLayer(() => {
+const layer = createLayer("a", () => {
     const id = "a";
     const name = "Aqua";
     const color = "#2197eb";

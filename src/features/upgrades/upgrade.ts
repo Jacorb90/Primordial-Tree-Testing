@@ -2,6 +2,7 @@ import UpgradeComponent from "features/upgrades/Upgrade.vue";
 import {
     CoercableComponent,
     Component,
+    OptionsFunc,
     findFeatures,
     GatherProps,
     getUniqueID,
@@ -23,7 +24,7 @@ import {
 } from "util/computed";
 import { createLazyProxy } from "util/proxies";
 import { computed, Ref, unref } from "vue";
-import { Persistent, makePersistent, PersistentState } from "game/persistence";
+import { persistent, Persistent, PersistentState } from "game/persistence";
 
 export const UpgradeType = Symbol("Upgrade");
 
@@ -78,11 +79,10 @@ export type GenericUpgrade = Replace<
 >;
 
 export function createUpgrade<T extends UpgradeOptions>(
-    optionsFunc: () => T & ThisType<Upgrade<T>>
+    optionsFunc: OptionsFunc<T, Upgrade<T>, BaseUpgrade>
 ): Upgrade<T> {
-    return createLazyProxy(() => {
-        const upgrade: T & Partial<BaseUpgrade> = optionsFunc();
-        makePersistent<boolean>(upgrade, false);
+    return createLazyProxy(persistent => {
+        const upgrade = Object.assign(persistent, optionsFunc());
         upgrade.id = getUniqueID("upgrade-");
         upgrade.type = UpgradeType;
         upgrade[Component] = UpgradeComponent;
@@ -167,7 +167,7 @@ export function createUpgrade<T extends UpgradeOptions>(
         };
 
         return upgrade as unknown as Upgrade<T>;
-    });
+    }, persistent<boolean>(false));
 }
 
 export function setupAutoPurchase(

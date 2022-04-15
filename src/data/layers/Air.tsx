@@ -17,7 +17,7 @@ import { computed, unref } from "vue";
 import life from "./Life";
 import { globalBus } from "game/events";
 
-const layer = createLayer(() => {
+const layer = createLayer("ai", () => {
     const id = "ai";
     const name = "Air";
     const color = "#ffd1fb";
@@ -75,6 +75,17 @@ const layer = createLayer(() => {
                         .root(1.4)
                         .floor()
                         .sub(conv.gainResource.value);
+            },
+            currentAt: conv => {
+                if (advancements.milestones[10].earned.value)
+                    return Decimal.div(unref(conv.currentGain), 3)
+                        .plus(2 / 3)
+                        .pow(4)
+                        .times(1e4);
+                else
+                    return Decimal.pow(2, Decimal.add(conv.gainResource.value, 1).pow(1.4)).times(
+                        5e3
+                    );
             },
             nextAt: conv => {
                 if (advancements.milestones[10].earned.value)

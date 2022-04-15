@@ -20,7 +20,7 @@ import flame from "./Flame";
 import life from "./Life";
 import aqua from "./Aqua";
 
-const layer = createLayer(() => {
+const layer = createLayer("c", () => {
     const id = "c";
     const name = "Cryo";
     const color = "#03f4fc";

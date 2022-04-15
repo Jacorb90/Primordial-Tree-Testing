@@ -19,7 +19,7 @@ import air from "./layers/Air";
 /**
  * @hidden
  */
-export const main = createLayer(() => {
+export const main = createLayer("main", () => {
     const particles = createResource<DecimalSource>(10, "particles");
     const best = trackBest(particles);
     const total = trackTotal(particles);
@@ -100,7 +100,6 @@ export const main = createLayer(() => {
     })) as GenericTree;
 
     return {
-        id: "main",
         name: "Tree",
         links: tree.links,
         display: jsx(() => (

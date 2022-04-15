@@ -1,6 +1,6 @@
 import ClickableComponent from "features/clickables/Clickable.vue";
 import { Resource } from "features/resources/resource";
-import { Persistent, makePersistent, PersistentState } from "game/persistence";
+import { Persistent, PersistentState, persistent } from "game/persistence";
 import Decimal, { DecimalSource, format, formatWhole } from "util/bignum";
 import {
     Computable,
@@ -15,6 +15,7 @@ import { computed, Ref, unref } from "vue";
 import {
     CoercableComponent,
     Component,
+    OptionsFunc,
     GatherProps,
     getUniqueID,
     jsx,
@@ -88,10 +89,10 @@ export type GenericBuyable = Replace<
 >;
 
 export function createBuyable<T extends BuyableOptions>(
-    optionsFunc: () => T & ThisType<Buyable<T>>
+    optionsFunc: OptionsFunc<T, Buyable<T>, BaseBuyable>
 ): Buyable<T> {
-    return createLazyProxy(() => {
-        const buyable: T & Partial<BaseBuyable> = optionsFunc();
+    return createLazyProxy(persistent => {
+        const buyable = Object.assign(persistent, optionsFunc());
 
         if (buyable.canPurchase == null && (buyable.resource == null || buyable.cost == null)) {
             console.warn(
@@ -101,7 +102,6 @@ export function createBuyable<T extends BuyableOptions>(
             throw "Cannot create buyable without a canPurchase property or a resource and cost property";
         }
 
-        makePersistent<DecimalSource>(buyable, 0);
         buyable.id = getUniqueID("buyable-");
         buyable.type = BuyableType;
         buyable[Component] = ClickableComponent;
@@ -246,5 +246,5 @@ export function createBuyable<T extends BuyableOptions>(
         };
 
         return buyable as unknown as Buyable<T>;
-    });
+    }, persistent<DecimalSource>(0));
 }

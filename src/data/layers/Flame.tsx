@@ -22,7 +22,7 @@ import lightning from "./Lightning";
 import cryo from "./Cryo";
 import { globalBus } from "game/events";
 
-const layer = createLayer(() => {
+const layer = createLayer("f", () => {
     const id = "f";
     const name = "Flame";
     const color = "#fc3b00";

@@ -18,7 +18,7 @@ import advancements from "./Advancements";
 import Decimal from "lib/break_eternity";
 import { format } from "util/break_eternity";
 
-const layer = createLayer(() => {
+const layer = createLayer("li", () => {
     const id = "li";
     const name = "Lightning";
     const color = "#ffd500";

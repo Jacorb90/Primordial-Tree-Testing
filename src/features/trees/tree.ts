@@ -1,6 +1,7 @@
 import {
     CoercableComponent,
     Component,
+    OptionsFunc,
     GatherProps,
     getUniqueID,
     Replace,
@@ -13,7 +14,7 @@ import { GenericReset } from "features/reset";
 import { displayResource, Resource } from "features/resources/resource";
 import { Tooltip } from "features/tooltip";
 import TreeComponent from "features/trees/Tree.vue";
-import { persistent } from "game/persistence";
+import { deletePersistent, persistent } from "game/persistence";
 import Decimal, { DecimalSource, format, formatWhole } from "util/bignum";
 import {
     Computable,
@@ -74,18 +75,20 @@ export type GenericTreeNode = Replace<
 >;
 
 export function createTreeNode<T extends TreeNodeOptions>(
-    optionsFunc: () => T & ThisType<TreeNode<T>>
+    optionsFunc: OptionsFunc<T, TreeNode<T>, BaseTreeNode>
 ): TreeNode<T> {
+    const forceTooltip = persistent(false);
     return createLazyProxy(() => {
-        const treeNode: T & Partial<BaseTreeNode> = optionsFunc();
+        const treeNode = optionsFunc();
         treeNode.id = getUniqueID("treeNode-");
         treeNode.type = TreeNodeType;
 
         if (treeNode.tooltip) {
-            treeNode.forceTooltip = persistent(false);
+            treeNode.forceTooltip = forceTooltip;
         } else {
             // If we don't have a tooltip, no point in making this persistent
             treeNode.forceTooltip = ref(false);
+            deletePersistent(forceTooltip);
         }
 
         processComputable(treeNode as T, "visibility");
@@ -166,10 +169,10 @@ export type GenericTree = Replace<
 >;
 
 export function createTree<T extends TreeOptions>(
-    optionsFunc: () => T & ThisType<Tree<T>>
+    optionsFunc: OptionsFunc<T, Tree<T>, BaseTree>
 ): Tree<T> {
     return createLazyProxy(() => {
-        const tree: T & Partial<BaseTree> = optionsFunc();
+        const tree = optionsFunc();
         tree.id = getUniqueID("tree-");
         tree.type = TreeType;
         tree[Component] = TreeComponent;

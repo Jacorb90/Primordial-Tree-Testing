@@ -24,7 +24,7 @@ import air from "./Air";
 import { globalBus } from "game/events";
 import { createClickable } from "features/clickables/clickable";
 
-const layer = createLayer(() => {
+const layer = createLayer("l", () => {
     const id = "l";
     const name = "Life";
     const color = "#32a85e";

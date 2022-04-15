@@ -2,6 +2,7 @@ import GridComponent from "features/grids/Grid.vue";
 import {
     CoercableComponent,
     Component,
+    OptionsFunc,
     GatherProps,
     getUniqueID,
     Replace,
@@ -19,7 +20,7 @@ import {
 } from "util/computed";
 import { createLazyProxy } from "util/proxies";
 import { computed, Ref, unref } from "vue";
-import { State, Persistent, makePersistent, PersistentState } from "game/persistence";
+import { State, Persistent, PersistentState, persistent } from "game/persistence";
 
 export const GridType = Symbol("Grid");
 
@@ -241,11 +242,10 @@ export type GenericGrid = Replace<
 >;
 
 export function createGrid<T extends GridOptions>(
-    optionsFunc: () => T & ThisType<Grid<T>>
+    optionsFunc: OptionsFunc<T, Grid<T>, BaseGrid>
 ): Grid<T> {
-    return createLazyProxy(() => {
-        const grid: T & Partial<BaseGrid> = optionsFunc();
-        makePersistent(grid, {});
+    return createLazyProxy(persistent => {
+        const grid = Object.assign(persistent, optionsFunc());
         grid.id = getUniqueID("grid-");
         grid[Component] = GridComponent;
 
@@ -301,5 +301,5 @@ export function createGrid<T extends GridOptions>(
         };
 
         return grid as unknown as Grid<T>;
-    });
+    }, persistent({}));
 }

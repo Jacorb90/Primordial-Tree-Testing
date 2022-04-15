@@ -2,6 +2,7 @@ import Select from "components/fields/Select.vue";
 import {
     CoercableComponent,
     Component,
+    OptionsFunc,
     GatherProps,
     getUniqueID,
     jsx,
@@ -13,7 +14,7 @@ import {
 import MilestoneComponent from "features/milestones/Milestone.vue";
 import { globalBus } from "game/events";
 import "game/notifications";
-import { makePersistent, Persistent, PersistentState } from "game/persistence";
+import { persistent, Persistent, PersistentState } from "game/persistence";
 import settings, { registerSettingField } from "game/settings";
 import { camelToTitle } from "util/common";
 import {
@@ -83,11 +84,10 @@ export type GenericMilestone = Replace<
 >;
 
 export function createMilestone<T extends MilestoneOptions>(
-    optionsFunc: () => T & ThisType<Milestone<T>>
+    optionsFunc: OptionsFunc<T, Milestone<T>, BaseMilestone>
 ): Milestone<T> {
-    return createLazyProxy(() => {
-        const milestone: T & Partial<BaseMilestone> = optionsFunc();
-        makePersistent<boolean>(milestone, false);
+    return createLazyProxy(persistent => {
+        const milestone = Object.assign(persistent, optionsFunc());
         milestone.id = getUniqueID("milestone-");
         milestone.type = MilestoneType;
         milestone[Component] = MilestoneComponent;
@@ -168,7 +168,7 @@ export function createMilestone<T extends MilestoneOptions>(
         }
 
         return milestone as unknown as Milestone<T>;
-    });
+    }, persistent<boolean>(false));
 }
 
 declare module "game/settings" {

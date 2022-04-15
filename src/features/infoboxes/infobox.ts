@@ -2,6 +2,7 @@ import InfoboxComponent from "features/infoboxes/Infobox.vue";
 import {
     CoercableComponent,
     Component,
+    OptionsFunc,
     GatherProps,
     getUniqueID,
     Replace,
@@ -18,7 +19,7 @@ import {
 } from "util/computed";
 import { createLazyProxy } from "util/proxies";
 import { Ref, unref } from "vue";
-import { Persistent, makePersistent, PersistentState } from "game/persistence";
+import { Persistent, PersistentState, persistent } from "game/persistence";
 
 export const InfoboxType = Symbol("Infobox");
 
@@ -63,11 +64,10 @@ export type GenericInfobox = Replace<
 >;
 
 export function createInfobox<T extends InfoboxOptions>(
-    optionsFunc: () => T & ThisType<Infobox<T>>
+    optionsFunc: OptionsFunc<T, Infobox<T>, BaseInfobox>
 ): Infobox<T> {
-    return createLazyProxy(() => {
-        const infobox: T & Partial<BaseInfobox> = optionsFunc();
-        makePersistent<boolean>(infobox, false);
+    return createLazyProxy(persistent => {
+        const infobox = Object.assign(persistent, optionsFunc());
         infobox.id = getUniqueID("infobox-");
         infobox.type = InfoboxType;
         infobox[Component] = InfoboxComponent;
@@ -112,5 +112,5 @@ export function createInfobox<T extends InfoboxOptions>(
         };
 
         return infobox as unknown as Infobox<T>;
-    });
+    }, persistent<boolean>(false));
 }

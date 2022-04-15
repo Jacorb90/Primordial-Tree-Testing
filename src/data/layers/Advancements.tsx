@@ -17,7 +17,7 @@ import { createMilestone } from "features/milestones/milestone";
 import { computed } from "vue";
 import { formatWhole } from "util/break_eternity";
 
-const layer = createLayer(() => {
+const layer = createLayer("adv", () => {
     const id = "adv";
     const name = "Advancements";
     const color = "#ffffff";
@@ -35,6 +35,7 @@ const layer = createLayer(() => {
                 )
                     ? 1
                     : 0,
+            currentAt: conv => reqs[new Decimal(conv.gainResource.value).sub(1).toNumber()],
             nextAt: conv => reqs[new Decimal(conv.gainResource.value).toNumber()]
         },
         baseResource: main.particleGain,
@@ -56,7 +57,7 @@ const layer = createLayer(() => {
 
     const resetButton = createResetButton(() => ({
         conversion,
-        displayName: "particles/s",
+        baseResourceName: "particles/s",
         tree: main.tree,
         treeNode
     }));

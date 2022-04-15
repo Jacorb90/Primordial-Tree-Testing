@@ -2,6 +2,7 @@ import AchievementComponent from "features/achievements/Achievement.vue";
 import {
     CoercableComponent,
     Component,
+    OptionsFunc,
     GatherProps,
     getUniqueID,
     Replace,
@@ -10,7 +11,7 @@ import {
     Visibility
 } from "features/feature";
 import "game/notifications";
-import { Persistent, makePersistent, PersistentState } from "game/persistence";
+import { Persistent, PersistentState, persistent } from "game/persistence";
 import {
     Computable,
     GetComputableType,
@@ -67,11 +68,10 @@ export type GenericAchievement = Replace<
 >;
 
 export function createAchievement<T extends AchievementOptions>(
-    optionsFunc: () => T & ThisType<Achievement<T>>
+    optionsFunc: OptionsFunc<T, Achievement<T>, BaseAchievement>
 ): Achievement<T> {
-    return createLazyProxy(() => {
-        const achievement: T & Partial<BaseAchievement> = optionsFunc();
-        makePersistent<boolean>(achievement, false);
+    return createLazyProxy(persistent => {
+        const achievement = Object.assign(persistent, optionsFunc());
         achievement.id = getUniqueID("achievement-");
         achievement.type = AchievementType;
         achievement[Component] = AchievementComponent;
@@ -122,5 +122,5 @@ export function createAchievement<T extends AchievementOptions>(
         }
 
         return achievement as unknown as Achievement<T>;
-    });
+    }, persistent<boolean>(false));
 }
