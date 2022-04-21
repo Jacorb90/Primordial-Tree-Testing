@@ -186,7 +186,7 @@ const layer = createLayer("c", () => {
         visibility: () =>
             advancements.milestones[2].earned.value ? Visibility.Visible : Visibility.Hidden,
         layerID: id,
-        display: jsx(() => <img src="/nodes/cryo.png" />),
+        display: jsx(() => <img src="./nodes/cryo.png" />),
         color,
         reset
     }));

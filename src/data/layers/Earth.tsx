@@ -158,7 +158,7 @@ const layer = createLayer("e", () => {
         visibility: () =>
             advancements.milestones[11].earned.value ? Visibility.Visible : Visibility.Hidden,
         layerID: id,
-        display: jsx(() => <img src="/nodes/earth.png" />),
+        display: jsx(() => <img src="./nodes/earth.png" />),
         color,
         reset
     }));

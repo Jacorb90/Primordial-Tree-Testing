@@ -122,7 +122,7 @@ const layer = createLayer("li", () => {
         visibility: () =>
             advancements.milestones[0].earned.value ? Visibility.Visible : Visibility.Hidden,
         layerID: id,
-        display: jsx(() => <img src="/nodes/lightning.png" />),
+        display: jsx(() => <img src="./nodes/lightning.png" />),
         color,
         reset
     }));

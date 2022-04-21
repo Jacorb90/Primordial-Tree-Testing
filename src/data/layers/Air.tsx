@@ -124,7 +124,7 @@ const layer = createLayer("ai", () => {
         visibility: () =>
             advancements.milestones[6].earned.value ? Visibility.Visible : Visibility.Hidden,
         layerID: id,
-        display: jsx(() => <img src="/nodes/air.png" />),
+        display: jsx(() => <img src="./nodes/air.png" />),
         color,
         reset
     }));

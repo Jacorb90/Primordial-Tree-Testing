@@ -271,7 +271,7 @@ const layer = createLayer("l", () => {
 
     const treeNode = createLayerTreeNode(() => ({
         layerID: id,
-        display: jsx(() => <img src="/nodes/life.png" />),
+        display: jsx(() => <img src="./nodes/life.png" />),
         color,
         reset
     }));
