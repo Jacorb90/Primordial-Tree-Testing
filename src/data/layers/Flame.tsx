@@ -242,7 +242,7 @@ const layer = createLayer("f", () => {
 
     const treeNode = createLayerTreeNode(() => ({
         layerID: id,
-        display: jsx(() => <img src="/nodes/flame.png" />),
+        display: jsx(() => <img src="./nodes/flame.png" />),
         color,
         reset
     }));
