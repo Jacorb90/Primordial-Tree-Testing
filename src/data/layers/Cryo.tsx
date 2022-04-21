@@ -202,6 +202,7 @@ const layer = createLayer("c", () => {
         name,
         color,
         cryo,
+        best,
         display: jsx(() => (
             <>
                 <MainDisplay resource={cryo} color={color} />

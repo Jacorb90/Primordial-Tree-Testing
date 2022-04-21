@@ -36,7 +36,13 @@ const layer = createLayer("li", () => {
 
     const clickableEffects = {
         0: computed(() => Decimal.add(lightning.value, 1).log2().times(2)),
-        1: computed(() => Decimal.add(lightning.value, 1).sqrt()),
+        1: computed(() => {
+            let ret = Decimal.add(lightning.value, 1).sqrt();
+
+            if (ret.gte(100)) ret = ret.log(100).times(100);
+
+            return ret;
+        }),
         2: computed(() => Decimal.add(lightning.value, 1).log(3).plus(1).sqrt()),
         3: computed(() =>
             Decimal.add(lightning.value, 1)
@@ -132,6 +138,7 @@ const layer = createLayer("li", () => {
         name,
         color,
         lightning,
+        best,
         lightningSel,
         display: jsx(() => (
             <>

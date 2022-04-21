@@ -20,6 +20,7 @@ import life from "./Life";
 import advancements from "./Advancements";
 import lightning from "./Lightning";
 import cryo from "./Cryo";
+import earth from "./Earth";
 import { globalBus } from "game/events";
 
 const layer = createLayer("f", () => {
@@ -31,6 +32,7 @@ const layer = createLayer("f", () => {
     const best = trackBest(flame);
 
     const time = createResource<number>(0);
+    const autoDone = createResource<boolean>(false);
 
     const gainMult = computed(() => {
         let mult = Decimal.dOne;
@@ -43,6 +45,7 @@ const layer = createLayer("f", () => {
             Decimal.lte(time.value, advancements.adv5time.value)
         )
             mult = mult.times(3);
+        mult = mult.times(earth.flameMult.value);
 
         return mult;
     });
@@ -64,6 +67,19 @@ const layer = createLayer("f", () => {
         if (advancements.milestones[3].earned.value)
             flame.value = Decimal.mul(conversion.currentGain.value, diff).plus(flame.value);
         time.value += diff;
+
+        if (
+            !autoDone.value &&
+            advancements.milestones[13].earned.value &&
+            time.value >= 1 &&
+            Decimal.gte(flame.value, Decimal.pow(2e4, upgCostExp.value))
+        ) {
+            autoDone.value = true;
+            for (let i = 0; i < 3; i++) {
+                upgradesR1[i].purchase();
+                upgradesR2[i].purchase();
+            }
+        }
     });
 
     const upgradeEffects = {
@@ -242,7 +258,9 @@ const layer = createLayer("f", () => {
         name,
         color,
         flame,
+        best,
         time,
+        autoDone,
         upgradeEffects,
         display: jsx(() => (
             <>

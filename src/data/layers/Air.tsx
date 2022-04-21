@@ -29,7 +29,9 @@ const layer = createLayer("ai", () => {
         return Decimal.gte(air.value, 1) ? air.value : 0;
     });
     const windEff = computed(() => {
-        return Decimal.add(wind.value, 1);
+        let eff = Decimal.add(wind.value, 1);
+        if (eff.gte(10)) eff = Decimal.pow(10, eff.log10().sqrt());
+        return eff;
     });
 
     const zephyr = createResource<DecimalSource>(0, "Zephyr Force");
@@ -49,13 +51,25 @@ const layer = createLayer("ai", () => {
     });
 
     globalBus.on("update", diff => {
-        wind.value = Decimal.mul(windMul.value, diff).plus(Decimal.pow(10, wind.value)).log10();
-        zephyr.value = Decimal.mul(zephyrMul.value, diff)
-            .plus(Decimal.pow(10, zephyr.value))
-            .log10();
-        tornado.value = Decimal.mul(tornadoMul.value, diff)
-            .plus(Decimal.pow(10, tornado.value))
-            .log10();
+        if (advancements.milestones[14].earned.value) {
+            wind.value = Decimal.mul(Decimal.pow(10, Decimal.sqrt(windMul.value)), diff)
+                .plus(Decimal.pow(10, wind.value))
+                .log10();
+            zephyr.value = Decimal.mul(Decimal.pow(10, Decimal.sqrt(zephyrMul.value)), diff)
+                .plus(Decimal.pow(10, zephyr.value))
+                .log10();
+            tornado.value = Decimal.mul(Decimal.pow(10, Decimal.sqrt(tornadoMul.value)), diff)
+                .plus(Decimal.pow(10, tornado.value))
+                .log10();
+        } else {
+            wind.value = Decimal.mul(windMul.value, diff).plus(Decimal.pow(10, wind.value)).log10();
+            zephyr.value = Decimal.mul(zephyrMul.value, diff)
+                .plus(Decimal.pow(10, zephyr.value))
+                .log10();
+            tornado.value = Decimal.mul(tornadoMul.value, diff)
+                .plus(Decimal.pow(10, tornado.value))
+                .log10();
+        }
     });
 
     const conversion = createCumulativeConversion(() => ({

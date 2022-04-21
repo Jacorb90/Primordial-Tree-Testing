@@ -21,6 +21,7 @@ import life from "./Life";
 import advancements from "./Advancements";
 import lightning from "./Lightning";
 import cryo from "./Cryo";
+import earth from "./Earth";
 
 const layer = createLayer("a", () => {
     const id = "a";
@@ -53,6 +54,14 @@ const layer = createLayer("a", () => {
     const torrentTime = createResource<DecimalSource>(0);
     const torrents = computed(() => {
         return Decimal.log10(Decimal.add(torrentTime.value, 1));
+    });
+
+    const torrentEff = computed(() => {
+        let eff = new Decimal(0.2);
+
+        eff = eff.plus(earth.torrentEffAdded.value);
+
+        return eff;
     });
 
     globalBus.on("update", diff => {
@@ -124,6 +133,10 @@ const layer = createLayer("a", () => {
         if (cryo.challenges[1].active.value)
             speed = speed.div(cryo.challenge2Data.aquaBarDiv.value);
 
+        if (advancements.milestones[11].earned.value) speed = speed.times(2);
+        if (advancements.milestones[14].earned.value)
+            speed = speed.times(advancements.adv15eff.value);
+
         return speed;
     });
 
@@ -168,6 +181,7 @@ const layer = createLayer("a", () => {
         name,
         color,
         aqua,
+        best,
         time,
         bubbleTime,
         bubbles,
@@ -175,6 +189,7 @@ const layer = createLayer("a", () => {
         waves,
         torrentTime,
         torrents,
+        torrentEff,
         display: jsx(() => {
             const bubbleDiv = Decimal.gt(best.value, 0) ? (
                 <>
@@ -201,7 +216,7 @@ const layer = createLayer("a", () => {
             const torrentDiv = advancements.milestones[7].earned.value ? (
                 <>
                     {formatWhole(Decimal.floor(torrents.value))} Torrents, each increasing Point
-                    gain by 20%
+                    gain by {formatWhole(Decimal.mul(torrentEff.value, 100))}%
                     <br />
                     {render(torrentBar)}
                 </>

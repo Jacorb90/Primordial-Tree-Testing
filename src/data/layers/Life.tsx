@@ -21,6 +21,7 @@ import flame from "./Flame";
 import lightning from "./Lightning";
 import cryo from "./Cryo";
 import air from "./Air";
+import earth from "./Earth";
 import { globalBus } from "game/events";
 import { createClickable } from "features/clickables/clickable";
 
@@ -115,6 +116,7 @@ const layer = createLayer("l", () => {
                 .plus(1)
                 .log10()
                 .div(5)
+                .times(earth.lb6Mult.value)
         )
     };
 
@@ -285,6 +287,7 @@ const layer = createLayer("l", () => {
         name,
         color,
         life,
+        best,
         time,
         buyableEffects,
         display: jsx(() => (

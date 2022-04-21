@@ -1,7 +1,13 @@
 import Spacer from "components/layout/Spacer.vue";
 import { jsx, Visibility } from "features/feature";
 import { createResource, trackBest, trackOOMPS, trackTotal } from "features/resources/resource";
-import { defaultResetPropagation, createTree, GenericTree } from "features/trees/tree";
+import {
+    defaultResetPropagation,
+    createTree,
+    GenericTree,
+    GenericTreeNode,
+    branchedResetPropagation
+} from "features/trees/tree";
 import { globalBus } from "game/events";
 import { createLayer, GenericLayer } from "game/layers";
 import player, { PlayerData } from "game/player";
@@ -15,12 +21,18 @@ import advancements from "./layers/Advancements";
 import lightning from "./layers/Lightning";
 import cryo from "./layers/Cryo";
 import air from "./layers/Air";
+import earth from "./layers/Earth";
+
+const customResetPropagation = function (tree: GenericTree, resettingNode: GenericTreeNode): void {
+    if (advancements.milestones[12].earned.value) branchedResetPropagation(tree, resettingNode);
+    else defaultResetPropagation(tree, resettingNode);
+};
 
 /**
  * @hidden
  */
 export const main = createLayer("main", () => {
-    const particles = createResource<DecimalSource>(10, "particles");
+    const particles = createResource<DecimalSource>(10, "particles", 2);
     const best = trackBest(particles);
     const total = trackTotal(particles);
 
@@ -33,6 +45,7 @@ export const main = createLayer("main", () => {
         gain = gain.plus(Decimal.floor(aqua.bubbles.value));
         if (lightning.lightningSel.value == 0)
             gain = gain.plus(lightning.clickableEffects[0].value);
+        gain = gain.plus(earth.baseGainAdded.value);
 
         return gain;
     });
@@ -46,7 +59,7 @@ export const main = createLayer("main", () => {
     });
 
     const particleGain = computed(() => {
-        const base = baseGain.value || new Decimal(0);
+        const base = baseGain.value;
         let gain = Decimal.pow(base, baseGainExp.value);
 
         if (flame.upgradesR1[1].bought.value) gain = gain.times(flame.upgradeEffects[1].value);
@@ -56,7 +69,9 @@ export const main = createLayer("main", () => {
         if (lightning.lightningSel.value == 3)
             gain = gain.times(lightning.clickableEffects[3].value);
         if (advancements.milestones[7].earned.value)
-            gain = gain.times(Decimal.pow(1.2, Decimal.floor(aqua.torrents.value)));
+            gain = gain.times(
+                Decimal.pow(aqua.torrentEff.value.plus(1), Decimal.floor(aqua.torrents.value))
+            );
 
         return gain;
     });
@@ -68,7 +83,7 @@ export const main = createLayer("main", () => {
 
     const row1 = [flame.treeNode, life.treeNode, aqua.treeNode];
     const tree = createTree(() => ({
-        nodes: [row1, [lightning.treeNode, air.treeNode, cryo.treeNode]],
+        nodes: [row1, [earth.treeNode, lightning.treeNode, air.treeNode, cryo.treeNode]],
         leftSideNodes: [advancements.treeNode],
         branches: () => {
             const b = [];
@@ -87,6 +102,13 @@ export const main = createLayer("main", () => {
                 });
             }
 
+            if (earth.treeNode.visibility.value == Visibility.Visible) {
+                b.push({
+                    startNode: flame.treeNode,
+                    endNode: earth.treeNode
+                });
+            }
+
             return b;
         },
         onReset() {
@@ -96,7 +118,7 @@ export const main = createLayer("main", () => {
             best.value = particles.value;
             total.value = particles.value;
         },
-        resetPropagation: defaultResetPropagation
+        resetPropagation: customResetPropagation
     })) as GenericTree;
 
     return {
@@ -147,10 +169,10 @@ export const main = createLayer("main", () => {
 export const getInitialLayers = (
     /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
     player: Partial<PlayerData>
-): Array<GenericLayer> => [main, flame, life, aqua, advancements, lightning, cryo, air];
+): Array<GenericLayer> => [main, flame, life, aqua, advancements, lightning, cryo, air, earth];
 
 export const hasWon = computed(() => {
-    return false;
+    return Decimal.gte(main.particleGain.value, 3e9);
 });
 
 /* eslint-disable @typescript-eslint/no-unused-vars */

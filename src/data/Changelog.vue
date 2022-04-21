@@ -28,6 +28,14 @@
                     <li class="feature">Implemented Air layer</li>
                 </ul>
             </details>
+            <details>
+                <summary>v1.0 Our Planet - <time>2022-04-14</time></summary>
+                <ul>
+                    <li class="balancing">Balanced up to 3e9 Particles/s</li>
+                    <li class="feature">Implemented Advancements 11-15</li>
+                    <li class="feature">Implemented Earth layer</li>
+                </ul>
+            </details>
         </template>
     </Modal>
 </template>
