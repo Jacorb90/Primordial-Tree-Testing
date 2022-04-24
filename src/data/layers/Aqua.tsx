@@ -22,6 +22,8 @@ import advancements from "./Advancements";
 import lightning from "./Lightning";
 import cryo from "./Cryo";
 import earth from "./Earth";
+import { addTooltip } from "features/tooltips/tooltip";
+import { createResourceTooltip } from "features/trees/tree";
 
 const layer = createLayer("a", () => {
     const id = "a";
@@ -170,6 +172,10 @@ const layer = createLayer("a", () => {
         color,
         reset
     }));
+    addTooltip(treeNode, {
+        display: createResourceTooltip(aqua),
+        pinnable: true
+    });
 
     const resetButton = createResetButton(() => ({
         conversion,

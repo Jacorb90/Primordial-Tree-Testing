@@ -22,6 +22,8 @@ import lightning from "./Lightning";
 import cryo from "./Cryo";
 import earth from "./Earth";
 import { globalBus } from "game/events";
+import { createResourceTooltip } from "features/trees/tree";
+import { addTooltip } from "features/tooltips/tooltip";
 
 const layer = createLayer("f", () => {
     const id = "f";
@@ -251,6 +253,10 @@ const layer = createLayer("f", () => {
                 ? "red"
                 : ""
     }));
+    addTooltip(treeNode, {
+        display: createResourceTooltip(flame),
+        pinnable: true
+    });
 
     const resetButton = createResetButton(() => ({
         conversion,

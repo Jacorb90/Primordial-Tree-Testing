@@ -24,6 +24,8 @@ import air from "./Air";
 import earth from "./Earth";
 import { globalBus } from "game/events";
 import { createClickable } from "features/clickables/clickable";
+import { addTooltip } from "features/tooltips/tooltip";
+import { createResourceTooltip } from "features/trees/tree";
 
 const layer = createLayer("l", () => {
     const id = "l";
@@ -277,6 +279,10 @@ const layer = createLayer("l", () => {
         reset,
         glowColor: () => (buyables.some(b => b.canPurchase.value) ? "red" : "")
     }));
+    addTooltip(treeNode, {
+        display: createResourceTooltip(life),
+        pinnable: true
+    });
 
     const resetButton = createResetButton(() => ({
         conversion,
