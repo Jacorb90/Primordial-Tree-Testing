@@ -81,45 +81,50 @@ export const main = createLayer("main", () => {
     });
     const oomps = trackOOMPS(particles, particleGain);
 
-    const row1 = [flame.treeNode, life.treeNode, aqua.treeNode];
-    const tree = createTree(() => ({
-        nodes: [row1, [earth.treeNode, lightning.treeNode, air.treeNode, cryo.treeNode]],
-        leftSideNodes: [advancements.treeNode],
-        branches: () => {
-            const b = [];
+    const tree = createTree(() => {
+        const row1 = [flame.treeNode, life.treeNode, aqua.treeNode];
+        return {
+            nodes: [
+                [flame.treeNode, life.treeNode, aqua.treeNode],
+                [earth.treeNode, lightning.treeNode, air.treeNode, cryo.treeNode]
+            ],
+            leftSideNodes: [advancements.treeNode],
+            branches: () => {
+                const b = [];
 
-            if (cryo.treeNode.visibility.value == Visibility.Visible) {
-                b.push({
-                    startNode: aqua.treeNode,
-                    endNode: cryo.treeNode
-                });
-            }
+                if (cryo.treeNode.visibility.value == Visibility.Visible) {
+                    b.push({
+                        startNode: aqua.treeNode,
+                        endNode: cryo.treeNode
+                    });
+                }
 
-            if (air.treeNode.visibility.value == Visibility.Visible) {
-                b.push({
-                    startNode: life.treeNode,
-                    endNode: air.treeNode
-                });
-            }
+                if (air.treeNode.visibility.value == Visibility.Visible) {
+                    b.push({
+                        startNode: life.treeNode,
+                        endNode: air.treeNode
+                    });
+                }
 
-            if (earth.treeNode.visibility.value == Visibility.Visible) {
-                b.push({
-                    startNode: flame.treeNode,
-                    endNode: earth.treeNode
-                });
-            }
+                if (earth.treeNode.visibility.value == Visibility.Visible) {
+                    b.push({
+                        startNode: flame.treeNode,
+                        endNode: earth.treeNode
+                    });
+                }
 
-            return b;
-        },
-        onReset() {
-            particles.value = row1.some(tn => toRaw(this.resettingNode.value) === toRaw(tn))
-                ? 0
-                : 10;
-            best.value = particles.value;
-            total.value = particles.value;
-        },
-        resetPropagation: customResetPropagation
-    })) as GenericTree;
+                return b;
+            },
+            onReset() {
+                particles.value = row1.some(tn => toRaw(this.resettingNode.value) === toRaw(tn))
+                    ? 0
+                    : 10;
+                best.value = particles.value;
+                total.value = particles.value;
+            },
+            resetPropagation: customResetPropagation
+        };
+    }) as GenericTree;
 
     return {
         name: "Tree",

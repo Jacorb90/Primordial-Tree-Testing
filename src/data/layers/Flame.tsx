@@ -59,7 +59,8 @@ const layer = createLayer("f", () => {
         roundUpCost: true,
         gainModifier: {
             apply: gain => Decimal.mul(gain, gainMult.value),
-            revert: gain => Decimal.div(gain, gainMult.value)
+            revert: gain => Decimal.div(gain, gainMult.value),
+            enabled: true
         }
     }));
 
@@ -244,7 +245,11 @@ const layer = createLayer("f", () => {
         layerID: id,
         display: jsx(() => <img src="./nodes/flame.png" />),
         color,
-        reset
+        reset,
+        glowColor: () =>
+            upgradesR1.some(u => u.canPurchase.value) || upgradesR2.some(u => u.canPurchase.value)
+                ? "red"
+                : ""
     }));
 
     const resetButton = createResetButton(() => ({

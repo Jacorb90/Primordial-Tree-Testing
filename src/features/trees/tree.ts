@@ -12,9 +12,8 @@ import {
 import { Link } from "features/links/links";
 import { GenericReset } from "features/reset";
 import { displayResource, Resource } from "features/resources/resource";
-import { Tooltip } from "features/tooltip";
 import TreeComponent from "features/trees/Tree.vue";
-import { deletePersistent, persistent } from "game/persistence";
+import TreeNodeComponent from "features/trees/TreeNode.vue";
 import Decimal, { DecimalSource, format, formatWhole } from "util/bignum";
 import {
     Computable,
@@ -35,7 +34,6 @@ export interface TreeNodeOptions {
     canClick?: Computable<boolean>;
     color?: Computable<string>;
     display?: Computable<CoercableComponent>;
-    tooltip?: Computable<string | Tooltip>;
     glowColor?: Computable<string>;
     classes?: Computable<Record<string, boolean>>;
     style?: Computable<StyleValue>;
@@ -47,8 +45,9 @@ export interface TreeNodeOptions {
 
 export interface BaseTreeNode {
     id: string;
-    forceTooltip: Ref<boolean>;
     type: typeof TreeNodeType;
+    [Component]: typeof TreeNodeComponent;
+    [GatherProps]: () => Record<string, unknown>;
 }
 
 export type TreeNode<T extends TreeNodeOptions> = Replace<
@@ -62,7 +61,6 @@ export type TreeNode<T extends TreeNodeOptions> = Replace<
         classes: GetComputableType<T["classes"]>;
         style: GetComputableType<T["style"]>;
         mark: GetComputableType<T["mark"]>;
-        tooltip: GetComputableType<T["tooltip"]>;
     }
 >;
 
@@ -77,19 +75,11 @@ export type GenericTreeNode = Replace<
 export function createTreeNode<T extends TreeNodeOptions>(
     optionsFunc: OptionsFunc<T, TreeNode<T>, BaseTreeNode>
 ): TreeNode<T> {
-    const forceTooltip = persistent(false);
     return createLazyProxy(() => {
         const treeNode = optionsFunc();
         treeNode.id = getUniqueID("treeNode-");
         treeNode.type = TreeNodeType;
-
-        if (treeNode.tooltip) {
-            treeNode.forceTooltip = forceTooltip;
-        } else {
-            // If we don't have a tooltip, no point in making this persistent
-            treeNode.forceTooltip = ref(false);
-            deletePersistent(forceTooltip);
-        }
+        treeNode[Component] = TreeNodeComponent;
 
         processComputable(treeNode as T, "visibility");
         setDefault(treeNode, "visibility", Visibility.Visible);
@@ -97,7 +87,6 @@ export function createTreeNode<T extends TreeNodeOptions>(
         setDefault(treeNode, "canClick", true);
         processComputable(treeNode as T, "color");
         processComputable(treeNode as T, "display");
-        processComputable(treeNode as T, "tooltip");
         processComputable(treeNode as T, "glowColor");
         processComputable(treeNode as T, "classes");
         processComputable(treeNode as T, "style");
@@ -119,6 +108,35 @@ export function createTreeNode<T extends TreeNodeOptions>(
                 }
             };
         }
+
+        treeNode[GatherProps] = function (this: GenericTreeNode) {
+            const {
+                display,
+                visibility,
+                style,
+                classes,
+                onClick,
+                onHold,
+                color,
+                glowColor,
+                canClick,
+                mark,
+                id
+            } = this;
+            return {
+                display,
+                visibility,
+                style,
+                classes,
+                onClick,
+                onHold,
+                color,
+                glowColor,
+                canClick,
+                mark,
+                id
+            };
+        };
 
         return treeNode as unknown as TreeNode<T>;
     });
@@ -279,7 +297,7 @@ export function createResourceTooltip(
     const req = convertComputable(requirement);
     return computed(() => {
         if (requiredResource == null || Decimal.gte(resource.value, unref(req))) {
-            return displayResource(resource);
+            return displayResource(resource) + " " + resource.displayName;
         }
         return `Reach ${
             Decimal.eq(requiredResource.precision, 0)

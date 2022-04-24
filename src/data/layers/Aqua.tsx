@@ -121,7 +121,8 @@ const layer = createLayer("a", () => {
         roundUpCost: true,
         gainModifier: {
             apply: gain => Decimal.mul(gain, gainMult.value),
-            revert: gain => Decimal.div(gain, gainMult.value)
+            revert: gain => Decimal.div(gain, gainMult.value),
+            enabled: true
         }
     }));
 

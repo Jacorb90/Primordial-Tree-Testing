@@ -188,7 +188,8 @@ const layer = createLayer("c", () => {
         layerID: id,
         display: jsx(() => <img src="./nodes/cryo.png" />),
         color,
-        reset
+        reset,
+        glowColor: () => (challenges.some(c => c.canComplete.value) ? "red" : "")
     }));
 
     const resetButton = createResetButton(() => ({

@@ -29,11 +29,20 @@
                 </ul>
             </details>
             <details>
-                <summary>v1.0 Our Planet - <time>2022-04-14</time></summary>
+                <summary>v1.0 Our Planet - <time>2022-04-23</time></summary>
                 <ul>
                     <li class="balancing">Balanced up to 3e9 Particles/s</li>
                     <li class="feature">Implemented Advancements 11-15</li>
                     <li class="feature">Implemented Earth layer</li>
+                </ul>
+            </details>
+            <details>
+                <summary>v1.0.1 Refined Edges - <time>2022-04-24</time></summary>
+                <ul>
+                    <li class="fix">Updated to Profectus v0.3.2</li>
+                    <li class="fix">
+                        Added glow color to certain layers (thanks to thepaperpilot)
+                    </li>
                 </ul>
             </details>
         </template>

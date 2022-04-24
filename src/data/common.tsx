@@ -149,7 +149,7 @@ export type LayerTreeNode<T extends LayerTreeNodeOptions> = Replace<
 export type GenericLayerTreeNode = Replace<
     LayerTreeNode<LayerTreeNodeOptions>,
     {
-        display: ProcessedComputable<string>;
+        display: ProcessedComputable<CoercableComponent>;
         append?: ProcessedComputable<boolean>;
     }
 >;

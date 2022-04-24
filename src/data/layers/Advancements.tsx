@@ -71,7 +71,8 @@ const layer = createLayer("adv", () => {
         layerID: id,
         display: "A",
         color,
-        reset
+        reset,
+        glowColor: () => (Decimal.gt(conversion.actualGain.value, 0) ? "red" : "")
     }));
 
     const resetButton = createResetButton(() => ({

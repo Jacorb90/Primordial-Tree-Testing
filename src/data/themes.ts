@@ -23,6 +23,7 @@ export interface Theme {
     variables: ThemeVars;
     floatingTabs: boolean;
     mergeAdjacent: boolean;
+    showPin: boolean;
 }
 
 declare module "@vue/runtime-dom" {
@@ -34,7 +35,7 @@ const defaultTheme: Theme = {
     variables: {
         "--foreground": "#dfdfdf",
         "--background": "#0f0f0f",
-        "--feature-foreground": "#eee",
+        "--feature-foreground": "#0f0f0f",
         "--tooltip-background": "rgba(0, 0, 0, 0.75)",
         "--raised-background": "#0f0f0f",
         "--points": "#ffffff",
@@ -53,7 +54,8 @@ const defaultTheme: Theme = {
         "--feature-margin": "0px"
     },
     floatingTabs: true,
-    mergeAdjacent: true
+    mergeAdjacent: true,
+    showPin: true
 };
 
 export enum Themes {

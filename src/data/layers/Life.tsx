@@ -66,7 +66,8 @@ const layer = createLayer("l", () => {
         roundUpCost: true,
         gainModifier: {
             apply: gain => Decimal.mul(gain, gainMult.value),
-            revert: gain => Decimal.div(gain, gainMult.value)
+            revert: gain => Decimal.div(gain, gainMult.value),
+            enabled: true
         }
     }));
 
@@ -273,7 +274,8 @@ const layer = createLayer("l", () => {
         layerID: id,
         display: jsx(() => <img src="./nodes/life.png" />),
         color,
-        reset
+        reset,
+        glowColor: () => (buyables.some(b => b.canPurchase.value) ? "red" : "")
     }));
 
     const resetButton = createResetButton(() => ({
