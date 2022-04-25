@@ -3,11 +3,11 @@
  * @hidden
  */
 import { main } from "data/projEntry";
-import { createCumulativeConversion } from "features/conversion";
+import { Conversion, createCumulativeConversion, ScalingFunction } from "features/conversion";
 import { jsx, Visibility } from "features/feature";
 import { createReset } from "features/reset";
 import MainDisplay from "features/resources/MainDisplay.vue";
-import { createResource } from "features/resources/resource";
+import { createResource, Resource } from "features/resources/resource";
 import { addTooltip } from "features/tooltips/tooltip";
 import { createResourceTooltip } from "features/trees/tree";
 import { globalBus } from "game/events";
@@ -74,7 +74,13 @@ const layer = createLayer("ai", () => {
         }
     });
 
-    const conversion = createCumulativeConversion(() => ({
+    const conversion: Conversion<{
+        scaling: ScalingFunction;
+        baseResource: Resource<DecimalSource>;
+        gainResource: Resource<DecimalSource>;
+        buyMax: () => boolean;
+        roundUpCost: true;
+    }> = createCumulativeConversion(() => ({
         scaling: {
             currentGain: conv => {
                 if (Decimal.lt(conv.baseResource.value, 1e4)) return 0;
@@ -111,7 +117,7 @@ const layer = createLayer("ai", () => {
                         5e3
                     );
             }
-        },
+        } as ScalingFunction,
         baseResource: life.life,
         gainResource: air,
         buyMax: () => advancements.milestones[10].earned.value,

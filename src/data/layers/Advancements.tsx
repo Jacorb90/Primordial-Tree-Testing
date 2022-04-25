@@ -11,7 +11,7 @@ import { createMilestone } from "features/milestones/milestone";
 import { createReset } from "features/reset";
 import MainDisplay from "features/resources/MainDisplay.vue";
 import { createResource } from "features/resources/resource";
-import { addTooltip } from "features/tooltips/tooltip";
+import { addTooltip, TooltipDirection } from "features/tooltips/tooltip";
 import { createResourceTooltip } from "features/trees/tree";
 import { createLayer } from "game/layers";
 import Decimal, { DecimalSource } from "lib/break_eternity";
@@ -78,7 +78,8 @@ const layer = createLayer("adv", () => {
     }));
     addTooltip(treeNode, {
         display: createResourceTooltip(advancements),
-        pinnable: true
+        pinnable: true,
+        direction: TooltipDirection.RIGHT
     });
 
     const resetButton = createResetButton(() => ({
@@ -117,6 +118,9 @@ const layer = createLayer("adv", () => {
                         <Display />
                     </>
                 ))
+            },
+            style: {
+                width: "30em"
             }
         }));
     }
