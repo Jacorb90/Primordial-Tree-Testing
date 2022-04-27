@@ -61,6 +61,14 @@
                     </li>
                 </ul>
             </details>
+            <details>
+                <summary>v1.1 Particle Combinators - <time>2022-04-25</time></summary>
+                <ul>
+                    <li class="balancing">Balanced up to ??? Particles/s</li>
+                    <li class="feature">Implemented Particle Combinators</li>
+                    <li class="fix">Finally got the modifier tooltip to work on the Aqua layer</li>
+                </ul>
+            </details>
         </template>
     </Modal>
 </template>

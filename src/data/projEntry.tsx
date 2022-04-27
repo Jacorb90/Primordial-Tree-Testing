@@ -13,44 +13,16 @@ import player, { PlayerData } from "game/player";
 import Decimal, { DecimalSource, format, formatWhole, formatTime } from "util/bignum";
 import { render } from "util/vue";
 import { computed, toRaw, unref } from "vue";
-import flame from "./layers/Flame";
-import life from "./layers/Life";
-import aqua from "./layers/Aqua";
+import flame from "./layers/row1/Flame";
+import life from "./layers/row1/Life";
+import aqua from "./layers/row1/Aqua";
 import advancements from "./layers/Advancements";
-import lightning from "./layers/Lightning";
-import cryo from "./layers/Cryo";
-import air from "./layers/Air";
-import earth from "./layers/Earth";
-
-const oneWayBranchedResetPropagation = function (
-    tree: GenericTree,
-    resettingNode: GenericTreeNode
-): void {
-    const visitedNodes = [resettingNode];
-    let currentNodes = [resettingNode];
-    if (tree.branches != null) {
-        const branches = unref(tree.branches);
-        while (currentNodes.length > 0) {
-            const nextNodes: GenericTreeNode[] = [];
-            currentNodes.forEach(node => {
-                branches
-                    .filter(branch => branch.startNode === node)
-                    .map(branch => branch.endNode)
-                    .filter(node => !visitedNodes.includes(node))
-                    .forEach(node => {
-                        // Check here instead of in the filter because this check's results may
-                        // change as we go through each node
-                        if (!nextNodes.includes(node)) {
-                            nextNodes.push(node);
-                            node.reset?.reset();
-                        }
-                    });
-            });
-            currentNodes = nextNodes;
-            visitedNodes.push(...currentNodes);
-        }
-    }
-};
+import lightning from "./layers/row2/Lightning";
+import cryo from "./layers/row2/Cryo";
+import air from "./layers/row2/Air";
+import earth from "./layers/row2/Earth";
+import { oneWayBranchedResetPropagation } from "./helpers";
+import combinators from "./layers/row3/Combinators";
 
 const customResetPropagation = function (tree: GenericTree, resettingNode: GenericTreeNode): void {
     if (advancements.milestones[12].earned.value)
@@ -112,11 +84,11 @@ export const main = createLayer("main", () => {
     const oomps = trackOOMPS(particles, particleGain);
 
     const tree = createTree(() => {
-        const row1 = [flame.treeNode, life.treeNode, aqua.treeNode];
         return {
             nodes: [
                 [flame.treeNode, life.treeNode, aqua.treeNode],
-                [earth.treeNode, lightning.treeNode, air.treeNode, cryo.treeNode]
+                [earth.treeNode, lightning.treeNode, air.treeNode, cryo.treeNode],
+                [combinators.treeNode]
             ],
             leftSideNodes: [advancements.treeNode],
             branches: () => {
@@ -143,10 +115,31 @@ export const main = createLayer("main", () => {
                     });
                 }
 
+                if (combinators.treeNode.visibility.value == Visibility.Visible) {
+                    b.push({
+                        startNode: combinators.treeNode,
+                        endNode: earth.treeNode
+                    });
+                    b.push({
+                        startNode: combinators.treeNode,
+                        endNode: lightning.treeNode
+                    });
+                    b.push({
+                        startNode: combinators.treeNode,
+                        endNode: air.treeNode
+                    });
+                    b.push({
+                        startNode: combinators.treeNode,
+                        endNode: cryo.treeNode
+                    });
+                }
+
                 return b;
             },
             onReset() {
-                particles.value = row1.some(tn => toRaw(this.resettingNode.value) === toRaw(tn))
+                particles.value = [flame.treeNode, life.treeNode, aqua.treeNode].some(
+                    tn => toRaw(this.resettingNode.value) === toRaw(tn)
+                )
                     ? 0
                     : 10;
                 best.value = particles.value;
@@ -204,10 +197,21 @@ export const main = createLayer("main", () => {
 export const getInitialLayers = (
     /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
     player: Partial<PlayerData>
-): Array<GenericLayer> => [main, flame, life, aqua, advancements, lightning, cryo, air, earth];
+): Array<GenericLayer> => [
+    main,
+    flame,
+    life,
+    aqua,
+    advancements,
+    lightning,
+    cryo,
+    air,
+    earth,
+    combinators
+];
 
 export const hasWon = computed(() => {
-    return Decimal.gte(main.particleGain.value, 3e9);
+    return Decimal.gte(main.particleGain.value, 1 / 0);
 });
 
 /* eslint-disable @typescript-eslint/no-unused-vars */

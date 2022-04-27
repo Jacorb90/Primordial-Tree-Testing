@@ -19,7 +19,7 @@ import { format } from "util/bignum";
 import { formatWhole } from "util/break_eternity";
 import { coerceComponent, render } from "util/vue";
 import { computed, ComputedRef } from "vue";
-import earth from "./Earth";
+import earth from "./row2/Earth";
 
 const layer = createLayer("adv", () => {
     const id = "adv";
@@ -42,6 +42,7 @@ const layer = createLayer("adv", () => {
         55555555,
         1e9,
         2.35e9,
+        3.25e9,
         1 / 0
     ];
 
@@ -169,6 +170,10 @@ const layer = createLayer("adv", () => {
                     {format(adv15eff.value)}x)
                 </>
             ))
+        ),
+        createAdvancement(
+            16,
+            "Unlock Particle Combinators, gain 100% of Lightning Particle gain every second, and starting a Cryo Challenge only resets the Aqua layer."
         )
     ];
 

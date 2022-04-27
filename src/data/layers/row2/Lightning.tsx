@@ -9,16 +9,23 @@ import { jsx, Visibility } from "features/feature";
 import { createReset } from "features/reset";
 import MainDisplay from "features/resources/MainDisplay.vue";
 import { createResource, trackBest } from "features/resources/resource";
-import { addTooltip } from "features/tooltips/tooltip";
+import { addTooltip, TooltipDirection } from "features/tooltips/tooltip";
 import { createResourceTooltip } from "features/trees/tree";
+import { globalBus } from "game/events";
 import { createLayer } from "game/layers";
+import {
+    createModifierSection,
+    createMultiplicativeModifier,
+    createSequentialModifier
+} from "game/modifiers";
 import Decimal from "lib/break_eternity";
 import { DecimalSource } from "util/bignum";
 import { format } from "util/break_eternity";
 import { render } from "util/vue";
 import { computed } from "vue";
-import { createLayerTreeNode, createResetButton } from "../common";
-import advancements from "./Advancements";
+import { createLayerTreeNode, createResetButton } from "../../common";
+import advancements from "../Advancements";
+import combinators from "../row3/Combinators";
 
 const layer = createLayer("li", () => {
     const id = "li";
@@ -33,8 +40,21 @@ const layer = createLayer("li", () => {
         scaling: createPolynomialScaling(2.5e3, 1 / 4),
         baseResource: main.particles,
         gainResource: lightning,
-        roundUpCost: true
+        roundUpCost: true,
+        gainModifier: createSequentialModifier(
+            createMultiplicativeModifier(
+                combinators.mainEff,
+                "Particle Combinator Effect",
+                advancements.milestones[15].earned
+            )
+        )
     }));
+
+    globalBus.on("update", diff => {
+        if (advancements.milestones[15].earned.value) {
+            lightning.value = Decimal.mul(conversion.currentGain.value, diff).plus(lightning.value);
+        }
+    });
 
     const clickableEffects = {
         0: computed(() => Decimal.add(lightning.value, 1).log2().times(2)),
@@ -63,13 +83,14 @@ const layer = createLayer("li", () => {
             onClick: _ => {
                 lightningSel.value = 0;
             },
-            display: () => ({
-                title: "Lightning Mode A" + (lightningSel.value == 0 ? " (Active)" : ""),
-                description:
-                    "Increase Particle gain based on Lightning Particles (Currently: +" +
-                    format(clickableEffects[0].value, 1) +
-                    ")"
-            })
+            display: jsx(() => (
+                <>
+                    <h3>Lightning Mode A {lightningSel.value == 0 ? "(Active)" : ""}</h3>
+                    <br />
+                    Increase Particle gain based on Lightning Particles (Currently: +
+                    {format(clickableEffects[0].value, 1)})
+                </>
+            ))
         })),
         createClickable(() => ({
             visibility: () => (Decimal.gte(best.value, 1) ? Visibility.Visible : Visibility.None),
@@ -77,13 +98,14 @@ const layer = createLayer("li", () => {
             onClick: _ => {
                 lightningSel.value = 1;
             },
-            display: () => ({
-                title: "Lightning Mode B" + (lightningSel.value == 1 ? " (Active)" : ""),
-                description:
-                    "Multiply Particle gain based on Lightning Particles (Currently: x" +
-                    format(clickableEffects[1].value, 2) +
-                    ")"
-            })
+            display: jsx(() => (
+                <>
+                    <h3>Lightning Mode B {lightningSel.value == 1 ? "(Active)" : ""}</h3>
+                    <br />
+                    Multiply Particle gain based on Lightning Particles (Currently: x
+                    {format(clickableEffects[1].value, 2)})
+                </>
+            ))
         })),
         createClickable(() => ({
             visibility: () => (Decimal.gte(best.value, 2) ? Visibility.Visible : Visibility.None),
@@ -91,13 +113,14 @@ const layer = createLayer("li", () => {
             onClick: _ => {
                 lightningSel.value = 2;
             },
-            display: () => ({
-                title: "Lightning Mode C" + (lightningSel.value == 2 ? " (Active)" : ""),
-                description:
-                    "Multiply Flame, Life, & Aqua Particle gain based on Lightning Particles (Currently: x" +
-                    format(clickableEffects[2].value, 2) +
-                    ")"
-            })
+            display: jsx(() => (
+                <>
+                    <h3>Lightning Mode C {lightningSel.value == 2 ? "(Active)" : ""}</h3>
+                    <br />
+                    Multiply Flame, Life, \& Aqua Particle gain based on Lightning Particles
+                    (Currently: x{format(clickableEffects[2].value, 2)})
+                </>
+            ))
         })),
         createClickable(() => ({
             visibility: () => (Decimal.gte(best.value, 5) ? Visibility.Visible : Visibility.None),
@@ -106,12 +129,12 @@ const layer = createLayer("li", () => {
                 lightningSel.value = 3;
             },
             display: jsx(() => (
-                <div>
-                    <h3>Lightning Mode D{lightningSel.value == 3 ? " (Active)" : ""}</h3>
+                <>
+                    <h3>Lightning Mode D {lightningSel.value == 3 ? "(Active)" : ""}</h3>
                     <br />
-                    Multiply Particle gain based on Particles & Lightning Particles (Currently: x
+                    Multiply Particle gain based on Particles \& Lightning Particles (Currently: x
                     {format(clickableEffects[3].value, 2)})
-                </div>
+                </>
             ))
         }))
     ];
@@ -139,6 +162,19 @@ const layer = createLayer("li", () => {
         tree: main.tree,
         treeNode
     }));
+    addTooltip(resetButton, {
+        display: jsx(() =>
+            createModifierSection(
+                "Modifiers",
+                "",
+                conversion.gainModifier,
+                Decimal.floor(conversion.scaling.currentGain(conversion))
+            )
+        ),
+        pinnable: true,
+        direction: TooltipDirection.DOWN,
+        style: "width: 400px; text-align: left"
+    });
 
     return {
         id,

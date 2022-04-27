@@ -16,17 +16,17 @@ import { createResource, Resource, trackBest } from "features/resources/resource
 import { createLayer } from "game/layers";
 import Decimal, { DecimalSource, formatWhole } from "util/bignum";
 import { render } from "util/vue";
-import { createLayerTreeNode, createResetButton } from "../common";
+import { createLayerTreeNode, createResetButton } from "../../common";
 import { createBuyable, Buyable, BuyableDisplay } from "features/buyable";
 import { computed, ComputedRef, unref } from "vue";
 import { format } from "util/break_eternity";
 import { Computable } from "util/computed";
-import advancements from "./Advancements";
+import advancements from "../Advancements";
 import flame from "./Flame";
-import lightning from "./Lightning";
-import cryo from "./Cryo";
-import air from "./Air";
-import earth from "./Earth";
+import lightning from "../row2/Lightning";
+import cryo from "../row2/Cryo";
+import air from "../row2/Air";
+import earth from "../row2/Earth";
 import { globalBus } from "game/events";
 import { createClickable } from "features/clickables/clickable";
 import { addTooltip, TooltipDirection } from "features/tooltips/tooltip";
@@ -86,7 +86,7 @@ const layer = createLayer("l", () => {
                 ),
                 createMultiplicativeModifier(
                     lightning.clickableEffects[2],
-                    "Lightning Option 3",
+                    "Lightning Mode C",
                     () => lightning.lightningSel.value == 2
                 ),
                 createMultiplicativeModifier(

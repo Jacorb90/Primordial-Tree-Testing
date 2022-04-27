@@ -11,17 +11,17 @@ import { createResource, trackBest } from "features/resources/resource";
 import { createLayer } from "game/layers";
 import Decimal, { DecimalSource } from "util/bignum";
 import { render } from "util/vue";
-import { createLayerTreeNode, createResetButton } from "../common";
+import { createLayerTreeNode, createResetButton } from "../../common";
 import { createBar, Direction } from "features/bars/bar";
 import { formatWhole } from "util/break_eternity";
 import { computed } from "vue";
 import { globalBus } from "game/events";
 import flame from "./Flame";
 import life from "./Life";
-import advancements from "./Advancements";
-import lightning from "./Lightning";
-import cryo from "./Cryo";
-import earth from "./Earth";
+import advancements from "../Advancements";
+import lightning from "../row2/Lightning";
+import cryo from "../row2/Cryo";
+import earth from "../row2/Earth";
 import { addTooltip, TooltipDirection } from "features/tooltips/tooltip";
 import { createResourceTooltip } from "features/trees/tree";
 import {
@@ -115,7 +115,7 @@ const layer = createLayer("a", () => {
         gainModifier: createSequentialModifier(
             createMultiplicativeModifier(
                 lightning.clickableEffects[2],
-                "Lightning Option 3",
+                "Lightning Mode C",
                 () => lightning.lightningSel.value == 2
             ),
             createMultiplicativeModifier(
@@ -187,7 +187,7 @@ const layer = createLayer("a", () => {
         pinnable: true,
         direction: TooltipDirection.DOWN,
         style: "width: 400px; text-align: left"
-    });*/ // you can't click the layer for some reason when this is active
+    });*/ // button can't be clicked when tooltip is added
 
     return {
         id,
@@ -203,54 +203,36 @@ const layer = createLayer("a", () => {
         torrentTime,
         torrents,
         torrentEff,
-        display: jsx(() => {
-            const bubbleDiv = Decimal.gt(best.value, 0) ? (
-                <>
-                    {formatWhole(Decimal.floor(bubbles.value))} Bubbles, each generating 1
-                    Particle/second
+        display: jsx(() => (
+            <>
+                <MainDisplay resource={aqua} color={color} />
+                {render(resetButton)}
+                <br />
+                <br />
+                <div>
+                    <div v-show={Decimal.gt(best.value, 0)}>
+                        {formatWhole(Decimal.floor(bubbles.value))} Bubbles, each generating 1
+                        Particle/second
+                        <br />
+                        {render(bubbleBar)}
+                    </div>
                     <br />
-                    {render(bubbleBar)}
-                </>
-            ) : (
-                <div />
-            );
-
-            const waveDiv = Decimal.gte(bubbles.value, 1) ? (
-                <>
-                    {formatWhole(Decimal.floor(waves.value))} Waves, each halving the Aqua Particle
-                    cost
+                    <div v-show={Decimal.gte(bubbles.value, 1)}>
+                        {formatWhole(Decimal.floor(waves.value))} Waves, each halving the Aqua
+                        Particle cost
+                        <br />
+                        {render(waveBar)}
+                    </div>
                     <br />
-                    {render(waveBar)}
-                </>
-            ) : (
-                <div />
-            );
-
-            const torrentDiv = advancements.milestones[7].earned.value ? (
-                <>
-                    {formatWhole(Decimal.floor(torrents.value))} Torrents, each increasing Point
-                    gain by {formatWhole(Decimal.mul(torrentEff.value, 100))}%
-                    <br />
-                    {render(torrentBar)}
-                </>
-            ) : (
-                <div />
-            );
-
-            return (
-                <>
-                    <MainDisplay resource={aqua} color={color} />
-                    {render(resetButton)}
-                    <br />
-                    <br />
-                    {bubbleDiv}
-                    <br />
-                    {waveDiv}
-                    <br />
-                    {torrentDiv}
-                </>
-            );
-        }),
+                    <div v-show={advancements.milestones[7].earned.value}>
+                        {formatWhole(Decimal.floor(torrents.value))} Torrents, each increasing
+                        Particle gain by {formatWhole(Decimal.mul(torrentEff.value, 100))}%
+                        <br />
+                        {render(torrentBar)}
+                    </div>
+                </div>
+            </>
+        )),
         treeNode
     };
 });
