@@ -29,6 +29,7 @@ import {
     createMultiplicativeModifier,
     createSequentialModifier
 } from "game/modifiers";
+import combinators from "../row3/Combinators";
 
 const layer = createLayer("a", () => {
     const id = "a";
@@ -124,6 +125,13 @@ const layer = createLayer("a", () => {
                 () =>
                     advancements.milestones[4].earned.value &&
                     Decimal.lte(time.value, advancements.adv5time.value)
+            ),
+            createMultiplicativeModifier(
+                combinators.multiBuyableEffects[1].value,
+                "Mud Molecule",
+                () =>
+                    Decimal.gte(combinators.multiBuyables[1].value, 1) &&
+                    advancements.milestones[15].earned.value
             )
         )
     }));
@@ -183,7 +191,7 @@ const layer = createLayer("a", () => {
         treeNode
     }));
     /*addTooltip(resetButton, {
-        display: jsx(() => createModifierSection("Modifiers", "", conversion.gainModifier, Decimal.floor(conversion.scaling.currentGain(conversion)))),
+        display: jsx(() => createModifierSection("Modifiers", "", conversion.gainModifier, conversion.scaling.currentGain(conversion))),
         pinnable: true,
         direction: TooltipDirection.DOWN,
         style: "width: 400px; text-align: left"

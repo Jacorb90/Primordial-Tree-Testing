@@ -43,6 +43,8 @@ const layer = createLayer("adv", () => {
         1e9,
         2.35e9,
         3.25e9,
+        1e10,
+        2e10,
         1 / 0
     ];
 
@@ -174,7 +176,9 @@ const layer = createLayer("adv", () => {
         createAdvancement(
             16,
             "Unlock Particle Combinators, gain 100% of Lightning Particle gain every second, and starting a Cryo Challenge only resets the Aqua layer."
-        )
+        ),
+        createAdvancement(17, "All Life Buyables are automatically purchased every second."),
+        createAdvancement(18, "The Spark Molecule effect is cubed.")
     ];
 
     return {

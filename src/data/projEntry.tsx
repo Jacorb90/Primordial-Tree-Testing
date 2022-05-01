@@ -48,6 +48,7 @@ export const main = createLayer("main", () => {
         if (lightning.lightningSel.value == 0)
             gain = gain.plus(lightning.clickableEffects[0].value);
         gain = gain.plus(earth.baseGainAdded.value);
+        gain = gain.plus(combinators.multiBuyableEffects[0].value);
 
         return gain;
     });
@@ -74,6 +75,11 @@ export const main = createLayer("main", () => {
             gain = gain.times(
                 Decimal.pow(aqua.torrentEff.value.plus(1), Decimal.floor(aqua.torrents.value))
             );
+        if (
+            Decimal.gte(combinators.multiBuyables[1].value, 1) &&
+            advancements.milestones[15].earned.value
+        )
+            gain = gain.times(combinators.multiBuyableEffects[1].value);
 
         return gain;
     });

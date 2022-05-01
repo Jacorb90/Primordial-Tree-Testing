@@ -163,7 +163,7 @@ const layer = createLayer("ai", () => {
         treeNode
     }));
     /*addTooltip(resetButton, {
-        display: jsx(() => createModifierSection("Modifiers", "", conversion.gainModifier, Decimal.floor(conversion.scaling.currentGain(conversion)))),
+        display: jsx(() => createModifierSection("Modifiers", "", conversion.gainModifier, conversion.scaling.currentGain(conversion))),
         pinnable: true,
         direction: TooltipDirection.DOWN,
         style: "width: 400px; text-align: left"

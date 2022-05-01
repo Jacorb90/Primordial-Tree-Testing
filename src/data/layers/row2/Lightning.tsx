@@ -117,7 +117,7 @@ const layer = createLayer("li", () => {
                 <>
                     <h3>Lightning Mode C {lightningSel.value == 2 ? "(Active)" : ""}</h3>
                     <br />
-                    Multiply Flame, Life, \& Aqua Particle gain based on Lightning Particles
+                    Multiply Flame, Life, and Aqua Particle gain based on Lightning Particles
                     (Currently: x{format(clickableEffects[2].value, 2)})
                 </>
             ))
@@ -132,7 +132,7 @@ const layer = createLayer("li", () => {
                 <>
                     <h3>Lightning Mode D {lightningSel.value == 3 ? "(Active)" : ""}</h3>
                     <br />
-                    Multiply Particle gain based on Particles \& Lightning Particles (Currently: x
+                    Multiply Particle gain based on Particles and Lightning Particles (Currently: x
                     {format(clickableEffects[3].value, 2)})
                 </>
             ))
@@ -168,7 +168,7 @@ const layer = createLayer("li", () => {
                 "Modifiers",
                 "",
                 conversion.gainModifier,
-                Decimal.floor(conversion.scaling.currentGain(conversion))
+                conversion.scaling.currentGain(conversion)
             )
         ),
         pinnable: true,

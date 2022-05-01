@@ -284,7 +284,7 @@ const layer = createLayer("f", () => {
                 "Modifiers",
                 "",
                 conversion.gainModifier,
-                Decimal.floor(conversion.scaling.currentGain(conversion))
+                conversion.scaling.currentGain(conversion)
             )
         ),
         pinnable: true,

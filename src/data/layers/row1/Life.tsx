@@ -47,6 +47,7 @@ const layer = createLayer("l", () => {
     const best = trackBest(life);
 
     const time = createResource<number>(0);
+    const autoTime = createResource<number>(0);
 
     const baseReq = computed(() => {
         let base = 10;
@@ -54,22 +55,6 @@ const layer = createLayer("l", () => {
         if (cryo.challenges[1].active.value) base = 1 / 0;
 
         return base;
-    });
-
-    const gainMult = computed(() => {
-        let mult = Decimal.dOne;
-
-        if (lightning.lightningSel.value == 2)
-            mult = mult.times(lightning.clickableEffects[2].value);
-        if (
-            advancements.milestones[4].earned.value &&
-            Decimal.lte(time.value, advancements.adv5time.value)
-        )
-            mult = mult.times(3);
-        mult = mult.times(buyableEffects[3].value);
-        mult = mult.times(air.windEff.value);
-
-        return mult;
     });
 
     const conversion: Conversion<ConversionOptions & { gainModifier: Required<Modifier> }> =
@@ -108,6 +93,12 @@ const layer = createLayer("l", () => {
         if (advancements.milestones[3].earned.value)
             life.value = Decimal.mul(conversion.currentGain.value, diff).plus(life.value);
         time.value += diff;
+        autoTime.value += diff;
+
+        if (advancements.milestones[16].earned.value && autoTime.value >= 1) {
+            autoTime.value = 0;
+            buyAll.onClick(undefined);
+        }
     });
 
     const extraBuyableLevelsAll = computed(() => {
@@ -326,7 +317,7 @@ const layer = createLayer("l", () => {
                 "Modifiers",
                 "",
                 conversion.gainModifier,
-                Decimal.floor(conversion.scaling.currentGain(conversion))
+                conversion.scaling.currentGain(conversion)
             )
         ),
         pinnable: true,
@@ -341,6 +332,7 @@ const layer = createLayer("l", () => {
         life,
         best,
         time,
+        autoTime,
         buyableEffects,
         display: jsx(() => (
             <>
