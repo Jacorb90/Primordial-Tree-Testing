@@ -20,6 +20,7 @@ import { computed, ComputedRef } from "vue";
 import { format } from "util/bignum";
 import flame from "../row1/Flame";
 import lightning from "../row2/Lightning";
+import life from "../row1/Life";
 import aqua from "../row1/Aqua";
 import earth from "../row2/Earth";
 import {
@@ -63,7 +64,8 @@ const layer = createLayer("comb", () => {
             transform: "scale(1.5)"
         },
         glowColor: () =>
-            multiBuyables.some(bbl => bbl.canPurchase.value && Decimal.lt(bbl.amount.value, 1))
+            multiBuyables.some(bbl => bbl.canPurchase.value && Decimal.lt(bbl.amount.value, 1)) ||
+            Decimal.gt(conversion.currentGain.value, combinators.value)
                 ? "red"
                 : ""
     }));
@@ -95,6 +97,18 @@ const layer = createLayer("comb", () => {
                 .times(Decimal.pow(multiBuyables[1].amount.value, 1.5))
                 .plus(1)
                 .cbrt()
+        ),
+        2: computed(() =>
+            Decimal.add(
+                Decimal.mul(
+                    combinators.value,
+                    Decimal.add(multiBuyables[2].amount.value, 1).log10()
+                ),
+                1
+            )
+                .log10()
+                .plus(1)
+                .sqrt()
         )
     };
 
@@ -135,6 +149,29 @@ const layer = createLayer("comb", () => {
                 title: "Mud Molecule",
                 description: "Multiply Particle & Aqua Particle gain based on Earth Particles.",
                 effectDisplay: format(multiBuyableEffects[1].value) + "x"
+            })
+        })),
+        createMultiBuyable(() => ({
+            visibility: () => showIf(Decimal.gte(best.value, 2)),
+            costSets: [
+                {
+                    cost: 1e8,
+                    resource: life.life
+                },
+                {
+                    cost: 1e5,
+                    resource: lightning.lightning
+                },
+                {
+                    cost: 500,
+                    resource: earth.earth
+                }
+            ],
+            display: () => ({
+                title: "Protein Molecule",
+                description: "Increase Life Buyable Power based on Combinators.",
+                effectDisplay:
+                    "+" + format(Decimal.sub(multiBuyableEffects[2].value, 1).times(100)) + "%"
             })
         }))
     ];

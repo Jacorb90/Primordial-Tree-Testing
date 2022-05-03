@@ -117,7 +117,7 @@ const layer = createLayer("a", () => {
             createMultiplicativeModifier(
                 lightning.clickableEffects[2],
                 "Lightning Mode C",
-                () => lightning.lightningSel.value == 2
+                () => lightning.lightningSel[2].value
             ),
             createMultiplicativeModifier(
                 3,

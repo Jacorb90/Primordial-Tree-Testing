@@ -34,7 +34,12 @@ const layer = createLayer("li", () => {
 
     const lightning = createResource<DecimalSource>(0, "Lightning Particles");
     const best = trackBest(lightning);
-    const lightningSel = createResource<number>(0);
+    const lightningSel = {
+        0: createResource<boolean>(false),
+        1: createResource<boolean>(false),
+        2: createResource<boolean>(false),
+        3: createResource<boolean>(false)
+    };
 
     const conversion = createCumulativeConversion(() => ({
         scaling: createPolynomialScaling(2.5e3, 1 / 4),
@@ -76,16 +81,29 @@ const layer = createLayer("li", () => {
         )
     };
 
+    const lightningSelLimit = computed(() => {
+        return advancements.milestones[18].earned.value ? 2 : 1;
+    });
+
     const clickables = [
         createClickable(() => ({
             visibility: () => (Decimal.gte(best.value, 1) ? Visibility.Visible : Visibility.None),
-            canClick: () => lightningSel.value != 0,
+            canClick: () => !lightningSel[0].value,
             onClick: _ => {
-                lightningSel.value = 0;
+                lightningSel[0].value = true;
+
+                if (
+                    Object.values(lightningSel).filter(res => res.value).length >
+                    lightningSelLimit.value
+                ) {
+                    lightningSel[1].value = false;
+                    lightningSel[2].value = false;
+                    lightningSel[3].value = false;
+                }
             },
             display: jsx(() => (
                 <>
-                    <h3>Lightning Mode A {lightningSel.value == 0 ? "(Active)" : ""}</h3>
+                    <h3>Lightning Mode A {lightningSel[0].value ? "(Active)" : ""}</h3>
                     <br />
                     Increase Particle gain based on Lightning Particles (Currently: +
                     {format(clickableEffects[0].value, 1)})
@@ -94,13 +112,22 @@ const layer = createLayer("li", () => {
         })),
         createClickable(() => ({
             visibility: () => (Decimal.gte(best.value, 1) ? Visibility.Visible : Visibility.None),
-            canClick: () => lightningSel.value != 1,
+            canClick: () => !lightningSel[1].value,
             onClick: _ => {
-                lightningSel.value = 1;
+                lightningSel[1].value = true;
+
+                if (
+                    Object.values(lightningSel).filter(res => res.value).length >
+                    lightningSelLimit.value
+                ) {
+                    lightningSel[0].value = false;
+                    lightningSel[2].value = false;
+                    lightningSel[3].value = false;
+                }
             },
             display: jsx(() => (
                 <>
-                    <h3>Lightning Mode B {lightningSel.value == 1 ? "(Active)" : ""}</h3>
+                    <h3>Lightning Mode B {lightningSel[1].value ? "(Active)" : ""}</h3>
                     <br />
                     Multiply Particle gain based on Lightning Particles (Currently: x
                     {format(clickableEffects[1].value, 2)})
@@ -109,13 +136,22 @@ const layer = createLayer("li", () => {
         })),
         createClickable(() => ({
             visibility: () => (Decimal.gte(best.value, 2) ? Visibility.Visible : Visibility.None),
-            canClick: () => lightningSel.value != 2,
+            canClick: () => !lightningSel[2].value,
             onClick: _ => {
-                lightningSel.value = 2;
+                lightningSel[2].value = true;
+
+                if (
+                    Object.values(lightningSel).filter(res => res.value).length >
+                    lightningSelLimit.value
+                ) {
+                    lightningSel[0].value = false;
+                    lightningSel[1].value = false;
+                    lightningSel[3].value = false;
+                }
             },
             display: jsx(() => (
                 <>
-                    <h3>Lightning Mode C {lightningSel.value == 2 ? "(Active)" : ""}</h3>
+                    <h3>Lightning Mode C {lightningSel[2].value ? "(Active)" : ""}</h3>
                     <br />
                     Multiply Flame, Life, and Aqua Particle gain based on Lightning Particles
                     (Currently: x{format(clickableEffects[2].value, 2)})
@@ -124,13 +160,22 @@ const layer = createLayer("li", () => {
         })),
         createClickable(() => ({
             visibility: () => (Decimal.gte(best.value, 5) ? Visibility.Visible : Visibility.None),
-            canClick: () => lightningSel.value != 3,
+            canClick: () => !lightningSel[3].value,
             onClick: _ => {
-                lightningSel.value = 3;
+                lightningSel[3].value = true;
+
+                if (
+                    Object.values(lightningSel).filter(res => res.value).length >
+                    lightningSelLimit.value
+                ) {
+                    lightningSel[0].value = false;
+                    lightningSel[1].value = false;
+                    lightningSel[2].value = false;
+                }
             },
             display: jsx(() => (
                 <>
-                    <h3>Lightning Mode D {lightningSel.value == 3 ? "(Active)" : ""}</h3>
+                    <h3>Lightning Mode D {lightningSel[3].value ? "(Active)" : ""}</h3>
                     <br />
                     Multiply Particle gain based on Particles and Lightning Particles (Currently: x
                     {format(clickableEffects[3].value, 2)})

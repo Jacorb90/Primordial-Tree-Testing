@@ -21,7 +21,7 @@ import lightning from "./layers/row2/Lightning";
 import cryo from "./layers/row2/Cryo";
 import air from "./layers/row2/Air";
 import earth from "./layers/row2/Earth";
-import { oneWayBranchedResetPropagation } from "./helpers";
+import { oneWayBranchedResetPropagation, versionGT } from "./helpers";
 import combinators from "./layers/row3/Combinators";
 
 const customResetPropagation = function (tree: GenericTree, resettingNode: GenericTreeNode): void {
@@ -45,8 +45,7 @@ export const main = createLayer("main", () => {
         if (flame.upgradesR2[2].bought.value) gain = gain.plus(flame.upgradeEffects[5].value);
         gain = gain.plus(life.buyableEffects[0].value);
         gain = gain.plus(Decimal.floor(aqua.bubbles.value));
-        if (lightning.lightningSel.value == 0)
-            gain = gain.plus(lightning.clickableEffects[0].value);
+        if (lightning.lightningSel[0].value) gain = gain.plus(lightning.clickableEffects[0].value);
         gain = gain.plus(earth.baseGainAdded.value);
         gain = gain.plus(combinators.multiBuyableEffects[0].value);
 
@@ -67,10 +66,8 @@ export const main = createLayer("main", () => {
 
         if (flame.upgradesR1[1].bought.value) gain = gain.times(flame.upgradeEffects[1].value);
         gain = gain.times(life.buyableEffects[1].value);
-        if (lightning.lightningSel.value == 1)
-            gain = gain.times(lightning.clickableEffects[1].value);
-        if (lightning.lightningSel.value == 3)
-            gain = gain.times(lightning.clickableEffects[3].value);
+        if (lightning.lightningSel[1].value) gain = gain.times(lightning.clickableEffects[1].value);
+        if (lightning.lightningSel[3].value) gain = gain.times(lightning.clickableEffects[3].value);
         if (advancements.milestones[7].earned.value)
             gain = gain.times(
                 Decimal.pow(aqua.torrentEff.value.plus(1), Decimal.floor(aqua.torrents.value))
@@ -221,9 +218,33 @@ export const hasWon = computed(() => {
 });
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
+export function fixOldSaveEarly(
+    oldVersion: string | undefined,
+    player: Partial<PlayerData>
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+): void {
+    if (versionGT("1.1", oldVersion)) {
+        if (
+            player?.layers?.li?.lightningSel !== undefined &&
+            typeof player.layers.li.lightningSel == typeof Number
+        ) {
+            player.layers.li.lightningSel = {
+                0: player.layers.li.lightningSel == 0,
+                1: player.layers.li.lightningSel == 1,
+                2: player.layers.li.lightningSel == 2,
+                3: player.layers.li.lightningSel == 3
+            };
+        }
+    }
+}
+/* eslint-enable @typescript-eslint/no-unused-vars */
+
+/* eslint-disable @typescript-eslint/no-unused-vars */
 export function fixOldSave(
     oldVersion: string | undefined,
     player: Partial<PlayerData>
     // eslint-disable-next-line @typescript-eslint/no-empty-function
-): void {}
+): void {
+    // player.modVersion = "1.1";
+}
 /* eslint-enable @typescript-eslint/no-unused-vars */

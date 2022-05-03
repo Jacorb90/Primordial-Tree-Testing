@@ -27,6 +27,7 @@ import lightning from "../row2/Lightning";
 import cryo from "../row2/Cryo";
 import air from "../row2/Air";
 import earth from "../row2/Earth";
+import combinators from "../row3/Combinators";
 import { globalBus } from "game/events";
 import { createClickable } from "features/clickables/clickable";
 import { addTooltip, TooltipDirection } from "features/tooltips/tooltip";
@@ -72,7 +73,7 @@ const layer = createLayer("l", () => {
                 createMultiplicativeModifier(
                     lightning.clickableEffects[2],
                     "Lightning Mode C",
-                    () => lightning.lightningSel.value == 2
+                    () => lightning.lightningSel[2].value
                 ),
                 createMultiplicativeModifier(
                     3,
@@ -101,6 +102,15 @@ const layer = createLayer("l", () => {
         }
     });
 
+    const buyablePower = computed(() => {
+        let power: DecimalSource = 1;
+
+        if (Decimal.gte(combinators.best.value, 2))
+            power = combinators.multiBuyableEffects[2].value;
+
+        return power;
+    });
+
     const extraBuyableLevelsAll = computed(() => {
         return air.zephyrEff.value;
     });
@@ -121,23 +131,51 @@ const layer = createLayer("l", () => {
     ];
 
     const buyableEffects = {
-        0: computed(() => Decimal.add(buyables[0].amount.value, extraBuyableLevels[0].value)),
+        0: computed(() =>
+            Decimal.add(buyables[0].amount.value, extraBuyableLevels[0].value).times(
+                buyablePower.value
+            )
+        ),
         1: computed(() =>
-            Decimal.pow(2, Decimal.add(buyables[1].amount.value, extraBuyableLevels[1].value))
+            Decimal.pow(
+                2,
+                Decimal.add(buyables[1].amount.value, extraBuyableLevels[1].value).times(
+                    buyablePower.value
+                )
+            )
         ),
         2: computed(() =>
-            Decimal.mul(2, Decimal.add(buyables[2].amount.value, extraBuyableLevels[2].value))
+            Decimal.mul(
+                2,
+                Decimal.add(buyables[2].amount.value, extraBuyableLevels[2].value).times(
+                    buyablePower.value
+                )
+            )
         ),
         3: computed(() =>
-            Decimal.pow(1.15, Decimal.add(buyables[3].amount.value, extraBuyableLevels[3].value))
+            Decimal.pow(
+                1.15,
+                Decimal.add(buyables[3].amount.value, extraBuyableLevels[3].value).times(
+                    buyablePower.value
+                )
+            )
         ),
         4: computed(() =>
-            Decimal.pow(2.25, Decimal.add(buyables[4].amount.value, extraBuyableLevels[4].value))
+            Decimal.pow(
+                2.25,
+                Decimal.add(buyables[4].amount.value, extraBuyableLevels[4].value).times(
+                    buyablePower.value
+                )
+            )
         ),
         5: computed(() =>
             Decimal.add(main.particleGain.value, 1)
                 .log10()
-                .times(Decimal.add(buyables[5].amount.value, extraBuyableLevels[5].value))
+                .times(
+                    Decimal.add(buyables[5].amount.value, extraBuyableLevels[5].value).times(
+                        buyablePower.value
+                    )
+                )
                 .plus(1)
                 .log10()
                 .div(5)
@@ -340,6 +378,9 @@ const layer = createLayer("l", () => {
                 {render(resetButton)}
                 <br />
                 <br />
+                <div v-show={Decimal.gt(buyablePower.value, 1)}>
+                    <b>Buyable Power: {format(Decimal.mul(buyablePower.value, 100))}%</b>
+                </div>
                 {render(buyAll)}
                 <table>
                     <tbody>

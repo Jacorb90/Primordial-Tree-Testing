@@ -74,7 +74,11 @@ export function getUniqueID(): string {
 export async function loadSave(playerObj: Partial<PlayerData>): Promise<void> {
     console.info("Loading save", playerObj);
     const { layers, removeLayer, addLayer } = await import("game/layers");
-    const { fixOldSave, getInitialLayers } = await import("data/projEntry");
+    const { fixOldSave, fixOldSaveEarly, getInitialLayers } = await import("data/projEntry");
+
+    if (playerObj.modVersion !== projInfo.versionNumber) {
+        fixOldSaveEarly(playerObj.modVersion, playerObj);
+    }
 
     for (const layer in layers) {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

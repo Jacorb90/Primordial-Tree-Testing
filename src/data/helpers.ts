@@ -71,3 +71,16 @@ export const oneWayBranchedResetPropagation = function (
         }
     }
 };
+
+export function versionGT(v1: string | undefined, v2: string | undefined): boolean {
+    if (v2 === undefined) return false;
+    if (v1 === undefined) return true;
+
+    const vl1 = v1.split(".");
+    const vl2 = v2.split(".");
+    return (
+        parseInt(vl1[0] ?? "0") > parseInt(vl2[0] ?? "0") ||
+        parseInt(vl1[1] ?? "0") > parseInt(vl2[1] ?? "0") ||
+        parseInt(vl1[2] ?? "0") > parseInt(vl2[2] ?? "0")
+    );
+}
