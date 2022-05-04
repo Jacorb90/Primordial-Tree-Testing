@@ -20,7 +20,7 @@ import { format } from "util/bignum";
 import { formatWhole } from "util/break_eternity";
 import { coerceComponent, render } from "util/vue";
 import { computed, ComputedRef } from "vue";
-import earth from "./row2/Earth";
+import earth from "../row2/Earth";
 
 const layer = createLayer("adv", () => {
     const id = "adv";

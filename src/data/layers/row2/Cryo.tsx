@@ -11,7 +11,7 @@ import { createLayer } from "game/layers";
 import Decimal, { DecimalSource, format, formatWhole } from "util/bignum";
 import { render } from "util/vue";
 import { createLayerTreeNode, createResetButton } from "../../common";
-import advancements from "../Advancements";
+import advancements from "../side/Advancements";
 import { main } from "data/projEntry";
 import { Challenge, createChallenge } from "features/challenges/challenge";
 import { Computable } from "util/computed";

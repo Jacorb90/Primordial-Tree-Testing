@@ -23,7 +23,7 @@ import Decimal, { DecimalSource, format } from "util/bignum";
 import { render } from "util/vue";
 import { computed, unref } from "vue";
 import { createLayerTreeNode, createResetButton } from "../../common";
-import advancements from "../Advancements";
+import advancements from "../side/Advancements";
 import life from "../row1/Life";
 import combinators from "../row3/Combinators";
 

@@ -14,7 +14,7 @@ import { createResourceTooltip } from "features/trees/tree";
 import { createLayer } from "game/layers";
 import Decimal, { DecimalSource } from "lib/break_eternity";
 import { render } from "util/vue";
-import advancements from "../Advancements";
+import advancements from "../side/Advancements";
 import MainDisplay from "features/resources/MainDisplay.vue";
 import { computed, ComputedRef } from "vue";
 import { format } from "util/bignum";
