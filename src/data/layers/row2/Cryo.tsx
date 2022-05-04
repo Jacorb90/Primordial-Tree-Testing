@@ -19,7 +19,8 @@ import { computed, unref } from "vue";
 import flame from "../row1/Flame";
 import life from "../row1/Life";
 import aqua from "../row1/Aqua";
-import { addTooltip, TooltipDirection } from "features/tooltips/tooltip";
+import { addTooltip } from "features/tooltips/tooltip";
+import { Direction } from "util/common";
 import { createResourceTooltip } from "features/trees/tree";
 import combinators from "../row3/Combinators";
 import {
@@ -223,12 +224,12 @@ const layer = createLayer("c", () => {
             createModifierSection(
                 "Modifiers",
                 "",
-                conversion.gainModifier,
+                conversion.gainModifier!,
                 conversion.scaling.currentGain(conversion)
             )
         ),
         pinnable: true,
-        direction: TooltipDirection.DOWN,
+        direction: Direction.Down,
         style: "width: 400px; text-align: left"
     });
 

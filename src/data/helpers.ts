@@ -84,3 +84,29 @@ export function versionGT(v1: string | undefined, v2: string | undefined): boole
         parseInt(vl1[2] ?? "0") > parseInt(vl2[2] ?? "0")
     );
 }
+
+export function overrideIsRecord<T extends Record<string | number | symbol, any>>(
+    obj: unknown
+): obj is T {
+    return true;
+}
+
+export function fixPoint4Obj(obj: unknown) {
+    if (overrideIsRecord(obj)) {
+        return fixPoint4Record(obj);
+    }
+
+    return {};
+}
+
+function fixPoint4Record<T, S extends { [key: string]: T }>(obj: S) {
+    const newObj: { [key: string]: any } = {};
+
+    Object.keys(obj).forEach(key => {
+        newObj[key] = {
+            bought: obj[key]
+        };
+    });
+
+    return newObj;
+}

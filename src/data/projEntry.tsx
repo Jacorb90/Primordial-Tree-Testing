@@ -21,7 +21,7 @@ import lightning from "./layers/row2/Lightning";
 import cryo from "./layers/row2/Cryo";
 import air from "./layers/row2/Air";
 import earth from "./layers/row2/Earth";
-import { oneWayBranchedResetPropagation, versionGT } from "./helpers";
+import { oneWayBranchedResetPropagation, versionGT, fixPoint4Obj } from "./helpers";
 import combinators from "./layers/row3/Combinators";
 
 const customResetPropagation = function (tree: GenericTree, resettingNode: GenericTreeNode): void {
@@ -56,6 +56,9 @@ export const main = createLayer("main", () => {
         let exp = Decimal.dOne;
 
         exp = exp.times(air.tornadoEff.value);
+
+        if (advancements.milestones[19].earned.value)
+            exp = exp.plus(Decimal.mul(0.05, Decimal.floor(aqua.floods.value)));
 
         return exp;
     });
@@ -235,6 +238,21 @@ export function fixOldSaveEarly(
                 3: player.layers.li.lightningSel == 3
             };
         }
+
+        if (player?.layers?.f?.upgradesR1 !== undefined)
+            player.layers.f.upgradesR1 = fixPoint4Obj(player.layers.f.upgradesR1);
+
+        if (player?.layers?.f?.upgradesR2 !== undefined)
+            player.layers.f.upgradesR2 = fixPoint4Obj(player.layers.f.upgradesR2);
+
+        if (player?.layers?.l?.buyables !== undefined)
+            player.layers.l.buyables = fixPoint4Obj(player.layers.l.buyables);
+
+        if (player?.layers?.e?.grid !== undefined)
+            player.layers.e.grid = fixPoint4Obj(player.layers.e.grid);
+
+        if (player?.layers?.adv?.milestones !== undefined)
+            player.layers.adv.milestones = fixPoint4Obj(player.layers.adv.milestones);
     }
 }
 /* eslint-enable @typescript-eslint/no-unused-vars */
@@ -245,6 +263,6 @@ export function fixOldSave(
     player: Partial<PlayerData>
     // eslint-disable-next-line @typescript-eslint/no-empty-function
 ): void {
-    // player.modVersion = "1.1";
+    player.modVersion = "1.1";
 }
 /* eslint-enable @typescript-eslint/no-unused-vars */

@@ -29,6 +29,7 @@ import {
     MultiBuyableOptions
 } from "data/customFeatures/multiBuyable";
 import { Computable } from "util/computed";
+import { createClickable } from "features/clickables/clickable";
 
 const layer = createLayer("comb", () => {
     const id = "comb";
@@ -81,6 +82,12 @@ const layer = createLayer("comb", () => {
         treeNode
     }));
 
+    const moleculeLimit = computed(() => {
+        let limit = Decimal.mul(50, combinators.value);
+        if (advancements.milestones[20].earned.value) limit = limit.times(1.2);
+        return limit;
+    });
+
     const multiBuyableEffects: { [key: number]: ComputedRef<DecimalSource> } = {
         0: computed(() => {
             let eff = Decimal.add(flame.flame.value, 1)
@@ -113,7 +120,10 @@ const layer = createLayer("comb", () => {
     };
 
     const multiBuyables: MultiBuyable<
-        MultiBuyableOptions & { visibility: Computable<Visibility> }
+        MultiBuyableOptions & {
+            visibility: Computable<Visibility>;
+            purchaseLimit: Computable<DecimalSource>;
+        }
     >[] = [
         createMultiBuyable(() => ({
             visibility: () => showIf(Decimal.gte(best.value, 1)),
@@ -131,7 +141,8 @@ const layer = createLayer("comb", () => {
                 title: "Spark Molecule",
                 description: "Increase Base Particle gain based on Flame Particles.",
                 effectDisplay: "+" + format(multiBuyableEffects[0].value)
-            })
+            }),
+            purchaseLimit: moleculeLimit
         })),
         createMultiBuyable(() => ({
             visibility: () => showIf(Decimal.gte(best.value, 1)),
@@ -149,7 +160,8 @@ const layer = createLayer("comb", () => {
                 title: "Mud Molecule",
                 description: "Multiply Particle & Aqua Particle gain based on Earth Particles.",
                 effectDisplay: format(multiBuyableEffects[1].value) + "x"
-            })
+            }),
+            purchaseLimit: moleculeLimit
         })),
         createMultiBuyable(() => ({
             visibility: () => showIf(Decimal.gte(best.value, 2)),
@@ -172,7 +184,8 @@ const layer = createLayer("comb", () => {
                 description: "Increase Life Buyable Power based on Combinators.",
                 effectDisplay:
                     "+" + format(Decimal.sub(multiBuyableEffects[2].value, 1).times(100)) + "%"
-            })
+            }),
+            purchaseLimit: moleculeLimit
         }))
     ];
 

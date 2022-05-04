@@ -12,7 +12,7 @@ import { createLayer } from "game/layers";
 import Decimal, { DecimalSource } from "util/bignum";
 import { render } from "util/vue";
 import { createLayerTreeNode, createResetButton } from "../../common";
-import { createBar, Direction } from "features/bars/bar";
+import { createBar } from "features/bars/bar";
 import { formatWhole } from "util/break_eternity";
 import { computed } from "vue";
 import { globalBus } from "game/events";
@@ -22,13 +22,10 @@ import advancements from "../Advancements";
 import lightning from "../row2/Lightning";
 import cryo from "../row2/Cryo";
 import earth from "../row2/Earth";
-import { addTooltip, TooltipDirection } from "features/tooltips/tooltip";
+import { addTooltip } from "features/tooltips/tooltip";
+import { Direction } from "util/common";
 import { createResourceTooltip } from "features/trees/tree";
-import {
-    createModifierSection,
-    createMultiplicativeModifier,
-    createSequentialModifier
-} from "game/modifiers";
+import { createMultiplicativeModifier, createSequentialModifier } from "game/modifiers";
 import combinators from "../row3/Combinators";
 
 const layer = createLayer("a", () => {
@@ -72,6 +69,11 @@ const layer = createLayer("a", () => {
         return eff;
     });
 
+    const floodTime = createResource<DecimalSource>(0);
+    const floods = computed(() => {
+        return Decimal.log10(Decimal.add(floodTime.value, 1));
+    });
+
     globalBus.on("update", diff => {
         bubbleTime.value = Decimal.add(
             bubbleTime.value,
@@ -86,6 +88,13 @@ const layer = createLayer("a", () => {
             torrentTime.value = Decimal.add(
                 torrentTime.value,
                 Decimal.mul(Decimal.floor(waveTime.value), diff / 2e6).times(aquaBarSpeed.value)
+            );
+        }
+
+        if (advancements.milestones[19].earned.value) {
+            floodTime.value = Decimal.add(
+                floodTime.value,
+                Decimal.mul(Decimal.floor(torrentTime.value), diff / 1e10).times(aquaBarSpeed.value)
             );
         }
 
@@ -169,6 +178,12 @@ const layer = createLayer("a", () => {
         direction: Direction.Right,
         progress: () => Decimal.sub(torrents.value, Decimal.floor(torrents.value))
     }));
+    const floodBar = createBar(() => ({
+        width: 300,
+        height: 25,
+        direction: Direction.Right,
+        progress: () => Decimal.sub(floods.value, Decimal.floor(floods.value))
+    }));
 
     const reset = createReset(() => ({
         thingsToReset: (): Record<string, unknown>[] => [layer]
@@ -193,7 +208,7 @@ const layer = createLayer("a", () => {
     /*addTooltip(resetButton, {
         display: jsx(() => createModifierSection("Modifiers", "", conversion.gainModifier, conversion.scaling.currentGain(conversion))),
         pinnable: true,
-        direction: TooltipDirection.DOWN,
+        direction: Direction.Down,
         style: "width: 400px; text-align: left"
     });*/ // button can't be clicked when tooltip is added
 
@@ -211,6 +226,8 @@ const layer = createLayer("a", () => {
         torrentTime,
         torrents,
         torrentEff,
+        floodTime,
+        floods,
         display: jsx(() => (
             <>
                 <MainDisplay resource={aqua} color={color} />
@@ -237,6 +254,13 @@ const layer = createLayer("a", () => {
                         Particle gain by {formatWhole(Decimal.mul(torrentEff.value, 100))}%
                         <br />
                         {render(torrentBar)}
+                    </div>
+                    <br />
+                    <div v-show={advancements.milestones[19].earned.value}>
+                        {formatWhole(Decimal.floor(floods.value))} Floods, each increasing the Base
+                        Particle gain exponent by 0.05
+                        <br />
+                        {render(floodBar)}
                     </div>
                 </div>
             </>

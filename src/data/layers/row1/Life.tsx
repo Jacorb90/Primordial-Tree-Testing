@@ -30,7 +30,8 @@ import earth from "../row2/Earth";
 import combinators from "../row3/Combinators";
 import { globalBus } from "game/events";
 import { createClickable } from "features/clickables/clickable";
-import { addTooltip, TooltipDirection } from "features/tooltips/tooltip";
+import { addTooltip } from "features/tooltips/tooltip";
+import { Direction } from "util/common";
 import { createResourceTooltip } from "features/trees/tree";
 import {
     createModifierSection,
@@ -359,7 +360,7 @@ const layer = createLayer("l", () => {
             )
         ),
         pinnable: true,
-        direction: TooltipDirection.DOWN,
+        direction: Direction.Down,
         style: "width: 400px; text-align: left"
     });
 

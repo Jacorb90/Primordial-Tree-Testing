@@ -28,7 +28,8 @@ import cryo from "../row2/Cryo";
 import earth from "../row2/Earth";
 import { globalBus } from "game/events";
 import { createResourceTooltip } from "features/trees/tree";
-import { addTooltip, TooltipDirection } from "features/tooltips/tooltip";
+import { addTooltip } from "features/tooltips/tooltip";
+import { Direction } from "util/common";
 import {
     createSequentialModifier,
     createMultiplicativeModifier,
@@ -58,7 +59,7 @@ const layer = createLayer("f", () => {
             gainModifier: createSequentialModifier(
                 createMultiplicativeModifier(
                     upgradeEffects[4],
-                    "Flame Upgrade 4",
+                    "Flame Upgrade 5",
                     upgradesR2[1].bought
                 ),
                 createMultiplicativeModifier(
@@ -288,7 +289,7 @@ const layer = createLayer("f", () => {
             )
         ),
         pinnable: true,
-        direction: TooltipDirection.DOWN,
+        direction: Direction.Down,
         style: "width: 400px; text-align: left"
     });
 

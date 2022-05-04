@@ -9,7 +9,8 @@ import { jsx, Visibility } from "features/feature";
 import { createReset } from "features/reset";
 import MainDisplay from "features/resources/MainDisplay.vue";
 import { createResource, trackBest } from "features/resources/resource";
-import { addTooltip, TooltipDirection } from "features/tooltips/tooltip";
+import { addTooltip } from "features/tooltips/tooltip";
+import { Direction } from "util/common";
 import { createResourceTooltip } from "features/trees/tree";
 import { globalBus } from "game/events";
 import { createLayer } from "game/layers";
@@ -212,12 +213,12 @@ const layer = createLayer("li", () => {
             createModifierSection(
                 "Modifiers",
                 "",
-                conversion.gainModifier,
+                conversion.gainModifier!,
                 conversion.scaling.currentGain(conversion)
             )
         ),
         pinnable: true,
-        direction: TooltipDirection.DOWN,
+        direction: Direction.Down,
         style: "width: 400px; text-align: left"
     });
 
