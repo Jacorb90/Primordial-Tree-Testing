@@ -5,7 +5,7 @@
         </template>
         <template v-slot:body>
             <details>
-                <summary>v1.1.1 Big Loar - <time>2022-05-04</time></summary>
+                <summary>v1.1.1 Big Loar - <time>2022-05-05</time></summary>
                 <ul>
                     <li class="balancing">Balanced up to 1e17 Particles/s</li>
                     <li class="feature">Implemented Advancements 22-23</li>
