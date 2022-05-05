@@ -80,6 +80,10 @@ const layer = createLayer("ai", () => {
                 .plus(Decimal.pow(10, tornado.value))
                 .log10();
         }
+
+        if (advancements.milestones[21].earned.value) {
+            air.value = Decimal.mul(conversion.currentGain.value, diff).plus(air.value);
+        }
     });
 
     const conversion: Conversion<{
