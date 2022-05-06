@@ -8,6 +8,7 @@
                 <summary>v1.2 Bond Glue - <time>2022-05-05</time></summary>
                 <ul>
                     <li class="balancing">Balanced up to ??? Particles/s</li>
+                    <li class="feature">Implemented Intrabonds</li>
                 </ul>
             </details>
             <details>

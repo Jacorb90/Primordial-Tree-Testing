@@ -191,7 +191,7 @@ const layer = createLayer("adv", () => {
         createAdvancement(21, "Increase the Molecule limit by 20%."),
         createAdvancement(22, "Gain 100% of Air Particle gain every second."),
         createAdvancement(23, "Gain 100% of Cryo Particle gain every second."),
-        createAdvancement(24, "Unlock Bond Boosts.")
+        createAdvancement(24, "Unlock Intrabonds.")
     ];
 
     return {

@@ -16,7 +16,7 @@ import Decimal, { DecimalSource } from "lib/break_eternity";
 import { render } from "util/vue";
 import advancements from "../side/Advancements";
 import MainDisplay from "features/resources/MainDisplay.vue";
-import { computed, ComputedRef } from "vue";
+import { computed, ComputedRef, unref } from "vue";
 import { format } from "util/bignum";
 import flame from "../row1/Flame";
 import lightning from "../row2/Lightning";
@@ -31,6 +31,8 @@ import {
     MultiBuyableOptions
 } from "data/customFeatures/multiBuyable";
 import { Computable } from "util/computed";
+import { createTab } from "features/tabs/tab";
+import { createTabFamily, TabFamily, TabFamilyOptions } from "features/tabs/tabFamily";
 
 const layer = createLayer("comb", () => {
     const id = "comb";
@@ -223,6 +225,37 @@ const layer = createLayer("comb", () => {
         }))
     ];
 
+    const moleculeTab = createTab(() => ({
+        display: jsx(() => <>{multiBuyables.map(render)}</>)
+    }));
+
+    const intrabondTab = createTab(() => ({
+        display: jsx(() => <>???</>)
+    }));
+
+    const tabFamily: TabFamily<TabFamilyOptions> = createTabFamily({
+        Molecules: () => ({
+            visibility: Visibility.Visible,
+            tab: moleculeTab,
+            display: "Molecules",
+            glowColor: () =>
+                multiBuyables.some(
+                    bbl => bbl.canPurchase.value && Decimal.lt(bbl.amount.value, 1)
+                ) || Decimal.gt(conversion.currentGain.value, combinators.value)
+                    ? "red"
+                    : ""
+        }),
+
+        Intrabonds: () => ({
+            visibility: () => showIf(advancements.milestones[23].earned.value),
+            tab: intrabondTab,
+            display: "Intrabonds",
+            style: () => ({
+                borderColor: advancements.milestones[23].earned.value ? "#ff9100" : "transparent"
+            })
+        })
+    });
+
     return {
         id,
         name,
@@ -232,21 +265,18 @@ const layer = createLayer("comb", () => {
         multiBuyables,
         multiBuyableEffects,
         mainEff,
-        display: jsx(() => {
-            const combDisplay = multiBuyables.map(render);
-
-            return (
-                <>
-                    <MainDisplay resource={combinators} color={color} />
-                    {render(resetButton)} <br />
-                    <br />
-                    Multiplies Earth, Lightning, Air, and Cryo Particles by {format(mainEff.value)}.
-                    <br />
-                    <br />
-                    {combDisplay}
-                </>
-            );
-        }),
+        tabFamily,
+        display: jsx(() => (
+            <>
+                <MainDisplay resource={combinators} color={color} />
+                {render(resetButton)} <br />
+                <br />
+                Multiplies Earth, Lightning, Air, and Cryo Particles by {format(mainEff.value)}.
+                <br />
+                <br />
+                {render(tabFamily)}
+            </>
+        )),
         treeNode
     };
 });
