@@ -112,20 +112,31 @@ const layer = createLayer("ai", () => {
                         .sub(conv.gainResource.value);
             },
             currentAt: conv => {
-                if (advancements.milestones[10].earned.value)
-                    return Decimal.div(unref(conv.currentGain), 3)
+                if (advancements.milestones[10].earned.value) {
+                    let current = unref(conv.currentGain);
+                    if (conversion.gainModifier) {
+                        current = conversion.gainModifier.revert(current);
+                    }
+                    return Decimal.div(current, 3)
                         .plus(2 / 3)
                         .pow(4)
                         .times(1e4);
-                else
+                } else
                     return Decimal.pow(2, Decimal.add(conv.gainResource.value, 1).pow(1.4)).times(
                         5e3
                     );
             },
             nextAt: conv => {
-                if (advancements.milestones[10].earned.value)
-                    return Decimal.div(unref(conv.currentGain), 3).plus(1).pow(4).times(1e4);
-                else
+                if (advancements.milestones[10].earned.value) {
+                    let current: DecimalSource = Decimal.add(unref(conv.currentGain), 1);
+                    if (conversion.gainModifier) {
+                        current = conversion.gainModifier.revert(current);
+                    }
+                    return Decimal.div(current, 3)
+                        .plus(2 / 3)
+                        .pow(4)
+                        .times(1e4);
+                } else
                     return Decimal.pow(2, Decimal.add(conv.gainResource.value, 1).pow(1.4)).times(
                         5e3
                     );

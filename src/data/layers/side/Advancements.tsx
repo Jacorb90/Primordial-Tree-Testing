@@ -51,6 +51,7 @@ const layer = createLayer("adv", () => {
         6e13,
         1e14,
         5e14,
+        1e17,
         1 / 0
     ];
 
@@ -189,7 +190,8 @@ const layer = createLayer("adv", () => {
         createAdvancement(20, "Unlock a new Aqua Bar."),
         createAdvancement(21, "Increase the Molecule limit by 20%."),
         createAdvancement(22, "Gain 100% of Air Particle gain every second."),
-        createAdvancement(23, "Gain 100% of Cryo Particle gain every second.")
+        createAdvancement(23, "Gain 100% of Cryo Particle gain every second."),
+        createAdvancement(24, "Unlock Bond Boosts.")
     ];
 
     return {
