@@ -33,6 +33,9 @@ import {
 import { Computable } from "util/computed";
 import { createTab } from "features/tabs/tab";
 import { createTabFamily, TabFamily, TabFamilyOptions } from "features/tabs/tabFamily";
+import { globalBus } from "game/events";
+import { Buyable, BuyableOptions, createBuyable } from "features/buyable";
+import { formatWhole } from "util/break_eternity";
 
 const layer = createLayer("comb", () => {
     const id = "comb";
@@ -96,6 +99,7 @@ const layer = createLayer("comb", () => {
             let eff = Decimal.add(flame.flame.value, 1)
                 .log10()
                 .times(multiBuyables[0].amount.value)
+                .times(attractionEff.value)
                 .plus(1)
                 .log10();
             if (advancements.milestones[17].earned.value) eff = eff.pow(3);
@@ -104,7 +108,7 @@ const layer = createLayer("comb", () => {
         1: computed(() =>
             Decimal.add(earth.earth.value, 1)
                 .log10()
-                .times(Decimal.pow(multiBuyables[1].amount.value, 1.5))
+                .times(Decimal.mul(multiBuyables[1].amount.value, attractionEff.value).pow(1.5))
                 .plus(1)
                 .cbrt()
         ),
@@ -112,7 +116,7 @@ const layer = createLayer("comb", () => {
             Decimal.add(
                 Decimal.mul(
                     combinators.value,
-                    Decimal.add(multiBuyables[2].amount.value, 1).log10()
+                    Decimal.mul(multiBuyables[2].amount.value, attractionEff.value).plus(1).log10()
                 ),
                 1
             )
@@ -124,9 +128,20 @@ const layer = createLayer("comb", () => {
             Decimal.add(air.air.value, 1)
                 .log10()
                 .times(multiBuyables[3].amount.value)
+                .times(attractionEff.value)
                 .plus(1)
                 .log10()
                 .div(2)
+                .plus(1)
+        ),
+        4: computed(() =>
+            Decimal.add(main.baseGain.value, 1)
+                .log10()
+                .times(multiBuyables[4].amount.value)
+                .times(attractionEff.value)
+                .plus(1)
+                .log10()
+                .div(5)
                 .plus(1)
         )
     };
@@ -222,15 +237,95 @@ const layer = createLayer("comb", () => {
                 effectDisplay: "^" + format(multiBuyableEffects[3].value)
             }),
             purchaseLimit: moleculeLimit
+        })),
+        createMultiBuyable(() => ({
+            visibility: () => showIf(Decimal.gte(best.value, 4)),
+            costSets: [
+                {
+                    cost: 1e12,
+                    resource: flame.flame
+                },
+                {
+                    cost: 1e6,
+                    resource: earth.earth
+                }
+            ],
+            display: () => ({
+                title: "Magma Molecule",
+                description:
+                    'Boost the effect of the "Heat = Speed" upgrade based on Base Particle gain.',
+                effectDisplay: "^" + format(multiBuyableEffects[4].value)
+            }),
+            purchaseLimit: moleculeLimit
         }))
     ];
+
+    globalBus.on("update", diff => {
+        covalencePower.value = Decimal.add(
+            covalencePower.value,
+            Decimal.mul(Decimal.add(ionicPower.value, ionicBondEff.value), diff)
+        );
+        attractionPower.value = Decimal.add(
+            attractionPower.value,
+            Decimal.mul(Decimal.add(covalencePower.value, covalentBondEff.value), diff)
+        );
+    });
+
+    const attractionPower = createResource<DecimalSource>(1, "Attraction Power");
+    const attractionEff = computed(() => {
+        return Decimal.max(attractionPower.value, 1).log10().div(3).plus(1);
+    });
+
+    const covalencePower = createResource<DecimalSource>(0);
+    const covalentBonds: Buyable<BuyableOptions> = createBuyable(() => ({
+        cost: () => Decimal.pow(8, Decimal.pow(covalentBonds.amount.value, 2)),
+        resource: attractionPower,
+        display: () => ({
+            title: "Covalent Bonds",
+            description: "Creates " + format(covalentBondEff.value) + " additional Covalence Power."
+        })
+    }));
+    const covalentBondEff = computed(() => {
+        return Decimal.pow(2, covalentBonds.amount.value).sub(1);
+    });
+
+    const ionicPower = createResource<DecimalSource>(0);
+    const ionicBonds: Buyable<BuyableOptions> = createBuyable(() => ({
+        cost: () => Decimal.pow(400, Decimal.pow(ionicBonds.amount.value, 2)).times(100),
+        resource: attractionPower,
+        display: () => ({
+            title: "Ionic Bonds",
+            description: "Creates " + format(ionicBondEff.value) + " additional Ionic Power."
+        })
+    }));
+    const ionicBondEff = computed(() => {
+        return Decimal.pow(2, ionicBonds.amount.value).sub(1).div(10);
+    });
 
     const moleculeTab = createTab(() => ({
         display: jsx(() => <>{multiBuyables.map(render)}</>)
     }));
 
     const intrabondTab = createTab(() => ({
-        display: jsx(() => <>???</>)
+        display: jsx(() => (
+            <>
+                <br />
+                There is <b style="font-size: 20px;">{format(attractionPower.value)}</b> Attraction
+                Power, which multiplies effective Molecules by{" "}
+                <b style="font-size: 20px;">{format(attractionEff.value)}</b>.<br />
+                <br />
+                There is <b>
+                    {format(Decimal.add(covalencePower.value, covalentBondEff.value))}
+                </b>{" "}
+                Covalence Power. {render(covalentBonds)}
+                <br />
+                <br />
+                There is <b>{format(Decimal.add(ionicPower.value, ionicBondEff.value))}</b> Ionic
+                Power. {render(ionicBonds)}
+                <br />
+                <br />
+            </>
+        ))
     }));
 
     const tabFamily: TabFamily<TabFamilyOptions> = createTabFamily({
@@ -265,6 +360,11 @@ const layer = createLayer("comb", () => {
         multiBuyables,
         multiBuyableEffects,
         mainEff,
+        attractionPower,
+        covalencePower,
+        covalentBonds,
+        ionicPower,
+        ionicBonds,
         tabFamily,
         display: jsx(() => (
             <>

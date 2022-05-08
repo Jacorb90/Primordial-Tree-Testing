@@ -26,6 +26,7 @@ import advancements from "../side/Advancements";
 import lightning from "../row2/Lightning";
 import cryo from "../row2/Cryo";
 import earth from "../row2/Earth";
+import combinators from "../row3/Combinators";
 import { globalBus } from "game/events";
 import { createResourceTooltip } from "features/trees/tree";
 import { addTooltip } from "features/tooltips/tooltip";
@@ -108,7 +109,12 @@ const layer = createLayer("f", () => {
             return ret.pow(cryo.challenge3Data.reward.value);
         }),
         1: computed(() => {
-            return Decimal.add(flame.value, 1).log(20).plus(1);
+            let ret = Decimal.add(flame.value, 1).log(20).plus(1);
+
+            if (Decimal.gte(combinators.best.value, 4))
+                ret = ret.pow(combinators.multiBuyableEffects[4].value);
+
+            return ret;
         }),
         2: computed(() => {
             return Decimal.add(flame.value, 1).log(5).plus(1);

@@ -5,7 +5,7 @@
 import { createLayerTreeNode, createResetButton } from "data/common";
 import { createClickable } from "features/clickables/clickable";
 import { createCumulativeConversion, createPolynomialScaling } from "features/conversion";
-import { jsx, Visibility } from "features/feature";
+import { jsx, showIf, Visibility } from "features/feature";
 import { createGrid } from "features/grids/grid";
 import { createReset } from "features/reset";
 import MainDisplay from "features/resources/MainDisplay.vue";
@@ -27,6 +27,7 @@ import { main } from "../../projEntry";
 import advancements from "../side/Advancements";
 import flame from "../row1/Flame";
 import combinators from "../row3/Combinators";
+import { globalBus } from "game/events";
 
 const layer = createLayer("e", () => {
     const id = "e";
@@ -144,6 +145,26 @@ const layer = createLayer("e", () => {
         })
     }));
 
+    const fillGrid = createClickable(() => ({
+        visibility: () => showIf(advancements.milestones[25].earned.value),
+        canClick: () =>
+            Decimal.gte(earth.value, Decimal.mul(gridCost.value, 50)) &&
+            !Object.values(grid.cells).every(cell => cell.state),
+        onClick: () => {
+            earth.value = Decimal.sub(earth.value, Decimal.mul(gridCost.value, 50));
+
+            for (let r = 1; r <= grid.rows; r++) {
+                for (let c = 1; c <= grid.cols; c++) {
+                    grid.setState(r * 100 + c, true);
+                }
+            }
+        },
+        display: () => ({
+            title: "Fill Grid",
+            description: "Cost: " + format(Decimal.mul(gridCost.value, 50)) + " Earth Particles"
+        })
+    }));
+
     const grid = createGrid(() => ({
         rows: 5,
         cols: 5,
@@ -202,12 +223,18 @@ const layer = createLayer("e", () => {
         style: "width: 400px; text-align: left"
     });
 
+    globalBus.on("update", diff => {
+        if (advancements.milestones[24].earned.value)
+            earth.value = Decimal.mul(conversion.currentGain.value, diff).plus(earth.value);
+    });
+
     return {
         id,
         name,
         color,
         earth,
         best,
+        fillGrid,
         gridLevel,
         bestGridLevel,
         display: jsx(() => {
@@ -236,6 +263,8 @@ const layer = createLayer("e", () => {
                             <span v-show={Decimal.gte(gridLevel.value, 4)}>
                                 Life Buyable 6 Effect Mult: {format(lb6Mult.value, 2)}x<br />
                             </span>
+                            <br />
+                            {render(fillGrid)}
                             <br />
                             {render(grid)}
                             <br />
