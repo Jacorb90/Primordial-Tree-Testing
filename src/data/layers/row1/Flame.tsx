@@ -79,6 +79,11 @@ const layer = createLayer("f", () => {
                     earth.flameMult,
                     "Earth Grid Boost 1",
                     advancements.milestones[11].earned
+                ),
+                createMultiplicativeModifier(
+                    combinators.mainEff,
+                    "Particle Combinator Effect",
+                    advancements.milestones[31].earned
                 )
             )
         }));

@@ -145,6 +145,17 @@ const layer = createLayer("comb", () => {
                 .log10()
                 .div(5)
                 .plus(1)
+        ),
+        5: computed(() =>
+            Decimal.add(
+                Decimal.mul(
+                    combinators.value,
+                    Decimal.mul(multiBuyables[5].amount.value, attractionEff.value).plus(1).log10()
+                ),
+                1
+            )
+                .log10()
+                .plus(1)
         )
     };
 
@@ -259,6 +270,24 @@ const layer = createLayer("comb", () => {
                 effectDisplay: "^" + format(multiBuyableEffects[4].value)
             }),
             purchaseLimit: moleculeLimit
+        })),
+        createMultiBuyable(() => ({
+            visibility: () => showIf(Decimal.gte(best.value, 5)),
+            costSets: [
+                {
+                    cost: 5e14,
+                    resource: life.life
+                },
+                {
+                    cost: 2e7,
+                    resource: earth.earth
+                }
+            ],
+            display: () => ({
+                title: "Wood Molecule",
+                description: "Divide the Earth Grid Cost based on Combinators.",
+                effectDisplay: "/" + format(multiBuyableEffects[5].value)
+            })
         }))
     ];
 
@@ -409,7 +438,8 @@ const layer = createLayer("comb", () => {
                 <MainDisplay resource={combinators} color={color} />
                 {render(resetButton)} <br />
                 <br />
-                Multiplies Earth, Lightning, Air, and Cryo Particles by {format(mainEff.value)}.
+                Multiplies {advancements.milestones[31].earned.value ? "Flame, Life, Aqua, " : ""}
+                Earth, Lightning, Air, and Cryo Particles by {format(mainEff.value)}.
                 <br />
                 <br />
                 {render(tabFamily)}

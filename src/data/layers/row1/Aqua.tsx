@@ -150,6 +150,11 @@ const layer = createLayer("a", () => {
                 () =>
                     Decimal.gte(combinators.multiBuyables[1].value, 1) &&
                     advancements.milestones[15].earned.value
+            ),
+            createMultiplicativeModifier(
+                combinators.mainEff,
+                "Particle Combinator Effect",
+                advancements.milestones[31].earned
             )
         )
     }));

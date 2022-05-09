@@ -40,7 +40,10 @@ const layer = createLayer("e", () => {
     const gridLevel = createResource<DecimalSource>(0);
     const bestGridLevel = trackBest(gridLevel);
     const gridCost = computed(() => {
-        return Decimal.pow(2, gridLevel.value);
+        let cost = Decimal.pow(2, gridLevel.value);
+        if (Decimal.gte(combinators.best.value, 5))
+            cost = cost.div(combinators.multiBuyableEffects[5].value);
+        return cost;
     });
 
     const gridCellMult = computed(() => {
