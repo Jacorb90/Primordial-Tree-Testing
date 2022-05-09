@@ -96,6 +96,11 @@ const layer = createLayer("e", () => {
         else return Decimal.add(baseGainAdded.value, 1).log10().div(2).plus(1).pow(2);
     });
 
+    const particleGainMult = computed(() => {
+        if (Decimal.lt(gridLevel.value, 16)) return 1;
+        else return flameMult.value.pow(1.1).div(Math.pow(100, 1.1)).plus(0.99);
+    });
+
     const conversion = createCumulativeConversion(() => ({
         scaling: createPolynomialScaling(1.5e5, 1 / 2),
         baseResource: flame.flame,
@@ -263,6 +268,9 @@ const layer = createLayer("e", () => {
                             <span v-show={Decimal.gte(gridLevel.value, 4)}>
                                 Life Buyable 6 Effect Mult: {format(lb6Mult.value, 2)}x<br />
                             </span>
+                            <span v-show={Decimal.gte(gridLevel.value, 16)}>
+                                Particle Gain Mult: {format(particleGainMult.value, 2)}x<br />
+                            </span>
                             <br />
                             {render(fillGrid)}
                             <br />
@@ -288,7 +296,8 @@ const layer = createLayer("e", () => {
         flameMult,
         baseGainAdded,
         torrentEffAdded,
-        lb6Mult
+        lb6Mult,
+        particleGainMult
     };
 });
 

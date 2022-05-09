@@ -89,7 +89,9 @@ const layer = createLayer("comb", () => {
     }));
 
     const moleculeLimit = computed(() => {
-        let limit = Decimal.mul(50, combinators.value);
+        let comb = combinators.value;
+        if (Decimal.gte(comb, 10)) comb = Decimal.mul(comb, 10).sqrt();
+        let limit = Decimal.mul(50, comb);
         if (advancements.milestones[20].earned.value) limit = limit.times(1.2);
         return limit;
     });
@@ -286,7 +288,24 @@ const layer = createLayer("comb", () => {
         })
     }));
     const covalentBondEff = computed(() => {
-        return Decimal.pow(2, covalentBonds.amount.value).sub(1);
+        return Decimal.pow(2, Decimal.mul(covalentBonds.amount.value, covalenceBoostEff.value)).sub(
+            1
+        );
+    });
+
+    const covalenceBoost: Buyable<BuyableOptions> = createBuyable(() => ({
+        cost: () => Decimal.pow(5, Decimal.pow(covalenceBoost.amount.value, 3)).times(1e5),
+        resource: attractionPower,
+        display: () => ({
+            title: "Covalence Boosts",
+            description:
+                "Makes Covalent Bonds " +
+                format(Decimal.sub(covalenceBoostEff.value, 1).times(100)) +
+                "% stronger."
+        })
+    }));
+    const covalenceBoostEff = computed(() => {
+        return Decimal.div(covalenceBoost.amount.value, 2).plus(1);
     });
 
     const ionicPower = createResource<DecimalSource>(0);
@@ -299,7 +318,24 @@ const layer = createLayer("comb", () => {
         })
     }));
     const ionicBondEff = computed(() => {
-        return Decimal.pow(2, ionicBonds.amount.value).sub(1).div(10);
+        return Decimal.pow(2, Decimal.mul(ionicBonds.amount.value, ionicBoostEff.value))
+            .sub(1)
+            .div(10);
+    });
+
+    const ionicBoost: Buyable<BuyableOptions> = createBuyable(() => ({
+        cost: () => Decimal.pow(15, Decimal.pow(ionicBoost.amount.value, 3)).times(3e5),
+        resource: attractionPower,
+        display: () => ({
+            title: "Ionic Boosts",
+            description:
+                "Makes Ionic Bonds " +
+                format(Decimal.sub(ionicBoostEff.value, 1).times(100)) +
+                "% stronger."
+        })
+    }));
+    const ionicBoostEff = computed(() => {
+        return Decimal.div(ionicBoost.amount.value, 2).plus(1);
     });
 
     const moleculeTab = createTab(() => ({
@@ -317,11 +353,11 @@ const layer = createLayer("comb", () => {
                 There is <b>
                     {format(Decimal.add(covalencePower.value, covalentBondEff.value))}
                 </b>{" "}
-                Covalence Power. {render(covalentBonds)}
+                Covalence Power. {render(covalentBonds)} {render(covalenceBoost)}
                 <br />
                 <br />
                 There is <b>{format(Decimal.add(ionicPower.value, ionicBondEff.value))}</b> Ionic
-                Power. {render(ionicBonds)}
+                Power. {render(ionicBonds)} {render(ionicBoost)}
                 <br />
                 <br />
             </>
@@ -363,8 +399,10 @@ const layer = createLayer("comb", () => {
         attractionPower,
         covalencePower,
         covalentBonds,
+        covalenceBoost,
         ionicPower,
         ionicBonds,
+        ionicBoost,
         tabFamily,
         display: jsx(() => (
             <>

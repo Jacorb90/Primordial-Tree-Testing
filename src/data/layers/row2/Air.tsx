@@ -46,7 +46,9 @@ const layer = createLayer("ai", () => {
 
     const zephyr = createResource<DecimalSource>(0, "Zephyr Force");
     const zephyrMul = computed(() => {
-        return Decimal.gte(air.value, 3) ? Decimal.div(wind.value, 10) : 0;
+        return Decimal.gte(air.value, 3)
+            ? Decimal.div(wind.value, advancements.milestones[28].earned.value ? 1 : 10)
+            : 0;
     });
     const zephyrEff = computed(() => {
         return Decimal.add(zephyr.value, 1).log2();
@@ -54,7 +56,9 @@ const layer = createLayer("ai", () => {
 
     const tornado = createResource<DecimalSource>(0, "Tornado Force");
     const tornadoMul = computed(() => {
-        return Decimal.gte(air.value, 5) ? Decimal.div(zephyr.value, 10) : 0;
+        return Decimal.gte(air.value, 5)
+            ? Decimal.div(zephyr.value, advancements.milestones[28].earned.value ? 1 : 10)
+            : 0;
     });
     const tornadoEff = computed(() => {
         return Decimal.add(tornado.value, 1).log10().plus(1).log(3).plus(1).sqrt();

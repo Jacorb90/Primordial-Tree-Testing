@@ -117,13 +117,23 @@ const layer = createLayer("f", () => {
             return ret;
         }),
         2: computed(() => {
-            return Decimal.add(flame.value, 1).log(5).plus(1);
+            return Decimal.add(flame.value, 1)
+                .log(5)
+                .plus(1)
+                .pow(advancements.milestones[29].earned.value ? 2 : 1);
         }),
         3: computed(() => {
-            return Decimal.add(flame.value, 1).log10().sqrt();
+            return Decimal.add(flame.value, 1)
+                .log10()
+                .pow(advancements.milestones[29].earned.value ? 1 : 0.5);
         }),
         4: computed(() => {
-            return Decimal.add(main.particles.value, 1).log10().plus(1).log10().plus(1);
+            return Decimal.add(main.particles.value, 1)
+                .log10()
+                .plus(1)
+                .log10()
+                .plus(1)
+                .pow(advancements.milestones[29].earned.value ? 2 : 1);
         }),
         5: computed(() => {
             return Decimal.add(flame.value, 1).log10().sqrt().times(3);

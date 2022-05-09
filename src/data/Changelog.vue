@@ -8,7 +8,13 @@
                 <summary>v1.2 Bond Glue - <time>2022-05-05</time></summary>
                 <ul>
                     <li class="balancing">Balanced up to ??? Particles/s</li>
+                    <li class="feature">Implemented Advancements 24-???</li>
                     <li class="feature">Implemented Intrabonds</li>
+                    <li class="fix">
+                        Fixed a bug with the Cryo Challenge rewards not being dependent on the right
+                        challenge completions (this might slightly slow down your particles/s, but
+                        not substantially enough to be a problem)
+                    </li>
                 </ul>
             </details>
             <details>
