@@ -45,12 +45,6 @@ const layer = createLayer("light", () => {
         thingsToReset: (): Record<string, unknown>[] => [layer]
     }));
 
-    globalBus.on("reset", currentReset => {
-        if (currentReset === (reset as GenericReset) && order.value == 0) {
-            order.value = sound.order.value == 0 ? 1 : 2;
-        }
-    });
-
     const treeNode = createLayerTreeNode(() => ({
         visibility: () =>
             advancements.milestones[32].earned.value ? Visibility.Visible : Visibility.Hidden,
@@ -68,7 +62,12 @@ const layer = createLayer("light", () => {
     const resetButton = createResetButton(() => ({
         conversion,
         tree: main.tree,
-        treeNode
+        treeNode,
+        onClick: () => {
+            if (order.value == 0) {
+                order.value = sound.order.value == 0 ? 1 : 2;
+            }
+        }
     }));
 
     return {

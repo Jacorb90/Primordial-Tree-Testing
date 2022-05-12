@@ -31,7 +31,7 @@ const layer = createLayer("sound", () => {
     const order = createResource<number>(0);
 
     const conversion = createConversion(() => ({
-        scaling: createPolynomialScaling(() => (light.order.value == 1 ? 1 / 0 : 1e6), 1 / 3),
+        scaling: createPolynomialScaling(() => (light.order.value == 1 ? 1 / 0 : 1e7), 1 / 3),
         baseResource: air.air,
         gainResource: sound
     }));
@@ -39,12 +39,6 @@ const layer = createLayer("sound", () => {
     const reset = createReset(() => ({
         thingsToReset: (): Record<string, unknown>[] => [layer]
     }));
-
-    globalBus.on("reset", currentReset => {
-        if (currentReset === reset && order.value == 0) {
-            order.value = light.order.value == 0 ? 1 : 2;
-        }
-    });
 
     const treeNode = createLayerTreeNode(() => ({
         visibility: () =>
@@ -63,7 +57,12 @@ const layer = createLayer("sound", () => {
     const resetButton = createResetButton(() => ({
         conversion,
         tree: main.tree,
-        treeNode
+        treeNode,
+        onClick: () => {
+            if (order.value == 0) {
+                order.value = light.order.value == 0 ? 1 : 2;
+            }
+        }
     }));
 
     return {

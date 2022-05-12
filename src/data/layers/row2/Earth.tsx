@@ -28,6 +28,7 @@ import advancements from "../side/Advancements";
 import flame from "../row1/Flame";
 import combinators from "../row3/Combinators";
 import { globalBus } from "game/events";
+import DangerButton from "components/fields/DangerButton.vue";
 
 const layer = createLayer("e", () => {
     const id = "e";
@@ -118,22 +119,24 @@ const layer = createLayer("e", () => {
         )
     }));
 
-    const levelDown = createClickable(() => ({
-        canClick: () => Decimal.gte(gridLevel.value, 1),
-        onClick: () => {
-            gridLevel.value = Decimal.sub(gridLevel.value, 1);
-            for (let r = 1; r <= grid.rows; r++) {
-                for (let c = 1; c <= grid.cols; c++) {
-                    grid.setState(r * 100 + c, true);
+    const levelDown = jsx(() => (
+        <DangerButton
+            skipConfirm={Decimal.lt(gridLevel.value, bestGridLevel.value)}
+            class="feature clickable can"
+            disabled={Decimal.lt(gridLevel.value, 1)}
+            customDisplay="WARNING: This will reset your Earth Grid!"
+            forceOnClick={() => {
+                gridLevel.value = Decimal.sub(gridLevel.value, 1);
+                for (let r = 1; r <= grid.rows; r++) {
+                    for (let c = 1; c <= grid.cols; c++) {
+                        grid.setState(r * 100 + c, true);
+                    }
                 }
-            }
-        },
-        display: () => ({
-            title: "Level Down",
-            description: " "
-        }),
-        small: true
-    }));
+            }}
+        >
+            <b>Level Down</b>
+        </DangerButton>
+    ));
 
     const levelUp = createClickable(() => ({
         canClick: () => Object.values(grid.cells).every(cell => cell.state),
