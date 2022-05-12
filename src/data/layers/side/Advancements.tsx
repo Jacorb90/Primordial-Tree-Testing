@@ -60,6 +60,7 @@ const layer = createLayer("adv", () => {
         4.5e22,
         1.35e23,
         1e24,
+        1.4e25,
         1 / 0
     ];
 
@@ -217,7 +218,11 @@ const layer = createLayer("adv", () => {
             31,
             "The effect of the milestone at 5 Advancements is permanently active, and all Aqua bar requirements scale 10% slower."
         ),
-        createAdvancement(32, "The main Combinator effect also affects the first row of Particles.")
+        createAdvancement(
+            32,
+            "The main Combinator effect also affects the first row of Particles."
+        ),
+        createAdvancement(33, "Unlock Light or Sound.")
     ];
 
     return {

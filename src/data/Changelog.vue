@@ -4,6 +4,12 @@
             <h2>Changelog</h2>
         </template>
         <template v-slot:body>
+            <details open>
+                <summary>v1.3 For the Senses - <time>2022-05-09</time></summary>
+                <ul>
+                    <li class="balancing">Balanced up to ??? Particles/s</li>
+                </ul>
+            </details>
             <details>
                 <summary>v1.2 Bond Glue - <time>2022-05-09</time></summary>
                 <ul>
@@ -79,7 +85,7 @@
                     <li class="feature">Implemented Air layer</li>
                 </ul>
             </details>
-            <details open>
+            <details>
                 <summary>v0.2 Several Advancements - <time>2022-04-11</time></summary>
                 <ul>
                     <li class="balancing">Balanced up to 43,000 Particles/s</li>
@@ -87,7 +93,7 @@
                     <li class="feature">Implemented Cryo layer</li>
                 </ul>
             </details>
-            <details open>
+            <details>
                 <summary>v0.1 Basic Mechanics - <time>2022-04-08</time></summary>
                 <ul>
                     <li class="feature">Implemented Flame, Life, & Water layers</li>

@@ -21,7 +21,9 @@ import lightning from "./layers/row2/Lightning";
 import cryo from "./layers/row2/Cryo";
 import air from "./layers/row2/Air";
 import earth from "./layers/row2/Earth";
-import { oneWayBranchedResetPropagation, versionGT, fixPoint4Obj } from "./helpers";
+import light from "./layers/row3/Light";
+import sound from "./layers/row3/Sound";
+import { oneWayBranchedResetPropagation, versionGT, fixPoint4Obj, emptyTreeNode } from "./helpers";
 import combinators from "./layers/row3/Combinators";
 import projInfo from "./projInfo.json";
 import lore from "./layers/side/Lore";
@@ -98,6 +100,7 @@ export const main = createLayer("main", () => {
             nodes: [
                 [flame.treeNode, life.treeNode, aqua.treeNode],
                 [earth.treeNode, lightning.treeNode, air.treeNode, cryo.treeNode],
+                [light.treeNode, emptyTreeNode, sound.treeNode],
                 [combinators.treeNode]
             ],
             leftSideNodes: [advancements.treeNode, lore.treeNode],
@@ -141,6 +144,20 @@ export const main = createLayer("main", () => {
                     b.push({
                         startNode: combinators.treeNode,
                         endNode: cryo.treeNode
+                    });
+                }
+
+                if (light.treeNode.visibility.value == Visibility.Visible) {
+                    b.push({
+                        startNode: light.treeNode,
+                        endNode: lightning.treeNode
+                    });
+                }
+
+                if (sound.treeNode.visibility.value == Visibility.Visible) {
+                    b.push({
+                        startNode: sound.treeNode,
+                        endNode: air.treeNode
                     });
                 }
 
@@ -218,7 +235,9 @@ export const getInitialLayers = (
     cryo,
     air,
     earth,
-    combinators
+    combinators,
+    light,
+    sound
 ];
 
 export const hasWon = computed(() => {

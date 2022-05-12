@@ -297,6 +297,59 @@ const layer = createLayer("lore", () => {
                     }
                 } as InfoboxOptions),
             true
+        ),
+
+        createInfobox(
+            () =>
+                ({
+                    visibility: computed(() => showIf(advancements.milestones[32].earned.value)),
+                    color: "#ffffff",
+                    title: "Correction Major",
+                    display: jsx(() => (
+                        <>
+                            Hello! Yes I'm the one making the universe here! Maybe I'm just a
+                            novice, but that's what you're here for, right?
+                            <br />
+                            <br />
+                            Wait what? You're saying that I'm underqualified for this? How dare you,
+                            just because I skipped half of my classes doesn't mean-
+                            <br />
+                            <br />
+                            Oh, you meant that I need experience before I can make a universe here?
+                            But to get experience I'd need to make a universe, right?
+                            <br />
+                            <br />
+                            So I need experience to make a universe, but need to make a universe to
+                            have experience. Jeez, I'm no million-year-old genius but that sounds
+                            like a paradox to me.
+                            <br />
+                            <br />
+                            No, you cannot take control of this operation, it's mine! You have no
+                            authority here, so leave or I'll throw over a septillion particles at
+                            you! That oughta leave a dent!
+                            <br />
+                            <br />
+                            Yeah you're right, that's barely anything, but still! You have no right!
+                            I'll mind my business, and you mind yours! Or you could actually do your
+                            job and help me out here!
+                            <br />
+                            <br />
+                            Well, I don't have enough energy left to include both light and sound
+                            particles, so I have to choose one, and frankly, I don't have the mental
+                            capacity to make important decisions on my own.
+                            <br />
+                            <br />
+                            Ah you want me to choose? Damn, okay I guess I'll just choose at random
+                            then, let's flip a coin. Heads for light, tails for sound. Aaaaaaaand
+                            here goes!
+                            <br />
+                        </>
+                    )),
+                    style: {
+                        color: "black"
+                    }
+                } as InfoboxOptions),
+            true
         )
     ];
 
