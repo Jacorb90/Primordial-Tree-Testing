@@ -3,9 +3,19 @@
  * @hidden
  */
 
-import { createLayerTreeNode, createResetButton } from "data/common";
+import {
+    createLayerTreeNode,
+    createResetButton,
+    ResetButton,
+    ResetButtonOptions
+} from "data/common";
 import { main } from "data/projEntry";
-import { createConversion, createPolynomialScaling } from "features/conversion";
+import {
+    Conversion,
+    ConversionOptions,
+    createConversion,
+    createPolynomialScaling
+} from "features/conversion";
 import { Visibility, jsx } from "features/feature";
 import { createReset } from "features/reset";
 import { createResource, trackBest } from "features/resources/resource";
@@ -18,7 +28,6 @@ import air from "../row2/Air";
 import advancements from "../side/Advancements";
 import { render } from "util/vue";
 import light from "./Light";
-import { globalBus } from "game/events";
 
 const layer = createLayer("sound", () => {
     const id = "sound";
@@ -30,7 +39,7 @@ const layer = createLayer("sound", () => {
 
     const order = createResource<number>(0);
 
-    const conversion = createConversion(() => ({
+    const conversion: Conversion<ConversionOptions> = createConversion(() => ({
         scaling: createPolynomialScaling(() => (light.order.value == 1 ? 1 / 0 : 1e7), 1 / 3),
         baseResource: air.air,
         gainResource: sound
@@ -42,7 +51,9 @@ const layer = createLayer("sound", () => {
 
     const treeNode = createLayerTreeNode(() => ({
         visibility: () =>
-            advancements.milestones[32].earned.value ? Visibility.Visible : Visibility.Hidden,
+            advancements.milestones[32].earned.value && light.order.value != 1
+                ? Visibility.Visible
+                : Visibility.Hidden,
         layerID: id,
         display: jsx(() => <img src="./nodes/sound.png" />),
         color,
@@ -54,7 +65,7 @@ const layer = createLayer("sound", () => {
         style: () => (treeNode.visibility.value === Visibility.Visible ? "" : "display: none")
     });
 
-    const resetButton = createResetButton(() => ({
+    const resetButton: ResetButton<ResetButtonOptions> = createResetButton(() => ({
         conversion,
         tree: main.tree,
         treeNode,

@@ -8,6 +8,7 @@
                 <summary>v1.3 For the Senses - <time>2022-05-09</time></summary>
                 <ul>
                     <li class="balancing">Balanced up to ??? Particles/s</li>
+                    <li class="fix">A few minor bugfixes, and updated to Profectus 0.4.1</li>
                 </ul>
             </details>
             <details>

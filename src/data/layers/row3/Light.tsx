@@ -3,7 +3,14 @@
  * @hidden
  */
 
-import { createLayerTreeNode, createResetButton } from "data/common";
+import {
+    createLayerTreeNode,
+    createResetButton,
+    LayerTreeNode,
+    LayerTreeNodeOptions,
+    ResetButton,
+    ResetButtonOptions
+} from "data/common";
 import { main } from "data/projEntry";
 import {
     Conversion,
@@ -11,8 +18,8 @@ import {
     createConversion,
     createPolynomialScaling
 } from "features/conversion";
-import { Visibility, jsx } from "features/feature";
-import { createReset, GenericReset } from "features/reset";
+import { Visibility, jsx, JSXFunction } from "features/feature";
+import { createReset, GenericReset, Reset, ResetOptions } from "features/reset";
 import { createResource, trackBest } from "features/resources/resource";
 import { addTooltip } from "features/tooltips/tooltip";
 import { createResourceTooltip } from "features/trees/tree";
@@ -23,7 +30,6 @@ import lightning from "../row2/Lightning";
 import advancements from "../side/Advancements";
 import { render } from "util/vue";
 import sound from "./Sound";
-import { globalBus } from "game/events";
 
 const layer = createLayer("light", () => {
     const id = "light";
@@ -45,9 +51,17 @@ const layer = createLayer("light", () => {
         thingsToReset: (): Record<string, unknown>[] => [layer]
     }));
 
-    const treeNode = createLayerTreeNode(() => ({
+    const treeNode: LayerTreeNode<{
+        visibility: () => Visibility;
+        layerID: string;
+        display: JSXFunction;
+        color: string;
+        reset: Reset<ResetOptions>;
+    }> = createLayerTreeNode(() => ({
         visibility: () =>
-            advancements.milestones[32].earned.value ? Visibility.Visible : Visibility.Hidden,
+            advancements.milestones[32].earned.value && sound.order.value != 1
+                ? Visibility.Visible
+                : Visibility.Hidden,
         layerID: id,
         display: jsx(() => <img src="./nodes/light.png" />),
         color,
@@ -59,7 +73,7 @@ const layer = createLayer("light", () => {
         style: () => (treeNode.visibility.value === Visibility.Visible ? "" : "display: none")
     });
 
-    const resetButton = createResetButton(() => ({
+    const resetButton: ResetButton<ResetButtonOptions> = createResetButton(() => ({
         conversion,
         tree: main.tree,
         treeNode,
