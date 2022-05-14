@@ -27,7 +27,7 @@ import lightning from "../row2/Lightning";
 import cryo from "../row2/Cryo";
 import air from "../row2/Air";
 import earth from "../row2/Earth";
-import combinators from "../row3/Combinators";
+import combinators from "../row4/Combinators";
 import { globalBus } from "game/events";
 import { createClickable } from "features/clickables/clickable";
 import { addTooltip } from "features/tooltips/tooltip";
@@ -211,11 +211,16 @@ const layer = createLayer("l", () => {
         visibility: () =>
             advancements.milestones[10].earned.value ? Visibility.Visible : Visibility.None,
         canClick: () => advancements.milestones[10].earned.value,
-        display: "Buy All",
+        display: () => (advancements.milestones[33].earned.value ? "Max All" : "Buy All"),
         small: true,
         onClick: _ => {
             for (let i = 0; i < buyables.length; i++) {
-                if (unref(buyables[i].canClick)) buyables[i].onClick();
+                if (unref(buyables[i].canClick)) {
+                    if (advancements.milestones[33].earned.value) {
+                        const target = buyables[i].target();
+                        buyables[i].amount.value = Decimal.max(buyables[i].amount.value, target);
+                    } else buyables[i].onClick();
+                }
             }
         }
     }));
@@ -224,6 +229,7 @@ const layer = createLayer("l", () => {
         Buyable<{
             visibility: () => Visibility.Visible | Visibility.None;
             cost(): Decimal;
+            target(): Decimal;
             resource: Resource<DecimalSource>;
             display: Computable<BuyableDisplay>;
         }>
@@ -233,6 +239,14 @@ const layer = createLayer("l", () => {
             cost() {
                 const amt = buyables[0].amount.value;
                 return Decimal.pow(3, amt).div(buyableCostDiv.value).pow(buyableCostExp.value);
+            },
+            target() {
+                return Decimal.root(life.value, buyableCostExp.value)
+                    .times(buyableCostDiv.value)
+                    .max(1)
+                    .log(3)
+                    .plus(1)
+                    .floor();
             },
             resource: life,
             display: () => ({
@@ -252,6 +266,16 @@ const layer = createLayer("l", () => {
                     .div(buyableCostDiv.value)
                     .pow(buyableCostExp.value);
             },
+            target() {
+                return Decimal.root(life.value, buyableCostExp.value)
+                    .times(buyableCostDiv.value)
+                    .div(10)
+                    .max(1)
+                    .log(4)
+                    .root(1.2)
+                    .plus(1)
+                    .floor();
+            },
             resource: life,
             display: () => ({
                 title: "The Source",
@@ -269,6 +293,16 @@ const layer = createLayer("l", () => {
                     .times(50)
                     .div(buyableCostDiv.value)
                     .pow(buyableCostExp.value);
+            },
+            target() {
+                return Decimal.root(life.value, buyableCostExp.value)
+                    .times(buyableCostDiv.value)
+                    .div(50)
+                    .max(1)
+                    .log(2.5)
+                    .root(1.4)
+                    .plus(1)
+                    .floor();
             },
             resource: life,
             display: () => ({
@@ -288,6 +322,16 @@ const layer = createLayer("l", () => {
                     .div(buyableCostDiv.value)
                     .pow(buyableCostExp.value);
             },
+            target() {
+                return Decimal.root(life.value, buyableCostExp.value)
+                    .times(buyableCostDiv.value)
+                    .div(200)
+                    .max(1)
+                    .log2()
+                    .root(1.6)
+                    .plus(1)
+                    .floor();
+            },
             resource: life,
             display: () => ({
                 title: "Existence Formula",
@@ -306,6 +350,16 @@ const layer = createLayer("l", () => {
                     .div(buyableCostDiv.value)
                     .pow(buyableCostExp.value);
             },
+            target() {
+                return Decimal.root(life.value, buyableCostExp.value)
+                    .times(buyableCostDiv.value)
+                    .div(1e4)
+                    .max(1)
+                    .log(1.5)
+                    .root(1.8)
+                    .plus(1)
+                    .floor();
+            },
             resource: life,
             display: () => ({
                 title: "Water Lily",
@@ -323,6 +377,16 @@ const layer = createLayer("l", () => {
                     .times(1.2e4)
                     .div(buyableCostDiv.value)
                     .pow(buyableCostExp.value);
+            },
+            target() {
+                return Decimal.root(life.value, buyableCostExp.value)
+                    .times(buyableCostDiv.value)
+                    .div(1.2e4)
+                    .max(1)
+                    .log2()
+                    .sqrt()
+                    .plus(1)
+                    .floor();
             },
             resource: life,
             display: () => ({

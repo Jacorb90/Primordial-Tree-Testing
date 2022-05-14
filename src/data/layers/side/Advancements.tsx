@@ -61,6 +61,7 @@ const layer = createLayer("adv", () => {
         1.35e23,
         1e24,
         1.4e25,
+        1e27,
         1 / 0
     ];
 
@@ -222,7 +223,14 @@ const layer = createLayer("adv", () => {
             32,
             "The main Combinator effect also affects the first row of Particles."
         ),
-        createAdvancement(33, "Unlock Light or Sound.")
+        createAdvancement(
+            33,
+            "Unlock Light & Sound, square the Particle Combinator effect, and Lightning Modes are never de-selected by resets."
+        ),
+        createAdvancement(
+            34,
+            "All Light Energy colors are generated twice as fast, and you can buy max Life Buyables."
+        )
     ];
 
     return {

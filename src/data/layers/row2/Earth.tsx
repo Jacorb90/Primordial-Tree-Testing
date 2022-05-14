@@ -26,7 +26,7 @@ import { computed } from "vue";
 import { main } from "../../projEntry";
 import advancements from "../side/Advancements";
 import flame from "../row1/Flame";
-import combinators from "../row3/Combinators";
+import combinators from "../row4/Combinators";
 import { globalBus } from "game/events";
 import DangerButton from "components/fields/DangerButton.vue";
 

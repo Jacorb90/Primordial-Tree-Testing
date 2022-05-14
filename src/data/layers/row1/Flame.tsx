@@ -26,7 +26,7 @@ import advancements from "../side/Advancements";
 import lightning from "../row2/Lightning";
 import cryo from "../row2/Cryo";
 import earth from "../row2/Earth";
-import combinators from "../row3/Combinators";
+import combinators from "../row4/Combinators";
 import { globalBus } from "game/events";
 import { createResourceTooltip } from "features/trees/tree";
 import { addTooltip } from "features/tooltips/tooltip";

@@ -26,7 +26,7 @@ import { render } from "util/vue";
 import { computed } from "vue";
 import { createLayerTreeNode, createResetButton } from "../../common";
 import advancements from "../side/Advancements";
-import combinators from "../row3/Combinators";
+import combinators from "../row4/Combinators";
 
 const layer = createLayer("li", () => {
     const id = "li";
@@ -186,7 +186,22 @@ const layer = createLayer("li", () => {
     ];
 
     const reset = createReset(() => ({
-        thingsToReset: (): Record<string, unknown>[] => [layer]
+        thingsToReset: (): Record<string, unknown>[] => {
+            const toReset = {
+                id,
+                name,
+                color,
+                lightning,
+                best,
+                treeNode,
+                clickables,
+                clickableEffects
+            };
+
+            if (!advancements.milestones[32].earned.value) return [{ ...toReset, lightningSel }];
+
+            return [toReset];
+        }
     }));
 
     const treeNode = createLayerTreeNode(() => ({

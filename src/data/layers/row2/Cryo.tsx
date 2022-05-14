@@ -22,7 +22,7 @@ import aqua from "../row1/Aqua";
 import { addTooltip } from "features/tooltips/tooltip";
 import { Direction } from "util/common";
 import { createResourceTooltip } from "features/trees/tree";
-import combinators from "../row3/Combinators";
+import combinators from "../row4/Combinators";
 import {
     createSequentialModifier,
     createMultiplicativeModifier,

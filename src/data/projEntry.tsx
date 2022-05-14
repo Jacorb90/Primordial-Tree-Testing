@@ -24,7 +24,7 @@ import earth from "./layers/row2/Earth";
 import light from "./layers/row3/Light";
 import sound from "./layers/row3/Sound";
 import { oneWayBranchedResetPropagation, versionGT, fixPoint4Obj, emptyTreeNode } from "./helpers";
-import combinators from "./layers/row3/Combinators";
+import combinators from "./layers/row4/Combinators";
 import projInfo from "./projInfo.json";
 import lore from "./layers/side/Lore";
 
@@ -52,6 +52,9 @@ export const main = createLayer("main", () => {
         if (lightning.lightningSel[0].value) gain = gain.plus(lightning.clickableEffects[0].value);
         gain = gain.plus(earth.baseGainAdded.value);
         gain = gain.plus(combinators.multiBuyableEffects[0].value);
+
+        if (advancements.milestones[32].earned.value)
+            gain = gain.plus(light.lightBuyableEffects[1][1].value);
 
         return gain;
     });
@@ -86,6 +89,9 @@ export const main = createLayer("main", () => {
             gain = gain.times(combinators.multiBuyableEffects[1].value);
 
         if (Decimal.gte(earth.gridLevel.value, 16)) gain = gain.times(earth.particleGainMult.value);
+
+        if (advancements.milestones[32].earned.value)
+            gain = gain.times(light.lightBuyableEffects[0][1].value);
 
         return gain;
     });

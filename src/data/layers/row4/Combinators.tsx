@@ -46,7 +46,9 @@ const layer = createLayer("comb", () => {
     const best = trackBest(combinators);
 
     const mainEff = computed(() => {
-        return Decimal.sqrt(combinators.value).plus(1);
+        let eff = Decimal.sqrt(combinators.value).plus(1);
+        if (advancements.milestones[32].earned.value) eff = eff.pow(2);
+        return eff;
     });
 
     const conversion = createIndependentConversion(() => ({

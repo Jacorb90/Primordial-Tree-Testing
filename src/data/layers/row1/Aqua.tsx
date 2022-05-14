@@ -26,7 +26,7 @@ import { addTooltip } from "features/tooltips/tooltip";
 import { Direction } from "util/common";
 import { createResourceTooltip } from "features/trees/tree";
 import { createMultiplicativeModifier, createSequentialModifier } from "game/modifiers";
-import combinators from "../row3/Combinators";
+import combinators from "../row4/Combinators";
 
 const layer = createLayer("a", () => {
     const id = "a";
