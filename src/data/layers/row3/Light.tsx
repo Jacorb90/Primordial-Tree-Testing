@@ -42,6 +42,7 @@ import {
     TabFamilyOptions,
     TabButtonOptions
 } from "features/tabs/tabFamily";
+import combinators from "../row4/Combinators";
 
 interface LightData {
     energy: Resource<DecimalSource>;
@@ -129,8 +130,8 @@ const layer = createLayer("light", () => {
             computed(() =>
                 Decimal.pow(10, Decimal.add(lights[0].energy.value, 1).log10().sqrt())
                     .sub(1)
-                    .times(lights[1].buyables[0].amount.value)
                     .cbrt()
+                    .times(lights[1].buyables[0].amount.value)
                     .div(10)
             ),
             computed(() =>
@@ -151,9 +152,50 @@ const layer = createLayer("light", () => {
             computed(() =>
                 Decimal.pow(10, Decimal.add(light.value, 1).log10().cbrt())
                     .sub(1)
-                    .times(lights[2].buyables[0].amount.value)
                     .root(4)
-                    .div(15)
+                    .times(lights[2].buyables[0].amount.value)
+                    .div(7.5)
+            ),
+            computed(() =>
+                Decimal.add(lights[2].energy.value, 1)
+                    .log10()
+                    .times(Decimal.add(lights[2].buyables[1].amount.value, 1).log2())
+                    .div(2)
+                    .plus(1)
+                    .sqrt()
+            ),
+            computed(() =>
+                Decimal.add(lights[2].energy.value, 1)
+                    .log10()
+                    .sqrt()
+                    .times(lights[2].buyables[2].amount.value)
+                    .div(2)
+                    .plus(1)
+            )
+        ],
+        [
+            computed(() =>
+                Decimal.pow(10, Decimal.sqrt(combinators.combinators.value))
+                    .sub(1)
+                    .root(5)
+                    .times(lights[3].buyables[0].amount.value)
+                    .div(40)
+            ),
+            computed(() =>
+                Decimal.add(lights[3].energy.value, 1)
+                    .log10()
+                    .times(Decimal.add(lights[3].buyables[1].amount.value, 1).log2())
+                    .div(1.5)
+                    .plus(1)
+                    .root(2.5)
+            ),
+            computed(() =>
+                Decimal.add(lights[3].energy.value, 1)
+                    .log10()
+                    .sqrt()
+                    .times(lights[3].buyables[2].amount.value)
+                    .div(3)
+                    .plus(1)
             )
         ]
     ];
@@ -193,9 +235,35 @@ const layer = createLayer("light", () => {
                 title: "Shattered Dreams",
                 description: "Generate Yellow Energy over time based on Light Particles.",
                 effectDisplay: format(lightBuyableEffects[2][0].value) + "/s"
+            }),
+            () => ({
+                title: "Thunderous Streams",
+                description: "Yellow Energy boosts Lightning Particle gain.",
+                effectDisplay: format(lightBuyableEffects[2][1].value) + "x"
+            }),
+            () => ({
+                title: "Frightened Screams",
+                description: "Yellow Energy boosts Orange Energy gain at a reduced rate.",
+                effectDisplay: format(lightBuyableEffects[2][2].value) + "x"
             })
         ],
-        [],
+        [
+            () => ({
+                title: "Beautiful Fragrance",
+                description: "Generate Green Energy over time based on Combinators.",
+                effectDisplay: format(lightBuyableEffects[3][0].value) + "/s"
+            }),
+            () => ({
+                title: "Quantum Condensed",
+                description: "Green Energy boosts Ultrasound gain.",
+                effectDisplay: format(lightBuyableEffects[3][1].value) + "x"
+            }),
+            () => ({
+                title: "Calm Sense",
+                description: "Green Energy boosts Yellow Energy gain at a reduced rate.",
+                effectDisplay: format(lightBuyableEffects[3][2].value) + "x"
+            })
+        ],
         [],
         [],
         []
@@ -209,8 +277,11 @@ const layer = createLayer("light", () => {
 
             if (sound.upgrades[0].bought.value) mult = mult.times(sound.upgradeEffects[0].value);
             if (advancements.milestones[33].earned.value) mult = mult.times(2);
+            if (advancements.milestones[35].earned.value) mult = mult.times(3);
 
             if (index == 0) mult = mult.times(lightBuyableEffects[1][2].value);
+            if (index == 1) mult = mult.times(lightBuyableEffects[2][2].value);
+            if (index == 2) mult = mult.times(lightBuyableEffects[3][2].value);
 
             return mult;
         });
@@ -226,9 +297,10 @@ const layer = createLayer("light", () => {
                 cost: () =>
                     Decimal.pow(
                         index / 4 + bIndex / 2 + 2,
-                        Decimal.pow(buyables[bIndex].amount.value, 1 + (index + bIndex) / 10).plus(
-                            (index / 4 + Math.sqrt(bIndex)) * 3
-                        )
+                        Decimal.pow(
+                            buyables[bIndex].amount.value,
+                            1 + (Math.sqrt(index) + bIndex) / 10
+                        ).plus((Math.sqrt(index) / 4 + Math.sqrt(bIndex)) * 3)
                     ),
                 resource: bIndex == 0 ? light : energy,
                 display: lightBuyableData[index][bIndex]
@@ -288,7 +360,7 @@ const layer = createLayer("light", () => {
     );
 
     globalBus.on("update", diff => {
-        for (let i = 0; i <= 2; i++)
+        for (let i = 0; i <= 3; i++)
             lights[i].energy.value = Decimal.add(
                 lights[i].energy.value,
                 Decimal.mul(lightBuyableEffects[i][0].value, diff).times(lights[i].gainMult.value)

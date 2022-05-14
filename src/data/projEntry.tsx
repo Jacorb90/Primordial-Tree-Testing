@@ -156,14 +156,16 @@ export const main = createLayer("main", () => {
                 if (light.treeNode.visibility.value == Visibility.Visible) {
                     b.push({
                         startNode: light.treeNode,
-                        endNode: lightning.treeNode
+                        endNode: lightning.treeNode,
+                        stroke: "#999999"
                     });
                 }
 
                 if (sound.treeNode.visibility.value == Visibility.Visible) {
                     b.push({
                         startNode: sound.treeNode,
-                        endNode: air.treeNode
+                        endNode: air.treeNode,
+                        stroke: "#999999"
                     });
                 }
 

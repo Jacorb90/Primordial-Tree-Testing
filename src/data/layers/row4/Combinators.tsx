@@ -95,6 +95,7 @@ const layer = createLayer("comb", () => {
         if (Decimal.gte(comb, 10)) comb = Decimal.mul(comb, 10).sqrt();
         let limit = Decimal.mul(50, comb);
         if (advancements.milestones[20].earned.value) limit = limit.times(1.2);
+        if (advancements.milestones[34].earned.value) limit = limit.times(1.2);
         return limit;
     });
 
@@ -152,7 +153,11 @@ const layer = createLayer("comb", () => {
             Decimal.add(
                 Decimal.mul(
                     combinators.value,
-                    Decimal.mul(multiBuyables[5].amount.value, attractionEff.value).plus(1).log10()
+                    advancements.milestones[34].earned.value
+                        ? Decimal.mul(multiBuyables[5].amount.value, attractionEff.value).div(100)
+                        : Decimal.mul(multiBuyables[5].amount.value, attractionEff.value)
+                              .plus(1)
+                              .log10()
                 ),
                 1
             )
@@ -312,7 +317,17 @@ const layer = createLayer("comb", () => {
 
     const covalencePower = createResource<DecimalSource>(0);
     const covalentBonds: Buyable<BuyableOptions> = createBuyable(() => ({
-        cost: () => Decimal.pow(8, Decimal.pow(covalentBonds.amount.value, 2)),
+        cost: () =>
+            Decimal.pow(
+                8,
+                Decimal.pow(
+                    Decimal.div(
+                        covalentBonds.amount.value,
+                        advancements.milestones[35].earned.value ? 3 : 1
+                    ),
+                    2
+                )
+            ),
         resource: attractionPower,
         display: () => ({
             title: "Covalent Bonds",
@@ -342,7 +357,17 @@ const layer = createLayer("comb", () => {
 
     const ionicPower = createResource<DecimalSource>(0);
     const ionicBonds: Buyable<BuyableOptions> = createBuyable(() => ({
-        cost: () => Decimal.pow(400, Decimal.pow(ionicBonds.amount.value, 2)).times(100),
+        cost: () =>
+            Decimal.pow(
+                400,
+                Decimal.pow(
+                    Decimal.div(
+                        ionicBonds.amount.value,
+                        advancements.milestones[35].earned.value ? 3 : 1
+                    ),
+                    2
+                )
+            ).times(100),
         resource: attractionPower,
         display: () => ({
             title: "Ionic Bonds",
@@ -401,6 +426,9 @@ const layer = createLayer("comb", () => {
             visibility: Visibility.Visible,
             tab: moleculeTab,
             display: "Molecules",
+            style: {
+                borderColor: color
+            },
             glowColor: () =>
                 multiBuyables.some(
                     bbl => bbl.canPurchase.value && Decimal.lt(bbl.amount.value, 1)

@@ -27,6 +27,7 @@ import { computed } from "vue";
 import { createLayerTreeNode, createResetButton } from "../../common";
 import advancements from "../side/Advancements";
 import combinators from "../row4/Combinators";
+import light from "../row3/Light";
 
 const layer = createLayer("li", () => {
     const id = "li";
@@ -52,6 +53,11 @@ const layer = createLayer("li", () => {
                 combinators.mainEff,
                 "Particle Combinator Effect",
                 advancements.milestones[15].earned
+            ),
+            createMultiplicativeModifier(
+                light.lightBuyableEffects[2][1],
+                "Yellow Energy Buyable 2",
+                () => Decimal.gte(light.lights[2].buyables[1].amount.value, 1)
             )
         )
     }));

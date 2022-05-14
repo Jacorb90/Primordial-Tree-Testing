@@ -62,6 +62,8 @@ const layer = createLayer("adv", () => {
         1e24,
         1.4e25,
         1e27,
+        1.2e28,
+        6e28,
         1 / 0
     ];
 
@@ -230,6 +232,14 @@ const layer = createLayer("adv", () => {
         createAdvancement(
             34,
             "All Light Energy colors are generated twice as fast, and you can buy max Life Buyables."
+        ),
+        createAdvancement(
+            35,
+            "Increase the Molecule limit by 20%, and the Wood Molecule effect uses a better formula."
+        ),
+        createAdvancement(
+            36,
+            "Covalent/Ionic Bond costs scale 67% slower, and all Light Energy colors are generated 3x as fast."
         )
     ];
 

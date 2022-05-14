@@ -73,6 +73,15 @@ const layer = createLayer("sound", () => {
 
     const ultrasound = createResource<DecimalSource>(0, "Ultrasound");
 
+    const ultrasoundGainMult = computed(() => {
+        let mult = Decimal.dOne;
+
+        if (Decimal.gte(light.lights[3].buyables[1].amount.value, 1))
+            mult = mult.times(light.lightBuyableEffects[3][1].value);
+
+        return mult;
+    });
+
     const upgradeEffects = [
         computed(() => Decimal.add(ultrasound.value, 1).log10().plus(1).log10().plus(1)),
         computed(() => Decimal.add(ultrasound.value, 1).log10().plus(1).sqrt())
@@ -101,7 +110,10 @@ const layer = createLayer("sound", () => {
     ];
 
     globalBus.on("update", diff => {
-        ultrasound.value = Decimal.add(ultrasound.value, Decimal.mul(sound.value, diff));
+        ultrasound.value = Decimal.add(
+            ultrasound.value,
+            Decimal.mul(sound.value, diff).times(ultrasoundGainMult.value)
+        );
     });
 
     return {
