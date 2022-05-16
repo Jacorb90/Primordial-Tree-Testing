@@ -9,7 +9,7 @@
                 <ul>
                     <li class="balancing">Balanced up to 2e37 Particles/s</li>
                     <li class="feature">Implemented Advancements 33-39</li>
-                    <li class="feature">Implemented Light and Sound</li>
+                    <li class="feature">Implemented Light and Sound.</li>
                     <li class="fix">A few minor bugfixes, and updated to Profectus 0.4.1</li>
                 </ul>
             </details>
