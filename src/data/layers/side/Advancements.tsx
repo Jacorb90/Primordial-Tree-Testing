@@ -66,6 +66,7 @@ const layer = createLayer("adv", () => {
         6e28,
         5e30,
         2.5e32,
+        2.25e36,
         1 / 0
     ];
 
@@ -257,6 +258,10 @@ const layer = createLayer("adv", () => {
         createAdvancement(
             38,
             "Automatically level up and fill the Earth Grid if both are possible every second, and double Ultrasound gain."
+        ),
+        createAdvancement(
+            39,
+            "Color Energy Boosts only use up half of your Light Particles when used, and they last 50% longer."
         )
     ];
 

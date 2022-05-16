@@ -42,7 +42,10 @@ import {
     TabFamilyOptions,
     TabButtonOptions
 } from "features/tabs/tabFamily";
+import cryo from "../row2/Cryo";
 import combinators from "../row4/Combinators";
+import { Clickable, ClickableOptions, createClickable } from "features/clickables/clickable";
+import { formatTime } from "util/break_eternity";
 
 interface LightData {
     energy: Resource<DecimalSource>;
@@ -50,6 +53,17 @@ interface LightData {
     buyables: Buyable<BuyableOptions & { visibility: () => Visibility }>[];
     tab: Tab<TabOptions>;
 }
+
+interface LightSpell {
+    time: Resource<DecimalSource>;
+    totalTime: ComputedRef<DecimalSource>;
+    spell: Clickable<ClickableOptions>;
+}
+
+const colorNames = ["Red", "Orange", "Yellow", "Green", "Blue", "Indigo", "Violet"];
+const lighterColors = ["#FF4444", "#FFBF44", "#FFFF44", "#44FF44", "#4444FF", "#8F44B6", "#D844F7"];
+const lightColors = ["#FF0000", "#FF7F00", "#FFFF00", "#00FF00", "#0000FF", "#4B0082", "#9400D3"];
+const darkColors = ["#770000", "#773700", "#777700", "#007700", "#000077", "#250041", "#420061"];
 
 const layer = createLayer("light", () => {
     const id = "light";
@@ -94,26 +108,6 @@ const layer = createLayer("light", () => {
         tree: main.tree,
         treeNode
     }));
-
-    const colorNames = ["Red", "Orange", "Yellow", "Green", "Blue", "Indigo", "Violet"];
-    const lightColors = [
-        "#FF0000",
-        "#FF7F00",
-        "#FFFF00",
-        "#00FF00",
-        "#0000FF",
-        "#4B0082",
-        "#9400D3"
-    ];
-    const darkColors = [
-        "#770000",
-        "#773700",
-        "#777700",
-        "#007700",
-        "#000077",
-        "#250041",
-        "#420061"
-    ];
 
     const lightBuyableEffects: ComputedRef<DecimalSource>[][] = [
         [
@@ -197,6 +191,38 @@ const layer = createLayer("light", () => {
                     .div(3)
                     .plus(1)
             )
+        ],
+        [
+            computed(() =>
+                Decimal.pow(
+                    10,
+                    Decimal.cbrt(
+                        cryo.challenges.reduce<DecimalSource>(
+                            (a, c) => Decimal.add(a, c.completions.value),
+                            0
+                        )
+                    )
+                )
+                    .sub(1)
+                    .root(6)
+                    .times(lights[4].buyables[0].amount.value)
+                    .div(225)
+            ),
+            computed(() =>
+                Decimal.add(lights[4].energy.value, 1)
+                    .log10()
+                    .times(Decimal.add(lights[4].buyables[1].amount.value, 1).log2())
+                    .plus(1)
+                    .pow(1.25)
+            ),
+            computed(() =>
+                Decimal.add(lights[4].energy.value, 1)
+                    .log10()
+                    .sqrt()
+                    .times(lights[4].buyables[2].amount.value)
+                    .div(4)
+                    .plus(1)
+            )
         ]
     ];
 
@@ -264,10 +290,82 @@ const layer = createLayer("light", () => {
                 effectDisplay: format(lightBuyableEffects[3][2].value) + "x"
             })
         ],
-        [],
+        [
+            () => ({
+                title: "The Night Sky",
+                description:
+                    "Generate Blue Energy over time based on Total Cryo Challenge Completions.",
+                effectDisplay: format(lightBuyableEffects[4][0].value) + "/s"
+            }),
+            () => ({
+                title: "Ocean Nigh",
+                description: "Blue Energy boosts the speed of all Aqua bars.",
+                effectDisplay: format(lightBuyableEffects[4][1].value) + "x"
+            }),
+            () => ({
+                title: "Frozen Light",
+                description: "Blue Energy boosts Green Energy gain at a reduced rate.",
+                effectDisplay: format(lightBuyableEffects[4][2].value) + "x"
+            })
+        ],
         [],
         []
     ];
+
+    const lightSpells: LightSpell[] = [...new Array(7)].map((_, index) => {
+        const time = createResource<DecimalSource>(0);
+
+        const totalTime = computed(() => {
+            let t = Decimal.sub(
+                60,
+                Decimal.div(60, Decimal.add(light.value, 1).log10().div(2).plus(1).sqrt())
+            );
+
+            if (advancements.milestones[38].earned.value) t = Decimal.mul(t, 1.5);
+
+            return t;
+        });
+
+        const spell: Clickable<ClickableOptions> = createClickable(
+            () =>
+                ({
+                    canClick: () => Decimal.eq(time.value, 0) && Decimal.gte(light.value, 1),
+                    display: () => ({
+                        title:
+                            colorNames[index] +
+                            " Energy Boost" +
+                            (Decimal.gt(time.value, 0) ? " (ACTIVE)" : ""),
+                        description:
+                            "Triples " +
+                            colorNames[index] +
+                            " Energy gain for " +
+                            formatTime(Decimal.eq(time.value, 0) ? totalTime.value : time.value) +
+                            ", but sacrifices " +
+                            (advancements.milestones[38].earned.value ? "50% of" : "all") +
+                            " Light Particles."
+                    }),
+                    onClick: () => {
+                        time.value = totalTime.value;
+                        light.value = advancements.milestones[38].earned.value
+                            ? Decimal.div(light.value, 2)
+                            : 0;
+                    },
+                    style: () => ({
+                        backgroundColor: Decimal.gt(time.value, 0)
+                            ? lighterColors[index]
+                            : Decimal.gte(light.value, 1)
+                            ? lightColors[index]
+                            : "grey"
+                    })
+                } as ClickableOptions)
+        );
+
+        return {
+            time,
+            totalTime,
+            spell
+        };
+    });
 
     const lights: LightData[] = [...new Array(7)].map((_, index) => {
         const energy = createResource<DecimalSource>(0, colorNames[index] + " Energy");
@@ -281,9 +379,9 @@ const layer = createLayer("light", () => {
             if (advancements.milestones[36].earned.value)
                 mult = mult.times(advancements.adv37eff.value);
 
-            if (index == 0) mult = mult.times(lightBuyableEffects[1][2].value);
-            if (index == 1) mult = mult.times(lightBuyableEffects[2][2].value);
-            if (index == 2) mult = mult.times(lightBuyableEffects[3][2].value);
+            if (index <= 3) mult = mult.times(lightBuyableEffects[index + 1][2].value);
+
+            if (Decimal.gt(lightSpells[index].time.value, 0)) mult = mult.times(3);
 
             return mult;
         });
@@ -317,6 +415,10 @@ const layer = createLayer("light", () => {
                     </h3>
                     <br />
                     {buyables.map(render)}
+                    <br />
+                    <br />
+                    {render(lightSpells[index].spell)}
+                    <br />
                 </>
             )),
             style: {
@@ -362,11 +464,21 @@ const layer = createLayer("light", () => {
     );
 
     globalBus.on("update", diff => {
-        for (let i = 0; i <= 3; i++)
-            lights[i].energy.value = Decimal.add(
-                lights[i].energy.value,
-                Decimal.mul(lightBuyableEffects[i][0].value, diff).times(lights[i].gainMult.value)
+        for (let i = 0; i < 7; i++) {
+            if (i <= 4) {
+                lights[i].energy.value = Decimal.add(
+                    lights[i].energy.value,
+                    Decimal.mul(lightBuyableEffects[i][0].value, diff).times(
+                        lights[i].gainMult.value
+                    )
+                );
+            }
+
+            lightSpells[i].time.value = Decimal.max(
+                Decimal.sub(lightSpells[i].time.value, diff),
+                0
             );
+        }
     });
 
     return {
@@ -378,6 +490,7 @@ const layer = createLayer("light", () => {
         lights,
         lightBuyableEffects,
         tabFamily,
+        lightSpells,
         display: jsx(() => (
             <>
                 <MainDisplay resource={light} color={color} />
