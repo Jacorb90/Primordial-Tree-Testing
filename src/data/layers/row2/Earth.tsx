@@ -234,9 +234,22 @@ const layer = createLayer("e", () => {
         style: "width: 400px; text-align: left"
     });
 
+    const autoTime = createResource<number>(0);
+
     globalBus.on("update", diff => {
         if (advancements.milestones[24].earned.value)
             earth.value = Decimal.mul(conversion.currentGain.value, diff).plus(earth.value);
+
+        if (advancements.milestones[37].earned.value) {
+            autoTime.value += diff;
+            if (autoTime.value >= 1) {
+                autoTime.value = 0;
+                if (Decimal.gte(earth.value, Decimal.mul(gridCost.value, 100))) {
+                    levelUp.onClick();
+                    fillGrid.onClick();
+                }
+            }
+        }
     });
 
     return {
@@ -303,7 +316,8 @@ const layer = createLayer("e", () => {
         baseGainAdded,
         torrentEffAdded,
         lb6Mult,
-        particleGainMult
+        particleGainMult,
+        autoTime
     };
 });
 

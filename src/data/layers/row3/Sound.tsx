@@ -79,11 +79,16 @@ const layer = createLayer("sound", () => {
         if (Decimal.gte(light.lights[3].buyables[1].amount.value, 1))
             mult = mult.times(light.lightBuyableEffects[3][1].value);
 
+        if (upgrades[3].bought.value) mult = mult.times(upgradeEffects[3].value);
+        if (advancements.milestones[37].earned.value) mult = mult.times(2);
+
         return mult;
     });
 
     const upgradeEffects = [
         computed(() => Decimal.add(ultrasound.value, 1).log10().plus(1).log10().plus(1)),
+        computed(() => Decimal.add(ultrasound.value, 1).log10().plus(1).sqrt()),
+        computed(() => Decimal.add(ultrasound.value, 1).log10().div(20)),
         computed(() => Decimal.add(ultrasound.value, 1).log10().plus(1).sqrt())
     ];
 
@@ -105,6 +110,24 @@ const layer = createLayer("sound", () => {
                 effectDisplay: format(upgradeEffects[1].value) + "x"
             }),
             cost: 1e3,
+            resource: ultrasound
+        })),
+        createUpgrade(() => ({
+            display: () => ({
+                title: "Volume",
+                description: "Ultrasound boosts Life Buyable Power at a reduced rate.",
+                effectDisplay: "+" + format(Decimal.mul(upgradeEffects[2].value, 100)) + "%"
+            }),
+            cost: 2.5e3,
+            resource: ultrasound
+        })),
+        createUpgrade(() => ({
+            display: () => ({
+                title: "Timbre",
+                description: "Ultrasound boosts its own gain at a reduced rate.",
+                effectDisplay: format(upgradeEffects[3].value) + "x"
+            }),
+            cost: 1e4,
             resource: ultrasound
         }))
     ];

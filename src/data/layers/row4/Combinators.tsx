@@ -163,6 +163,21 @@ const layer = createLayer("comb", () => {
             )
                 .log10()
                 .plus(1)
+        ),
+        6: computed(() =>
+            Decimal.add(
+                Decimal.mul(
+                    combinators.value,
+                    Decimal.mul(
+                        Decimal.pow(multiBuyables[6].amount.value, 2),
+                        attractionEff.value
+                    ).div(25)
+                ),
+                1
+            )
+                .log10()
+                .plus(1)
+                .sqrt()
         )
     };
 
@@ -296,10 +311,40 @@ const layer = createLayer("comb", () => {
                 effectDisplay: "/" + format(multiBuyableEffects[5].value)
             }),
             purchaseLimit: moleculeLimit
+        })),
+        createMultiBuyable(() => ({
+            visibility: () => showIf(Decimal.gte(best.value, 6)),
+            costSets: [
+                {
+                    cost: 1e10,
+                    resource: lightning.lightning
+                },
+                {
+                    cost: 1e15,
+                    resource: cryo.cryo
+                },
+                {
+                    cost: 5e9,
+                    resource: earth.earth
+                }
+            ],
+            display: () => ({
+                title: "Steel Molecule",
+                description:
+                    'Boost the effect of the "Temperature Decrease" challenge based on Combinators.',
+                effectDisplay: "^" + format(multiBuyableEffects[6].value)
+            }),
+            purchaseLimit: moleculeLimit
         }))
     ];
 
     globalBus.on("update", diff => {
+        if (advancements.milestones[36].earned.value) {
+            ionicPower.value = Decimal.add(
+                ionicPower.value,
+                Decimal.mul(Decimal.add(metallicPower.value, metallicBondEff.value), diff)
+            );
+        }
         covalencePower.value = Decimal.add(
             covalencePower.value,
             Decimal.mul(Decimal.add(ionicPower.value, ionicBondEff.value), diff)
@@ -395,6 +440,37 @@ const layer = createLayer("comb", () => {
         return Decimal.div(ionicBoost.amount.value, 2).plus(1);
     });
 
+    const metallicPower = createResource<DecimalSource>(0);
+    const metallicBonds: Buyable<BuyableOptions> = createBuyable(() => ({
+        cost: () =>
+            Decimal.pow(7e3, Decimal.pow(Decimal.div(metallicBonds.amount.value, 3), 2)).times(1e8),
+        resource: attractionPower,
+        display: () => ({
+            title: "Metallic Bonds",
+            description: "Creates " + format(metallicBondEff.value) + " additional Metallic Power."
+        })
+    }));
+    const metallicBondEff = computed(() => {
+        return Decimal.pow(2, Decimal.mul(metallicBonds.amount.value, metallicBoostEff.value))
+            .sub(1)
+            .div(15);
+    });
+
+    const metallicBoost: Buyable<BuyableOptions> = createBuyable(() => ({
+        cost: () => Decimal.pow(65, Decimal.pow(metallicBoost.amount.value, 3)).times(1e9),
+        resource: attractionPower,
+        display: () => ({
+            title: "Metallic Boosts",
+            description:
+                "Makes Metallic Bonds " +
+                format(Decimal.sub(metallicBoostEff.value, 1).times(100)) +
+                "% stronger."
+        })
+    }));
+    const metallicBoostEff = computed(() => {
+        return Decimal.div(metallicBoost.amount.value, 2).plus(1);
+    });
+
     const moleculeTab = createTab(() => ({
         display: jsx(() => <>{multiBuyables.map(render)}</>)
     }));
@@ -417,6 +493,13 @@ const layer = createLayer("comb", () => {
                 Power. {render(ionicBonds)} {render(ionicBoost)}
                 <br />
                 <br />
+                <div v-show={advancements.milestones[36].earned.value}>
+                    There is{" "}
+                    <b>{format(Decimal.add(metallicPower.value, metallicBondEff.value))}</b>{" "}
+                    Metallic Power. {render(metallicBonds)} {render(metallicBoost)}
+                    <br />
+                    <br />
+                </div>
             </>
         ))
     }));
@@ -463,6 +546,9 @@ const layer = createLayer("comb", () => {
         ionicPower,
         ionicBonds,
         ionicBoost,
+        metallicPower,
+        metallicBonds,
+        metallicBoost,
         tabFamily,
         display: jsx(() => (
             <>

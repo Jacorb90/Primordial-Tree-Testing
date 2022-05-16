@@ -64,6 +64,8 @@ const layer = createLayer("adv", () => {
         1e27,
         1.2e28,
         6e28,
+        5e30,
+        2.5e32,
         1 / 0
     ];
 
@@ -124,6 +126,8 @@ const layer = createLayer("adv", () => {
     const adv15eff: ComputedRef<Decimal> = computed(() => {
         return Decimal.pow(2, Decimal.root(earth.gridLevel.value, 1.5));
     });
+
+    const adv37eff = computed(() => Decimal.pow(1.2, Decimal.sub(advancements.value, 35)));
 
     function createAdvancement(adv: DecimalSource, desc: CoercableComponent) {
         const Display = coerceComponent(desc);
@@ -240,6 +244,19 @@ const layer = createLayer("adv", () => {
         createAdvancement(
             36,
             "Covalent/Ionic Bond costs scale 67% slower, and all Light Energy colors are generated 3x as fast."
+        ),
+        createAdvancement(
+            37,
+            jsx(() => (
+                <>
+                    Unlock Metallic Bonds, and all Light Energy colors are generated 20% faster for
+                    every Advancement after 35 ({format(adv37eff.value)}x)
+                </>
+            ))
+        ),
+        createAdvancement(
+            38,
+            "Automatically level up and fill the Earth Grid if both are possible every second, and double Ultrasound gain."
         )
     ];
 
@@ -250,6 +267,7 @@ const layer = createLayer("adv", () => {
         advancements,
         adv5time,
         adv15eff,
+        adv37eff,
         display: jsx(() => (
             <>
                 <MainDisplay resource={advancements} color={color} />

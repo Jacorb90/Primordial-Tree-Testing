@@ -28,6 +28,7 @@ import cryo from "../row2/Cryo";
 import air from "../row2/Air";
 import earth from "../row2/Earth";
 import combinators from "../row4/Combinators";
+import sound from "../row3/Sound";
 import { globalBus } from "game/events";
 import { createClickable } from "features/clickables/clickable";
 import { addTooltip } from "features/tooltips/tooltip";
@@ -113,6 +114,9 @@ const layer = createLayer("l", () => {
 
         if (Decimal.gte(combinators.best.value, 2))
             power = combinators.multiBuyableEffects[2].value;
+
+        if (sound.upgrades[2].bought.value)
+            power = Decimal.add(power, sound.upgradeEffects[2].value);
 
         return power;
     });

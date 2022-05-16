@@ -278,6 +278,8 @@ const layer = createLayer("light", () => {
             if (sound.upgrades[0].bought.value) mult = mult.times(sound.upgradeEffects[0].value);
             if (advancements.milestones[33].earned.value) mult = mult.times(2);
             if (advancements.milestones[35].earned.value) mult = mult.times(3);
+            if (advancements.milestones[36].earned.value)
+                mult = mult.times(advancements.adv37eff.value);
 
             if (index == 0) mult = mult.times(lightBuyableEffects[1][2].value);
             if (index == 1) mult = mult.times(lightBuyableEffects[2][2].value);

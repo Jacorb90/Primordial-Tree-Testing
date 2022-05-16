@@ -76,6 +76,9 @@ const layer = createLayer("c", () => {
             const scs = Decimal.add(20, comps);
             if (reward.gte(scs)) reward = reward.log(scs.sqrt()).pow(2).times(scs).div(4);
 
+            if (Decimal.gte(combinators.best.value, 6))
+                reward = reward.pow(combinators.multiBuyableEffects[6].value);
+
             return reward;
         })
     };
