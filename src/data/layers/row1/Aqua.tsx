@@ -121,7 +121,7 @@ const layer = createLayer("a", () => {
     });
 
     const baseAquaParticleReq = computed(() => {
-        if (cryo.challenges[2].active.value) return new Decimal(1 / 0);
+        if (cryo.challenges[2].active.value) return Decimal.dInf;
 
         let req = new Decimal(10);
 

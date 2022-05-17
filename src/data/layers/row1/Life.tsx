@@ -53,9 +53,9 @@ const layer = createLayer("l", () => {
     const autoTime = createResource<number>(0);
 
     const baseReq = computed(() => {
-        let base = 10;
+        let base: DecimalSource = 10;
 
-        if (cryo.challenges[1].active.value) base = 1 / 0;
+        if (cryo.challenges[1].active.value) base = Decimal.dInf;
 
         return base;
     });
@@ -473,7 +473,8 @@ const layer = createLayer("l", () => {
             </>
         )),
         treeNode,
-        buyables
+        buyables,
+        buyablePower
     };
 });
 

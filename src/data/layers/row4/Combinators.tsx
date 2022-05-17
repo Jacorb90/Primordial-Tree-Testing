@@ -25,6 +25,7 @@ import aqua from "../row1/Aqua";
 import earth from "../row2/Earth";
 import air from "../row2/Air";
 import cryo from "../row2/Cryo";
+import light from "../row3/Light";
 import {
     createMultiBuyable,
     MultiBuyable,
@@ -35,7 +36,7 @@ import { createTab } from "features/tabs/tab";
 import { createTabFamily, TabFamily, TabFamilyOptions } from "features/tabs/tabFamily";
 import { globalBus } from "game/events";
 import { Buyable, BuyableOptions, createBuyable } from "features/buyable";
-import { formatWhole } from "util/break_eternity";
+import { createClickable } from "features/clickables/clickable";
 
 const layer = createLayer("comb", () => {
     const id = "comb";
@@ -96,7 +97,7 @@ const layer = createLayer("comb", () => {
         let limit = Decimal.mul(50, comb);
         if (advancements.milestones[20].earned.value) limit = limit.times(1.2);
         if (advancements.milestones[34].earned.value) limit = limit.times(1.2);
-        return limit;
+        return limit.ceil();
     });
 
     const multiBuyableEffects: { [key: number]: ComputedRef<DecimalSource> } = {
@@ -142,8 +143,11 @@ const layer = createLayer("comb", () => {
         4: computed(() =>
             Decimal.add(main.baseGain.value, 1)
                 .log10()
-                .times(multiBuyables[4].amount.value)
-                .times(attractionEff.value)
+                .times(
+                    Decimal.mul(multiBuyables[4].amount.value, attractionEff.value).pow(
+                        advancements.milestones[39].earned.value ? 2 : 1
+                    )
+                )
                 .plus(1)
                 .log10()
                 .div(5)
@@ -178,8 +182,46 @@ const layer = createLayer("comb", () => {
                 .log10()
                 .plus(1)
                 .sqrt()
+        ),
+        7: computed(() =>
+            Decimal.add(
+                Decimal.mul(
+                    Decimal.sub(life.buyablePower.value, 1).max(0),
+                    Decimal.mul(multiBuyables[7].amount.value, attractionEff.value).div(40)
+                ),
+                1
+            )
         )
     };
+
+    const maxAll = createClickable(() => ({
+        visibility: () => showIf(advancements.milestones[40].earned.value),
+        canClick: () => multiBuyables.some(bbl => bbl.canPurchase.value),
+        display: () => ({
+            title: "Max All",
+            description: " "
+        }),
+        onClick: () => {
+            for (let i = 0; i < multiBuyables.length; i++) {
+                const bbl = multiBuyables[i];
+
+                const bulk = bbl.costSets
+                    .reduce<Decimal>(
+                        (a, c) => Decimal.min(a, Decimal.div(c.resource.value, unref(c.cost))),
+                        Decimal.dInf
+                    )
+                    .min(Decimal.sub(unref(bbl.purchaseLimit), bbl.amount.value))
+                    .floor();
+
+                bbl.costSets.forEach(c => {
+                    c.resource.value = Decimal.sub(c.resource.value, bulk.times(unref(c.cost)));
+                });
+
+                bbl.amount.value = Decimal.add(bbl.amount.value, bulk);
+            }
+        },
+        small: true
+    }));
 
     const multiBuyables: MultiBuyable<
         MultiBuyableOptions & {
@@ -335,6 +377,25 @@ const layer = createLayer("comb", () => {
                 effectDisplay: "^" + format(multiBuyableEffects[6].value)
             }),
             purchaseLimit: moleculeLimit
+        })),
+        createMultiBuyable(() => ({
+            visibility: () => showIf(Decimal.gte(best.value, 7)),
+            costSets: [
+                {
+                    cost: 5e22,
+                    resource: life.life
+                },
+                {
+                    cost: 1e9,
+                    resource: air.air
+                }
+            ],
+            display: () => ({
+                title: "Methane Molecule",
+                description: "Boost Attraction Power gain based on Life Buyable Power.",
+                effectDisplay: format(multiBuyableEffects[7].value) + "x"
+            }),
+            purchaseLimit: moleculeLimit
         }))
     ];
 
@@ -351,13 +412,25 @@ const layer = createLayer("comb", () => {
         );
         attractionPower.value = Decimal.add(
             attractionPower.value,
-            Decimal.mul(Decimal.add(covalencePower.value, covalentBondEff.value), diff)
+            Decimal.mul(Decimal.add(covalencePower.value, covalentBondEff.value), diff).times(
+                attractionPowerGainMult.value
+            )
         );
     });
 
     const attractionPower = createResource<DecimalSource>(1, "Attraction Power");
     const attractionEff = computed(() => {
         return Decimal.max(attractionPower.value, 1).log10().div(3).plus(1);
+    });
+
+    const attractionPowerGainMult = computed(() => {
+        let mult: DecimalSource = 1;
+
+        if (Decimal.gte(combinators.value, 7)) mult = multiBuyableEffects[7].value;
+        if (Decimal.gte(light.lights[5].buyables[1].amount.value, 1))
+            mult = Decimal.mul(mult, light.lightBuyableEffects[5][1].value);
+
+        return mult;
     });
 
     const covalencePower = createResource<DecimalSource>(0);
@@ -472,7 +545,15 @@ const layer = createLayer("comb", () => {
     });
 
     const moleculeTab = createTab(() => ({
-        display: jsx(() => <>{multiBuyables.map(render)}</>)
+        display: jsx(() => (
+            <>
+                {render(maxAll)}
+                <br />
+                <br />
+                {multiBuyables.map(render)}
+                <br />
+            </>
+        ))
     }));
 
     const intrabondTab = createTab(() => ({
@@ -550,6 +631,7 @@ const layer = createLayer("comb", () => {
         metallicBonds,
         metallicBoost,
         tabFamily,
+        maxAll,
         display: jsx(() => (
             <>
                 <MainDisplay resource={combinators} color={color} />

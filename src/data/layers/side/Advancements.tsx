@@ -67,7 +67,9 @@ const layer = createLayer("adv", () => {
         5e30,
         2.5e32,
         2.25e36,
-        1 / 0
+        5e37,
+        2e39,
+        Decimal.dInf
     ];
 
     const advancements = createResource<number>(0, "Advancements");
@@ -77,12 +79,13 @@ const layer = createLayer("adv", () => {
             currentGain: conv =>
                 Decimal.gte(
                     conv.baseResource.value,
-                    reqs[new Decimal(conv.gainResource.value).toNumber()]
+                    reqs[new Decimal(conv.gainResource.value).toNumber()] || Decimal.dInf
                 )
                     ? 1
                     : 0,
-            currentAt: conv => reqs[new Decimal(conv.gainResource.value).toNumber()],
-            nextAt: conv => reqs[new Decimal(conv.gainResource.value).toNumber()]
+            currentAt: conv =>
+                reqs[new Decimal(conv.gainResource.value).toNumber()] || Decimal.dInf,
+            nextAt: conv => reqs[new Decimal(conv.gainResource.value).toNumber()] || Decimal.dInf
         },
         baseResource: main.particleGain,
         gainResource: advancements,
@@ -262,7 +265,9 @@ const layer = createLayer("adv", () => {
         createAdvancement(
             39,
             "Color Energy Boosts only use up half of your Light Particles when used, and they last 50% longer."
-        )
+        ),
+        createAdvancement(40, "The amount of Magma Molecules are effectively squared."),
+        createAdvancement(41, "You can max all Molecules at once.")
     ];
 
     return {

@@ -88,8 +88,13 @@ const layer = createLayer("sound", () => {
     const upgradeEffects = [
         computed(() => Decimal.add(ultrasound.value, 1).log10().plus(1).log10().plus(1)),
         computed(() => Decimal.add(ultrasound.value, 1).log10().plus(1).sqrt()),
-        computed(() => Decimal.add(ultrasound.value, 1).log10().div(20)),
-        computed(() => Decimal.add(ultrasound.value, 1).log10().plus(1).sqrt())
+        computed(() => {
+            let ret = Decimal.add(ultrasound.value, 1).log10().div(20);
+            if (ret.gte(0.5)) ret = ret.plus(0.5).log10().plus(0.5);
+            return ret;
+        }),
+        computed(() => Decimal.add(ultrasound.value, 1).log10().plus(1).sqrt()),
+        computed(() => Decimal.add(ultrasound.value, 1).log10().plus(1))
     ];
 
     const upgrades: Upgrade<UpgradeOptions>[] = [
@@ -128,6 +133,15 @@ const layer = createLayer("sound", () => {
                 effectDisplay: format(upgradeEffects[3].value) + "x"
             }),
             cost: 1e4,
+            resource: ultrasound
+        })),
+        createUpgrade(() => ({
+            display: () => ({
+                title: "Texture",
+                description: "Ultrasound boosts Flame Particle gain at a reduced rate.",
+                effectDisplay: format(upgradeEffects[4].value) + "x"
+            }),
+            cost: 1e5,
             resource: ultrasound
         }))
     ];

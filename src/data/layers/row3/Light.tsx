@@ -223,6 +223,30 @@ const layer = createLayer("light", () => {
                     .div(4)
                     .plus(1)
             )
+        ],
+        [
+            computed(() =>
+                Decimal.pow(10, Decimal.add(sound.ultrasound.value, 1).log10().root(4))
+                    .sub(1)
+                    .root(7)
+                    .times(lights[5].buyables[0].amount.value)
+                    .div(400)
+            ),
+            computed(() =>
+                Decimal.add(lights[5].energy.value, 1)
+                    .log10()
+                    .times(Decimal.add(lights[5].buyables[1].amount.value, 1).log2())
+                    .plus(1)
+                    .cbrt()
+            ),
+            computed(() =>
+                Decimal.add(lights[5].energy.value, 1)
+                    .log10()
+                    .sqrt()
+                    .times(lights[5].buyables[2].amount.value)
+                    .div(5)
+                    .plus(1)
+            )
         ]
     ];
 
@@ -308,7 +332,23 @@ const layer = createLayer("light", () => {
                 effectDisplay: format(lightBuyableEffects[4][2].value) + "x"
             })
         ],
-        [],
+        [
+            () => ({
+                title: "Morning Sights",
+                description: "Generate Indigo Energy over time based on Ultrasound.",
+                effectDisplay: format(lightBuyableEffects[5][0].value) + "/s"
+            }),
+            () => ({
+                title: "Beach Plight",
+                description: "Indigo Energy boosts Attraction Power gain.",
+                effectDisplay: format(lightBuyableEffects[5][1].value) + "x"
+            }),
+            () => ({
+                title: "Refracted Lights",
+                description: "Indigo Energy boosts Blue Energy gain at a reduced rate.",
+                effectDisplay: format(lightBuyableEffects[5][2].value) + "x"
+            })
+        ],
         []
     ];
 
@@ -355,7 +395,13 @@ const layer = createLayer("light", () => {
                             ? lighterColors[index]
                             : Decimal.gte(light.value, 1)
                             ? lightColors[index]
-                            : "grey"
+                            : "grey",
+                        color:
+                            Decimal.eq(time.value, 0) &&
+                            Decimal.gte(light.value, 1) &&
+                            (index == 4 || index == 5)
+                                ? lighterColors[index]
+                                : "black"
                     })
                 } as ClickableOptions)
         );
@@ -379,7 +425,7 @@ const layer = createLayer("light", () => {
             if (advancements.milestones[36].earned.value)
                 mult = mult.times(advancements.adv37eff.value);
 
-            if (index <= 3) mult = mult.times(lightBuyableEffects[index + 1][2].value);
+            if (index <= 4) mult = mult.times(lightBuyableEffects[index + 1][2].value);
 
             if (Decimal.gt(lightSpells[index].time.value, 0)) mult = mult.times(3);
 
@@ -423,7 +469,7 @@ const layer = createLayer("light", () => {
             )),
             style: {
                 backgroundColor: darkColors[index],
-                color: lightColors[index]
+                color: index == 4 || index == 5 ? lighterColors[index] : lightColors[index]
             }
         }));
 
@@ -465,7 +511,7 @@ const layer = createLayer("light", () => {
 
     globalBus.on("update", diff => {
         for (let i = 0; i < 7; i++) {
-            if (i <= 4) {
+            if (i <= 5) {
                 lights[i].energy.value = Decimal.add(
                     lights[i].energy.value,
                     Decimal.mul(lightBuyableEffects[i][0].value, diff).times(

@@ -249,7 +249,7 @@ export const getInitialLayers = (
 ];
 
 export const hasWon = computed(() => {
-    return Decimal.gte(main.particleGain.value, 1 / 0);
+    return Decimal.gte(main.particleGain.value, Decimal.dInf);
 });
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
