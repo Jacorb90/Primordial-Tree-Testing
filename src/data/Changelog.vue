@@ -7,8 +7,8 @@
             <details open>
                 <summary>v1.3 For the Senses - <time>2022-05-17</time></summary>
                 <ul>
-                    <li class="balancing">Balanced up to 4e41 Particles/s</li>
-                    <li class="feature">Implemented Advancements 33-41</li>
+                    <li class="balancing">Balanced up to 5e46 Particles/s</li>
+                    <li class="feature">Implemented Advancements 33-44</li>
                     <li class="feature">Implemented Light and Sound.</li>
                     <li class="fix">A few minor bugfixes, and updated to Profectus 0.4.1</li>
                 </ul>

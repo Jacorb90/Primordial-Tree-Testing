@@ -94,7 +94,8 @@ const layer = createLayer("sound", () => {
             return ret;
         }),
         computed(() => Decimal.add(ultrasound.value, 1).log10().plus(1).sqrt()),
-        computed(() => Decimal.add(ultrasound.value, 1).log10().plus(1))
+        computed(() => Decimal.add(ultrasound.value, 1).log10().plus(1)),
+        computed(() => Decimal.div(ultrasound.value, 100).plus(1))
     ];
 
     const upgrades: Upgrade<UpgradeOptions>[] = [
@@ -142,6 +143,15 @@ const layer = createLayer("sound", () => {
                 effectDisplay: format(upgradeEffects[4].value) + "x"
             }),
             cost: 1e5,
+            resource: ultrasound
+        })),
+        createUpgrade(() => ({
+            display: () => ({
+                title: "Location",
+                description: "Ultrasound boosts Aqua bar speed.",
+                effectDisplay: format(upgradeEffects[5].value) + "x"
+            }),
+            cost: 4e5,
             resource: ultrasound
         }))
     ];

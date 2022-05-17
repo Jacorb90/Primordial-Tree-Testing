@@ -69,6 +69,9 @@ const layer = createLayer("adv", () => {
         2.25e36,
         5e37,
         2e39,
+        7.2e41,
+        1.33e45,
+        3.5e46,
         Decimal.dInf
     ];
 
@@ -267,7 +270,16 @@ const layer = createLayer("adv", () => {
             "Color Energy Boosts only use up half of your Light Particles when used, and they last 50% longer."
         ),
         createAdvancement(40, "The amount of Magma Molecules are effectively squared."),
-        createAdvancement(41, "You can max all Molecules at once.")
+        createAdvancement(41, "You can max all Molecules at once."),
+        createAdvancement(42, "All Light Energy colors are generated 4x as fast."),
+        createAdvancement(
+            43,
+            "Color Energy boosts only use up 33% of your Light Particles when used, and they last 50% longer."
+        ),
+        createAdvancement(
+            44,
+            "Gain 10% of Light Particle gain every second, and you can activate all Color Energy boosts at once if you have unlocked all seven Color Energy types."
+        )
     ];
 
     return {

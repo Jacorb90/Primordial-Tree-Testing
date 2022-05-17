@@ -28,6 +28,7 @@ import { createResourceTooltip } from "features/trees/tree";
 import { createMultiplicativeModifier, createSequentialModifier } from "game/modifiers";
 import combinators from "../row4/Combinators";
 import light from "../row3/Light";
+import sound from "../row3/Sound";
 
 const layer = createLayer("a", () => {
     const id = "a";
@@ -180,6 +181,8 @@ const layer = createLayer("a", () => {
 
         if (Decimal.gte(light.lights[4].buyables[1].amount.value, 1))
             speed = speed.times(light.lightBuyableEffects[4][1].value);
+
+        if (sound.upgrades[5].bought.value) speed = speed.times(sound.upgradeEffects[5].value);
 
         return speed;
     });
