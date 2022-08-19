@@ -57,18 +57,20 @@
 </template>
 
 <script setup lang="ts">
-import projInfo from "data/projInfo.json";
 import Modal from "components/Modal.vue";
-import player, { PlayerData, stringifySave } from "game/player";
+import projInfo from "data/projInfo.json";
+import type { PlayerData } from "game/player";
+import player, { stringifySave } from "game/player";
 import settings from "game/settings";
-import { getUniqueID, loadSave, save, newSave } from "util/save";
-import { ComponentPublicInstance, computed, nextTick, ref, shallowReactive, watch } from "vue";
+import LZString from "lz-string";
+import { ProxyState } from "util/proxies";
+import { getUniqueID, loadSave, newSave, save } from "util/save";
+import type { ComponentPublicInstance } from "vue";
+import { computed, nextTick, ref, shallowReactive, watch } from "vue";
+import Draggable from "vuedraggable";
 import Select from "./fields/Select.vue";
 import Text from "./fields/Text.vue";
 import Save from "./Save.vue";
-import Draggable from "vuedraggable";
-import LZString from "lz-string";
-import { ProxyState } from "util/proxies";
 
 export type LoadablePlayerData = Omit<Partial<PlayerData>, "id"> & { id: string; error?: unknown };
 
@@ -124,13 +126,15 @@ watch(saveToImport, importedSave => {
     }
 });
 
-let bankContext = require.context("raw-loader!../../saves", true, /\.txt$/);
+let bankContext = import.meta.globEager("./../../saves/*.txt", { as: "raw" });
 let bank = ref(
-    bankContext.keys().reduce((acc: Array<{ label: string; value: string }>, curr) => {
-        // .slice(2, -4) strips the leading ./ and the trailing .txt
+    Object.keys(bankContext).reduce((acc: Array<{ label: string; value: string }>, curr) => {
         acc.push({
-            label: curr.slice(2, -4),
-            value: bankContext(curr).default
+            // .slice(2, -4) strips the leading ./ and the trailing .txt
+            label: curr.split("/").slice(-1)[0].slice(0, -4),
+            // Have to perform this unholy cast because globEager's typing doesn't appear to know
+            // adding { as: "raw" } will make the object contain strings rather than modules
+            value: bankContext[curr] as unknown as string
         });
         return acc;
     }, [])

@@ -92,7 +92,7 @@ export type GenericMultiBuyable = Replace<
 >;
 
 export function createMultiBuyable<T extends MultiBuyableOptions>(
-    optionsFunc: OptionsFunc<T, MultiBuyable<T>, BaseMultiBuyable>
+    optionsFunc: OptionsFunc<T, BaseMultiBuyable, GenericMultiBuyable>
 ): MultiBuyable<T> {
     return createLazyProxy(persistent => {
         const buyable = Object.assign(persistent, optionsFunc());

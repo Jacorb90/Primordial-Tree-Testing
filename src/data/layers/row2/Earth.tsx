@@ -17,7 +17,8 @@ import { createLayer } from "game/layers";
 import {
     createSequentialModifier,
     createMultiplicativeModifier,
-    createModifierSection
+    createModifierSection,
+Modifier
 } from "game/modifiers";
 import Decimal, { DecimalSource } from "lib/break_eternity";
 import { format, formatWhole } from "util/break_eternity";
@@ -110,7 +111,7 @@ const layer = createLayer("e", () => {
         baseResource: flame.flame,
         gainResource: earth,
         roundUpCost: true,
-        gainModifier: createSequentialModifier(
+        gainModifier: createSequentialModifier<Modifier[], Required<Modifier>>(
             createMultiplicativeModifier(
                 combinators.mainEff,
                 "Particle Combinator Effect",

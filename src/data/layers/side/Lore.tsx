@@ -42,8 +42,7 @@ const layer = createLayer("lore", () => {
                 titleStyle: {
                     color: "white"
                 }
-            }),
-            true
+            })
         ),
 
         createInfobox(
@@ -73,8 +72,7 @@ const layer = createLayer("lore", () => {
                     style: {
                         color: "black"
                     }
-                } as InfoboxOptions),
-            true
+                } as InfoboxOptions)
         ),
 
         createInfobox(
@@ -103,8 +101,7 @@ const layer = createLayer("lore", () => {
                     style: {
                         color: "black"
                     }
-                } as InfoboxOptions),
-            true
+                } as InfoboxOptions)
         ),
 
         createInfobox(
@@ -134,8 +131,7 @@ const layer = createLayer("lore", () => {
                     style: {
                         color: "black"
                     }
-                } as InfoboxOptions),
-            true
+                } as InfoboxOptions)
         ),
 
         createInfobox(
@@ -175,8 +171,7 @@ const layer = createLayer("lore", () => {
                     style: {
                         color: "black"
                     }
-                } as InfoboxOptions),
-            true
+                } as InfoboxOptions)
         ),
 
         createInfobox(
@@ -215,8 +210,7 @@ const layer = createLayer("lore", () => {
                     style: {
                         color: "black"
                     }
-                } as InfoboxOptions),
-            true
+                } as InfoboxOptions)
         ),
 
         createInfobox(
@@ -255,8 +249,7 @@ const layer = createLayer("lore", () => {
                     style: {
                         color: "black"
                     }
-                } as InfoboxOptions),
-            true
+                } as InfoboxOptions)
         ),
 
         createInfobox(
@@ -295,8 +288,7 @@ const layer = createLayer("lore", () => {
                     style: {
                         color: "black"
                     }
-                } as InfoboxOptions),
-            true
+                } as InfoboxOptions)
         ),
 
         createInfobox(
@@ -342,8 +334,7 @@ const layer = createLayer("lore", () => {
                     style: {
                         color: "black"
                     }
-                } as InfoboxOptions),
-            true
+                } as InfoboxOptions)
         )
     ];
 

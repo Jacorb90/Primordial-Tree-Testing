@@ -6,6 +6,87 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.1] - 2022-07-17
+### Added
+- Notif component that displays a jumping exclamation point
+- showAmount boolean to buyable displays
+- Tab families now take option to style the tab buttons container
+- Utility for creating text of a certain color
+### Changed
+- Improved typing of player.layers
+- Improved typing of createCollapsibleModifierSections's parameters
+- Made Particles vue component typed as GenericComponent due to issues generating documentation
+- Minimized how much of pixi.js is included in the built site
+- Split bundles into smaller bundles for faster loading
+- Updated TypeScript
+- Descriptions on buyables are now optional
+- Improved tooltips performance
+- Improved how MainDisplay displays effect strings
+- MainDisplays are now sticky
+- processComputable now binds uncached functions as well
+### Fixed
+- trackResetTime stopped working once its layer was removed and re-added
+- Runtime compilation was disabled in vite config
+- Websites had to be hosted on root directory to have assets load correctly
+- Tooltips' persistent ref was lazily created
+- In some situations Links would not update its bounding rect
+- Achievements' and milestones' onComplete callbacks were firing on load
+- Processed JSXFunctions were not considered coercable components by isCoercableComponent
+- Error from passing in overlay text to bar component
+### Removed
+- lodash.cloneDeep dependency, which hasn't been used in awhile
+- Some unused configs from vue-cli-service
+### Documented
+- Update vitepress, and updated the content of many pages
+- Rest of /game
+- Rest of /data
+- layers.tsx
+- Any type augmentations to Window object
+- Various cleanup of docs comments
+- Fixed doc generation being broken from switch to vite
+### Tests
+- Switched from jest to vitest
+
+## [0.5.0] - 2022-06-27
+### Added
+- Projects now cache for offline play, and show notification when an update is available
+- Projects can now be "installed" as a Progressive Web App
+- Conversions can now be given a custom spend function, which defaults to setting the base resource amount to 0
+- Components for displaying Floor and Square Root symbols
+### Changed
+- **BREAKING** Several projInfo properties now default to empty strings, to prevent things like reusing project IDs
+- **BREAKING** Replaced vue-cli-service with vite (should not break most projects)
+- Updated dependencies
+- Made all type-only imports explicit
+- setupPassiveGeneration now works properly on independent conversions
+- setupPassiveGeneration now takes an option cap it can't go over
+- Improved typing for PlayerData.layers
+- Options Functions have an improved `this` type - it now includes the options themselves
+- Removed v-show being used in data/common.tsx
+### Tests
+- Implement Jest, and running tests automatically on push
+- Tests written for utils/common.ts
+
+## [0.4.2] - 2022-05-23
+### Added
+- costModifier to conversions
+- onConvert(amountGained) to conversions
+### Changed
+- **BREAKING** getFirstFeature has a new signature, that will lead to improved performance
+- trackResetTime is now intended to be used with a reset button
+- regularFormat handles small numbers better
+- Slider tooltips now appear below the slider, not above
+- Node's mutation observers now ignore attributes. This shouldn't have issues with links/particle effect positions, but prevents a _lot_ of unnecessary node updates
+- OptionsFunc no longer takes its S type parameter, as it was unnecessary. Layer options functions now have proper `this` typing
+    - Several functions have been updated to take BaseLayer instead of GenericLayer, to allow them to work with `this` inside layer options functions
+### Fixed
+- Particle effects and links would not always appear on reload or when switching layers
+- Particle effects and links no longer appear in wrong spot after nodes are added or removed
+- Collapsibles having wrong widths on the button and collapsed content sections
+- Additive modifiers with negative values appeared like "+-" instead of "-"
+- Buyables' onPurchase was not being called
+- Reset button would display "Next:" if the buyMax property is a ref
+
 ## [0.4.1] - 2022-05-10
 ### Added
 - findFeatures can now accept multiple feature types

@@ -1,15 +1,16 @@
 import Decimal from "util/bignum";
 import { DoNotCache } from "util/computed";
-import { CSSProperties, DefineComponent, isRef } from "vue";
+import type { CSSProperties, DefineComponent } from "vue";
+import { isRef } from "vue";
 
 /**
  * A symbol to use as a key for a vue component a feature can be rendered with
- * @see {@link VueFeature}
+ * @see {@link util/vue.VueFeature}
  */
 export const Component = Symbol("Component");
 /**
  * A symbol to use as a key for a prop gathering function that a feature can use to send to its component
- * @see {@link VueFeature}
+ * @see {@link util/vue.VueFeature}
  */
 export const GatherProps = Symbol("GatherProps");
 
@@ -41,7 +42,9 @@ export type Replace<T, S> = S & Omit<T, keyof S>;
  * with "this" bound to what the type will eventually be processed into.
  * Intended for making lazily evaluated objects.
  */
-export type OptionsFunc<T, S = T, R = Record<string, unknown>> = () => T & ThisType<S> & Partial<R>;
+export type OptionsFunc<T, R = Record<string, unknown>, S = R> = () => T &
+    Partial<R> &
+    ThisType<T & S>;
 
 let id = 0;
 /**

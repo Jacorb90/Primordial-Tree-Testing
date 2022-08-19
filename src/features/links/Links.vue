@@ -13,44 +13,25 @@
 </template>
 
 <script setup lang="ts">
-import { Link } from "features/links/links";
-import { FeatureNode, NodesInjectionKey } from "game/layers";
-import { computed, inject, nextTick, onMounted, ref, toRef } from "vue";
+import type { Link } from "features/links/links";
+import type { FeatureNode } from "game/layers";
+import { BoundsInjectionKey, NodesInjectionKey } from "game/layers";
+import { computed, inject, onMounted, ref, toRef, watch } from "vue";
 import LinkVue from "./Link.vue";
 
 const _props = defineProps<{ links?: Link[] }>();
 const links = toRef(_props, "links");
 
-const resizeObserver = new ResizeObserver(updateNodes);
-
-// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-const nodes = inject(NodesInjectionKey)!;
-
 const resizeListener = ref<Element | null>(null);
 
-onMounted(() => {
-    // ResizeListener exists because ResizeObserver's don't work when told to observe an SVG element
-    const resListener = resizeListener.value;
-    if (resListener != null) {
-        resizeObserver.observe(resListener);
-    }
-});
-
-let isDirty = true;
-let boundingRect = ref(resizeListener.value?.getBoundingClientRect());
-function updateNodes() {
-    if (resizeListener.value != null && isDirty) {
-        isDirty = false;
-        nextTick(() => {
-            boundingRect.value = resizeListener.value?.getBoundingClientRect();
-            (Object.values(nodes.value) as FeatureNode[])
-                .filter(n => n) // Sometimes the values become undefined
-                .forEach(node => (node.rect = node.element.getBoundingClientRect()));
-            isDirty = true;
-        });
-    }
-}
-document.fonts.ready.then(updateNodes);
+const nodes = inject(NodesInjectionKey, ref<Record<string, FeatureNode | undefined>>({}));
+const outerBoundingRect = inject(BoundsInjectionKey, ref<DOMRect | undefined>(undefined));
+const boundingRect = ref<DOMRect | undefined>(resizeListener.value?.getBoundingClientRect());
+watch(
+    outerBoundingRect,
+    () => (boundingRect.value = resizeListener.value?.getBoundingClientRect())
+);
+onMounted(() => (boundingRect.value = resizeListener.value?.getBoundingClientRect()));
 
 const validLinks = computed(() => {
     const n = nodes.value;
@@ -63,9 +44,9 @@ const validLinks = computed(() => {
 <style scoped>
 .resize-listener {
     position: absolute;
-    top: 5px;
-    left: 5px;
-    right: 5px;
+    top: 0px;
+    left: 0;
+    right: -4px;
     bottom: 5px;
     z-index: -10;
     pointer-events: none;

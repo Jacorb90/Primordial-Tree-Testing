@@ -1,8 +1,9 @@
 import projInfo from "data/projInfo.json";
-import player, { Player, PlayerData, stringifySave } from "game/player";
+import type { Player, PlayerData } from "game/player";
+import player, { stringifySave } from "game/player";
 import settings, { loadSettings } from "game/settings";
-import { ProxyState } from "./proxies";
 import LZString from "lz-string";
+import { ProxyState } from "util/proxies";
 
 export function setupInitialStore(player: Partial<PlayerData> = {}): Player {
     return Object.assign(
@@ -127,6 +128,16 @@ window.onbeforeunload = () => {
         save();
     }
 };
+
+declare global {
+    /**
+     * Augment the window object so the save function, and the hard reset function can be access from the console.
+     */
+    interface Window {
+        save: VoidFunction;
+        hardReset: VoidFunction;
+    }
+}
 window.save = save;
 export const hardReset = (window.hardReset = async () => {
     await loadSave(newSave());

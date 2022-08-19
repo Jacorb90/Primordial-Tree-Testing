@@ -2,23 +2,26 @@ import AchievementComponent from "features/achievements/Achievement.vue";
 import {
     CoercableComponent,
     Component,
-    OptionsFunc,
     GatherProps,
     getUniqueID,
+    OptionsFunc,
     Replace,
     setDefault,
     StyleValue,
     Visibility
 } from "features/feature";
 import "game/notifications";
-import { Persistent, persistent } from "game/persistence";
-import {
+import type { Persistent } from "game/persistence";
+import { persistent } from "game/persistence";
+import player from "game/player";
+import settings from "game/settings";
+import type {
     Computable,
     GetComputableType,
     GetComputableTypeWithDefault,
-    processComputable,
     ProcessedComputable
 } from "util/computed";
+import { processComputable } from "util/computed";
 import { createLazyProxy } from "util/proxies";
 import { coerceComponent } from "util/vue";
 import { unref, watchEffect } from "vue";
@@ -68,7 +71,7 @@ export type GenericAchievement = Replace<
 >;
 
 export function createAchievement<T extends AchievementOptions>(
-    optionsFunc?: OptionsFunc<T, Achievement<T>, BaseAchievement>
+    optionsFunc?: OptionsFunc<T, BaseAchievement, GenericAchievement>
 ): Achievement<T> {
     const earned = persistent<boolean>(false);
     return createLazyProxy(() => {
@@ -98,6 +101,7 @@ export function createAchievement<T extends AchievementOptions>(
         if (achievement.shouldEarn) {
             const genericAchievement = achievement as GenericAchievement;
             watchEffect(() => {
+                if (settings.active !== player.id) return;
                 if (
                     !genericAchievement.earned.value &&
                     unref(genericAchievement.visibility) === Visibility.Visible &&

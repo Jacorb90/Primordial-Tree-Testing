@@ -11,9 +11,9 @@ A game engine that grows with you
 npm install
 ```
 
-### Compiles and hot-reloads for development
+### Hosts dev server and hot-reloads modules as they're changed
 ```
-npm run serve
+npm start
 ```
 
 ### Compiles and minifies for production
@@ -21,7 +21,17 @@ npm run serve
 npm run build
 ```
 
+### Hosts the production build
+```
+npm run preview
+```
+
 ### Lints and fixes files
 ```
 npm run lint
+```
+
+### Runs the tests using vite-jest
+```
+npm run test
 ```

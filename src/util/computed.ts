@@ -1,5 +1,6 @@
-import { computed, Ref } from "vue";
-import { isFunction } from "./common";
+import type { Ref } from "vue";
+import { computed } from "vue";
+import { isFunction } from "util/common";
 
 export const DoNotCache = Symbol("DoNotCache");
 
@@ -36,6 +37,10 @@ export function processComputable<T, S extends keyof ComputableKeysOf<T>>(
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         obj[key] = computed(computable.bind(obj));
+    } else if (isFunction(computable)) {
+        obj[key] = computable.bind(obj);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (obj[key] as any)[DoNotCache] = true;
     }
 }
 

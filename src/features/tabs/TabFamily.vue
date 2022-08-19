@@ -11,7 +11,11 @@
             tabStyle ?? []
         ]"
     >
-        <Sticky class="tab-buttons-container">
+        <Sticky
+            class="tab-buttons-container"
+            :class="unref(buttonContainerClasses)"
+            :style="unref(buttonContainerStyle)"
+        >
             <div class="tab-buttons" :class="{ floating }">
                 <TabButton
                     v-for="(button, id) in unref(tabs)"
@@ -32,23 +36,15 @@
 <script lang="ts">
 import Sticky from "components/layout/Sticky.vue";
 import themes from "data/themes";
-import { CoercableComponent, StyleValue, Visibility } from "features/feature";
-import { GenericTab } from "features/tabs/tab";
+import type { CoercableComponent, StyleValue } from "features/feature";
+import { Visibility } from "features/feature";
+import type { GenericTab } from "features/tabs/tab";
 import TabButton from "features/tabs/TabButton.vue";
-import { GenericTabButton } from "features/tabs/tabFamily";
+import type { GenericTabButton } from "features/tabs/tabFamily";
 import settings from "game/settings";
 import { coerceComponent, isCoercableComponent, processedPropType, unwrapRef } from "util/vue";
-import {
-    Component,
-    computed,
-    defineComponent,
-    PropType,
-    Ref,
-    shallowRef,
-    toRefs,
-    unref,
-    watchEffect
-} from "vue";
+import type { Component, PropType, Ref } from "vue";
+import { computed, defineComponent, shallowRef, toRefs, unref, watchEffect } from "vue";
 
 export default defineComponent({
     props: {
@@ -69,7 +65,9 @@ export default defineComponent({
             required: true
         },
         style: processedPropType<StyleValue>(String, Object, Array),
-        classes: processedPropType<Record<string, boolean>>(Object)
+        classes: processedPropType<Record<string, boolean>>(Object),
+        buttonContainerStyle: processedPropType<StyleValue>(String, Object, Array),
+        buttonContainerClasses: processedPropType<Record<string, boolean>>(Object)
     },
     components: {
         Sticky,

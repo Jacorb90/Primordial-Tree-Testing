@@ -1,26 +1,56 @@
+import { isPlainObject } from "is-plain-object";
 import Decimal from "util/bignum";
-import { isPlainObject } from "util/common";
-import { ProxiedWithState, ProxyPath, ProxyState } from "util/proxies";
+import type { ProxiedWithState } from "util/proxies";
+import { ProxyPath, ProxyState } from "util/proxies";
 import { reactive, unref } from "vue";
+import type { Ref } from "vue";
 import transientState from "./state";
 
+/** The player save data object. */
 export interface PlayerData {
+    /** The ID of this save. */
     id: string;
+    /** A multiplier for time passing. Set to 0 when the game is paused. */
     devSpeed: number | null;
+    /** The display name of this save. */
     name: string;
+    /** The open tabs. */
     tabs: Array<string>;
+    /** The current time this save was last opened at, in ms since the unix epoch. */
     time: number;
+    /** Whether or not to automatically save every couple of seconds and on tab close. */
     autosave: boolean;
+    /** Whether or not to apply offline time when loading this save. */
     offlineProd: boolean;
+    /** How much offline time has been accumulated and not yet processed. */
     offlineTime: number | null;
+    /** How long, in ms, this game has been played. */
     timePlayed: number;
+    /** Whether or not to continue playing after {@link data/projEntry.hasWon} is true. */
     keepGoing: boolean;
+    /** The ID of this project, to make sure saves aren't imported into the wrong project. */
     modID: string;
+    /** The version of the project this save was created by. Used for upgrading saves for new versions. */
     modVersion: string;
-    layers: Record<string, Record<string, unknown>>;
+    /** A dictionary of layer save data. */
+    layers: Record<string, LayerData<unknown>>;
 }
 
+/** The proxied player that is used to track NaN values. */
 export type Player = ProxiedWithState<PlayerData>;
+
+/** A layer's save data. Automatically unwraps refs. */
+export type LayerData<T> = {
+    [P in keyof T]?: T[P] extends (infer U)[]
+        ? Record<string, LayerData<U>>
+        : T[P] extends Record<string, never>
+        ? never
+        : T[P] extends Ref<infer S>
+        ? S
+        : T[P] extends object
+        ? LayerData<T[P]>
+        : T[P];
+};
 
 const state = reactive<PlayerData>({
     id: "",
@@ -38,6 +68,7 @@ const state = reactive<PlayerData>({
     layers: {}
 });
 
+/** Convert a player save data object into a JSON string. Unwraps refs. */
 export function stringifySave(player: PlayerData): string {
     return JSON.stringify(player, (key, value) => unref(value));
 }
@@ -51,11 +82,7 @@ const playerHandler: ProxyHandler<Record<PropertyKey, any>> = {
         }
 
         const value = target[ProxyState][key];
-        if (
-            key !== "value" &&
-            (isPlainObject(value) || Array.isArray(value)) &&
-            !(value instanceof Decimal)
-        ) {
+        if (key !== "value" && (isPlainObject(value) || Array.isArray(value))) {
             if (value !== target[key]?.[ProxyState]) {
                 const path = [...target[ProxyPath], key];
                 target[key] = new Proxy({ [ProxyState]: value, [ProxyPath]: path }, playerHandler);
@@ -116,6 +143,14 @@ const playerHandler: ProxyHandler<Record<PropertyKey, any>> = {
         return Object.getOwnPropertyDescriptor(target[ProxyState], key);
     }
 };
+
+declare global {
+    /** Augment the window object so the player can be accessed from the console. */
+    interface Window {
+        player: Player;
+    }
+}
+/** The player save data object. */
 export default window.player = new Proxy(
     { [ProxyState]: state, [ProxyPath]: ["player"] },
     playerHandler

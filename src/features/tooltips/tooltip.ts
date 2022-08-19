@@ -1,23 +1,18 @@
-import TooltipComponent from "./Tooltip.vue";
-import {
-    CoercableComponent,
-    Component,
-    GatherProps,
-    Replace,
-    setDefault,
-    StyleValue
-} from "features/feature";
-import {
+import type { CoercableComponent, Replace, StyleValue } from "features/feature";
+import { Component, GatherProps, setDefault } from "features/feature";
+import { persistent } from "game/persistence";
+import { Direction } from "util/common";
+import type {
     Computable,
     GetComputableType,
     GetComputableTypeWithDefault,
-    processComputable,
     ProcessedComputable
 } from "util/computed";
-import { VueFeature } from "util/vue";
-import { nextTick, Ref, unref } from "vue";
-import { persistent } from "game/persistence";
-import { Direction } from "util/common";
+import { processComputable } from "util/computed";
+import type { VueFeature } from "util/vue";
+import type { Ref } from "vue";
+import { nextTick, unref } from "vue";
+import TooltipComponent from "./Tooltip.vue";
 
 declare module "@vue/runtime-dom" {
     interface CSSProperties {
@@ -75,28 +70,28 @@ export function addTooltip<T extends TooltipOptions>(
     processComputable(options as T, "xoffset");
     processComputable(options as T, "yoffset");
 
-    nextTick(() => {
-        if (options.pinnable) {
-            if ("pinned" in element) {
-                console.error(
-                    "Cannot add pinnable tooltip to element that already has a property called 'pinned'"
-                );
-                options.pinnable = false;
-            } else {
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                (element as any).pinned = options.pinned = persistent<boolean>(false);
-            }
+    if (options.pinnable) {
+        if ("pinned" in element) {
+            console.error(
+                "Cannot add pinnable tooltip to element that already has a property called 'pinned'"
+            );
+            options.pinnable = false;
+        } else {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (element as any).pinned = options.pinned = persistent<boolean>(false);
         }
+    }
 
+    nextTick(() => {
         const elementComponent = element[Component];
         element[Component] = TooltipComponent;
-        const elementGratherProps = element[GatherProps].bind(element);
+        const elementGatherProps = element[GatherProps].bind(element);
         element[GatherProps] = function gatherTooltipProps(this: GenericTooltip) {
             const { display, classes, style, direction, xoffset, yoffset, pinned } = this;
             return {
                 element: {
                     [Component]: elementComponent,
-                    [GatherProps]: elementGratherProps
+                    [GatherProps]: elementGatherProps
                 },
                 display,
                 classes,

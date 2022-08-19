@@ -1,30 +1,20 @@
 import Col from "components/layout/Column.vue";
 import Row from "components/layout/Row.vue";
+import type { CoercableComponent, GenericComponent, JSXFunction } from "features/feature";
+import { Component as ComponentKey, GatherProps, jsx, Visibility } from "features/feature";
+import type { ProcessedComputable } from "util/computed";
+import { DoNotCache } from "util/computed";
+import type { Component, ComputedRef, DefineComponent, PropType, Ref, ShallowRef } from "vue";
 import {
-    CoercableComponent,
-    Component as ComponentKey,
-    GatherProps,
-    GenericComponent,
-    JSXFunction,
-    Visibility
-} from "features/feature";
-import {
-    Component,
     computed,
-    ComputedRef,
-    DefineComponent,
     defineComponent,
     isRef,
     onUnmounted,
-    PropType,
     ref,
-    Ref,
-    ShallowRef,
     shallowRef,
     unref,
     watchEffect
 } from "vue";
-import { DoNotCache, ProcessedComputable } from "./computed";
 
 export function coerceComponent(
     component: CoercableComponent,
@@ -118,7 +108,7 @@ export function setupHoldToClick(
     stop: VoidFunction;
     handleHolding: VoidFunction;
 } {
-    const interval = ref<null | number>(null);
+    const interval = ref<NodeJS.Timer | null>(null);
     const event = ref<MouseEvent | TouchEvent | undefined>(undefined);
 
     function start(e: MouseEvent | TouchEvent) {
@@ -146,10 +136,16 @@ export function setupHoldToClick(
     return { start, stop, handleHolding };
 }
 
-export function getFirstFeature<T extends { visibility: ProcessedComputable<Visibility> }>(
+export function getFirstFeature<
+    T extends VueFeature & { visibility: ProcessedComputable<Visibility> }
+>(
     features: T[],
     filter: (feature: T) => boolean
-): { firstFeature: Ref<T | undefined>; hiddenFeatures: Ref<T[]> } {
+): {
+    firstFeature: Ref<T | undefined>;
+    collapsedContent: JSXFunction;
+    hasCollapsedContent: Ref<boolean>;
+} {
     const filteredFeatures = computed(() =>
         features.filter(
             feature => unref(feature.visibility) === Visibility.Visible && filter(feature)
@@ -157,7 +153,8 @@ export function getFirstFeature<T extends { visibility: ProcessedComputable<Visi
     );
     return {
         firstFeature: computed(() => filteredFeatures.value[0]),
-        hiddenFeatures: computed(() => filteredFeatures.value.slice(1))
+        collapsedContent: jsx(() => renderCol(...filteredFeatures.value.slice(1))),
+        hasCollapsedContent: computed(() => filteredFeatures.value.length > 1)
     };
 }
 

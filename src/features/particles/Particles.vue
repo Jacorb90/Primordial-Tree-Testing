@@ -1,4 +1,3 @@
-onMounted,
 <template>
     <div
         ref="resizeListener"
@@ -9,20 +8,11 @@ onMounted,
 </template>
 
 <script lang="tsx">
-import { StyleValue } from "features/feature";
-import { FeatureNode, NodesInjectionKey } from "game/layers";
-import { Application } from "pixi.js";
+import type { StyleValue } from "features/feature";
+import { Application } from "@pixi/app";
 import { processedPropType } from "util/vue";
-import {
-    defineComponent,
-    inject,
-    nextTick,
-    onBeforeUnmount,
-    onMounted,
-    PropType,
-    ref,
-    unref
-} from "vue";
+import type { PropType } from "vue";
+import { defineComponent, nextTick, onBeforeUnmount, onMounted, ref, unref } from "vue";
 
 // TODO get typing support on the Particles component
 export default defineComponent({
@@ -44,10 +34,6 @@ export default defineComponent({
         const app = ref<null | Application>(null);
 
         const resizeObserver = new ResizeObserver(updateBounds);
-
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        const nodes = inject(NodesInjectionKey)!;
-
         const resizeListener = ref<HTMLElement | null>(null);
 
         onMounted(() => {
@@ -60,10 +46,10 @@ export default defineComponent({
                     backgroundAlpha: 0
                 });
                 resizeListener.value?.appendChild(app.value.view);
-                props.onInit(app.value as Application);
+                props.onInit?.(app.value as Application);
             }
             updateBounds();
-            if (module.hot?.status() === "apply" && props.onHotReload) {
+            if (props.onHotReload) {
                 nextTick(props.onHotReload);
             }
         });
@@ -77,10 +63,6 @@ export default defineComponent({
                 isDirty = false;
                 nextTick(() => {
                     if (resizeListener.value != null && props.onContainerResized) {
-                        // TODO don't overlap with Links.vue
-                        (Object.values(nodes.value).filter(n => n) as FeatureNode[]).forEach(
-                            node => (node.rect = node.element.getBoundingClientRect())
-                        );
                         props.onContainerResized(resizeListener.value.getBoundingClientRect());
                         app.value?.resize();
                     }
@@ -102,9 +84,9 @@ export default defineComponent({
 .not-fullscreen,
 .resize-listener {
     position: absolute;
-    top: 5px;
-    left: 5px;
-    right: 5px;
+    top: 0px;
+    left: 0;
+    right: -4px;
     bottom: 5px;
     pointer-events: none;
 }

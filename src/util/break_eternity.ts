@@ -1,5 +1,6 @@
-import Decimal, { DecimalSource } from "lib/break_eternity";
 import projInfo from "data/projInfo.json";
+import type { DecimalSource } from "lib/break_eternity";
+import Decimal from "lib/break_eternity";
 
 export default Decimal;
 
@@ -48,7 +49,10 @@ export function regularFormat(num: DecimalSource, precision: number): string {
         return (0).toFixed(precision);
     }
     if (num.mag < 0.1 && precision !== 0) {
-        precision = Math.max(Math.max(precision, 4), projInfo.defaultDecimalsShown);
+        precision = Math.max(
+            Math.max(precision, num.log10().negate().ceil().toNumber()),
+            projInfo.defaultDecimalsShown
+        );
     }
     return num.toStringWithDecimalPlaces(precision);
 }

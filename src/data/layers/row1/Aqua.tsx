@@ -25,7 +25,7 @@ import earth from "../row2/Earth";
 import { addTooltip } from "features/tooltips/tooltip";
 import { Direction } from "util/common";
 import { createResourceTooltip } from "features/trees/tree";
-import { createMultiplicativeModifier, createSequentialModifier } from "game/modifiers";
+import { createMultiplicativeModifier, createSequentialModifier, createModifierSection, Modifier } from "game/modifiers";
 import combinators from "../row4/Combinators";
 import light from "../row3/Light";
 import sound from "../row3/Sound";
@@ -139,7 +139,7 @@ const layer = createLayer("a", () => {
         baseResource: main.particles,
         gainResource: aqua,
         roundUpCost: true,
-        gainModifier: createSequentialModifier(
+        gainModifier: createSequentialModifier<Modifier[], Required<Modifier>>(
             createMultiplicativeModifier(
                 lightning.clickableEffects[2],
                 "Lightning Mode C",
@@ -232,12 +232,12 @@ const layer = createLayer("a", () => {
         tree: main.tree,
         treeNode
     }));
-    /*addTooltip(resetButton, {
+    addTooltip(resetButton, {
         display: jsx(() => createModifierSection("Modifiers", "", conversion.gainModifier, conversion.scaling.currentGain(conversion))),
         pinnable: true,
         direction: Direction.Down,
         style: "width: 400px; text-align: left"
-    });*/ // button can't be clicked when tooltip is added
+    });
 
     return {
         id,

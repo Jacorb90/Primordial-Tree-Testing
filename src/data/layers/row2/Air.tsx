@@ -195,12 +195,12 @@ const layer = createLayer("ai", () => {
         tree: main.tree,
         treeNode
     }));
-    /*addTooltip(resetButton, {
+    addTooltip(resetButton, {
         display: jsx(() => createModifierSection("Modifiers", "", conversion.gainModifier, conversion.scaling.currentGain(conversion))),
         pinnable: true,
         direction: Direction.Down,
         style: "width: 400px; text-align: left"
-    });*/ // button can't be clicked when tooltip is added
+    });
 
     return {
         id,

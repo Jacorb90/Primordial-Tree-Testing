@@ -1,27 +1,20 @@
-import {
-    CoercableComponent,
-    Component,
-    OptionsFunc,
-    GatherProps,
-    getUniqueID,
-    Replace,
-    setDefault,
-    StyleValue,
-    Visibility
-} from "features/feature";
+import type { CoercableComponent, OptionsFunc, Replace, StyleValue } from "features/feature";
+import { Component, GatherProps, getUniqueID, setDefault, Visibility } from "features/feature";
 import TabButtonComponent from "features/tabs/TabButton.vue";
 import TabFamilyComponent from "features/tabs/TabFamily.vue";
-import { Persistent, persistent } from "game/persistence";
-import {
+import type { Persistent } from "game/persistence";
+import { persistent } from "game/persistence";
+import type {
     Computable,
     GetComputableType,
     GetComputableTypeWithDefault,
-    processComputable,
     ProcessedComputable
 } from "util/computed";
+import { processComputable } from "util/computed";
 import { createLazyProxy } from "util/proxies";
-import { computed, Ref, unref } from "vue";
-import { GenericTab } from "./tab";
+import type { Ref } from "vue";
+import { computed, unref } from "vue";
+import type { GenericTab } from "./tab";
 
 export const TabButtonType = Symbol("TabButton");
 export const TabFamilyType = Symbol("TabFamily");
@@ -63,6 +56,8 @@ export interface TabFamilyOptions {
     visibility?: Computable<Visibility>;
     classes?: Computable<Record<string, boolean>>;
     style?: Computable<StyleValue>;
+    buttonContainerClasses?: Computable<Record<string, boolean>>;
+    buttonContainerStyle?: Computable<StyleValue>;
 }
 
 export interface BaseTabFamily {
@@ -92,7 +87,7 @@ export type GenericTabFamily = Replace<
 
 export function createTabFamily<T extends TabFamilyOptions>(
     tabs: Record<string, () => TabButtonOptions>,
-    optionsFunc?: OptionsFunc<T, TabFamily<T>, BaseTabFamily>
+    optionsFunc?: OptionsFunc<T, BaseTabFamily, GenericTabFamily>
 ): TabFamily<T> {
     if (Object.keys(tabs).length === 0) {
         console.warn("Cannot create tab family with 0 tabs");
@@ -147,10 +142,30 @@ export function createTabFamily<T extends TabFamilyOptions>(
         setDefault(tabFamily, "visibility", Visibility.Visible);
         processComputable(tabFamily as T, "classes");
         processComputable(tabFamily as T, "style");
+        processComputable(tabFamily as T, "buttonContainerClasses");
+        processComputable(tabFamily as T, "buttonContainerStyle");
 
         tabFamily[GatherProps] = function (this: GenericTabFamily) {
-            const { visibility, activeTab, selected, tabs, style, classes } = this;
-            return { visibility, activeTab, selected, tabs, style: unref(style), classes };
+            const {
+                visibility,
+                activeTab,
+                selected,
+                tabs,
+                style,
+                classes,
+                buttonContainerClasses,
+                buttonContainerStyle
+            } = this;
+            return {
+                visibility,
+                activeTab,
+                selected,
+                tabs,
+                style: unref(style),
+                classes,
+                buttonContainerClasses,
+                buttonContainerStyle
+            };
         };
 
         // This is necessary because board.types is different from T and TabFamily

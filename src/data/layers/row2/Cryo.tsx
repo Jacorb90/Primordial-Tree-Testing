@@ -26,7 +26,8 @@ import combinators from "../row4/Combinators";
 import {
     createSequentialModifier,
     createMultiplicativeModifier,
-    createModifierSection
+    createModifierSection,
+Modifier
 } from "game/modifiers";
 import { globalBus } from "game/events";
 
@@ -43,7 +44,7 @@ const layer = createLayer("c", () => {
         baseResource: aqua.aqua,
         gainResource: cryo,
         roundUpCost: true,
-        gainModifier: createSequentialModifier(
+        gainModifier: createSequentialModifier<Modifier[], Required<Modifier>>(
             createMultiplicativeModifier(
                 combinators.mainEff,
                 "Particle Combinator Effect",

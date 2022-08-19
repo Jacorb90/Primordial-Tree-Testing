@@ -21,12 +21,9 @@
                 unref(borderStyle) ?? {}
             ]"
         >
-            <component
-                v-if="component"
-                class="overlayText"
-                :style="unref(textStyle)"
-                :is="component"
-            />
+            <span v-if="component" class="overlayText" :style="unref(textStyle)">
+                <component :is="component" />
+            </span>
         </div>
         <div
             class="border"
@@ -45,13 +42,15 @@
 </template>
 
 <script lang="ts">
-import { CoercableComponent, Visibility } from "features/feature";
-import Decimal, { DecimalSource } from "util/bignum";
-import { computeOptionalComponent, processedPropType, unwrapRef } from "util/vue";
-import { computed, CSSProperties, defineComponent, StyleValue, toRefs, unref } from "vue";
-import Node from "components/Node.vue";
 import MarkNode from "components/MarkNode.vue";
+import Node from "components/Node.vue";
+import { CoercableComponent, Visibility } from "features/feature";
+import type { DecimalSource } from "util/bignum";
+import Decimal from "util/bignum";
 import { Direction } from "util/common";
+import { computeOptionalComponent, processedPropType, unwrapRef } from "util/vue";
+import type { CSSProperties, StyleValue } from "vue";
+import { computed, defineComponent, toRefs, unref } from "vue";
 
 export default defineComponent({
     props: {

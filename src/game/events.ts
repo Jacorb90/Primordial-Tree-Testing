@@ -1,24 +1,56 @@
 import projInfo from "data/projInfo.json";
-import Decimal from "util/bignum";
+import player from "game/player";
+import type { Settings } from "game/settings";
+import settings from "game/settings";
+import state from "game/state";
 import { createNanoEvents } from "nanoevents";
-import { App, Ref, watch } from "vue";
-import { GenericLayer } from "./layers";
-import player from "./player";
-import settings, { Settings } from "./settings";
-import state from "./state";
+import Decimal from "util/bignum";
+import type { App, Ref } from "vue";
+import { watch } from "vue";
+import type { GenericLayer } from "./layers";
 
+/** All types of events able to be sent or emitted from the global event bus. */
 export interface GlobalEvents {
+    /**
+     * Sent whenever a layer is added.
+     * @param layer The layer being added.
+     * @param saveData The layer's save data object within player.
+     */
     addLayer: (layer: GenericLayer, saveData: Record<string, unknown>) => void;
+    /**
+     * Sent whenever a layer is removed.
+     * @param layer The layer being removed.
+     */
     removeLayer: (layer: GenericLayer) => void;
+    /**
+     * Sent every game tick. Runs the life cycle of the project.
+     * @param diff The delta time since last tick, in ms.
+     * @param trueDiff The delta time since last tick, in ms. Unaffected by time modifiers like {@link game/player.Player.devSpeed} or {@link game/player.Player.offlineTime}. Intended for things like updating animations.
+     */
     update: (diff: number, trueDiff: number) => void;
+    /**
+     * Sent when constructing the {@link Settings} object.
+     * Use it to add default values for custom properties to the object.
+     * @param settings The settings object being constructed.
+     * @see {@link features/features.setDefault} for setting default values.
+     */
     loadSettings: (settings: Partial<Settings>) => void;
+    /**
+     * Sent when the game has ended.
+     */
     gameWon: VoidFunction;
+    /**
+     * Sent when setting up the Vue Application instance.
+     * Use it to register global components or otherwise set up things that should affect Vue globally.
+     * @param vue The Vue App being constructed.
+     */
     setupVue: (vue: App) => void;
 }
 
+/** A global event bus for hooking into {@link GlobalEvents}. */
 export const globalBus = createNanoEvents<GlobalEvents>();
 
-let intervalID: number | null = null;
+let intervalID: NodeJS.Timer | null = null;
 
 // Not imported immediately due to dependency cycles
 // This gets set during startGameLoop(), and will only be used in the update function
@@ -101,6 +133,7 @@ function update() {
     }
 }
 
+/** Starts the game loop for the project, which updates the game in ticks. */
 export async function startGameLoop() {
     hasWon = (await import("data/projEntry")).hasWon;
     watch(hasWon, hasWon => {
