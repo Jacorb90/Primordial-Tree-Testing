@@ -1,13 +1,18 @@
 import Spacer from "components/layout/Spacer.vue";
 import { jsx, Visibility } from "features/feature";
 import { createResource, trackBest, trackOOMPS, trackTotal } from "features/resources/resource";
-import { branchedResetPropagation, createTree, defaultResetPropagation, GenericTree, GenericTreeNode } from "features/trees/tree";
+import {
+    createTree,
+    defaultResetPropagation,
+    GenericTree,
+    GenericTreeNode
+} from "features/trees/tree";
 import { globalBus } from "game/events";
 import { createLayer, GenericLayer } from "game/layers";
 import player, { LayerData, PlayerData } from "game/player";
 import Decimal, { DecimalSource, format, formatTime, formatWhole } from "util/bignum";
 import { render } from "util/vue";
-import { computed, toRaw, unref } from "vue";
+import { computed, toRaw } from "vue";
 import flame from "./layers/row1/Flame";
 import life from "./layers/row1/Life";
 import aqua from "./layers/row1/Aqua";
@@ -253,6 +258,7 @@ export function fixOldSaveEarly(
     player: Partial<PlayerData>
     // eslint-disable-next-line @typescript-eslint/no-empty-function
 ): void {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const layers = player.layers as Record<string, LayerData<any>> | undefined;
     if (versionGT("1.1", oldVersion)) {
         if (
@@ -268,16 +274,14 @@ export function fixOldSaveEarly(
         }
 
         if (layers?.f?.upgradesR1 !== undefined)
-        layers.f.upgradesR1 = fixPoint4Obj(layers.f.upgradesR1);
+            layers.f.upgradesR1 = fixPoint4Obj(layers.f.upgradesR1);
 
         if (layers?.f?.upgradesR2 !== undefined)
             layers.f.upgradesR2 = fixPoint4Obj(layers.f.upgradesR2);
 
-        if (layers?.l?.buyables !== undefined)
-            layers.l.buyables = fixPoint4Obj(layers.l.buyables);
+        if (layers?.l?.buyables !== undefined) layers.l.buyables = fixPoint4Obj(layers.l.buyables);
 
-        if (layers?.e?.grid !== undefined)
-            layers.e.grid = fixPoint4Obj(layers.e.grid);
+        if (layers?.e?.grid !== undefined) layers.e.grid = fixPoint4Obj(layers.e.grid);
 
         if (layers?.adv?.milestones !== undefined)
             layers.adv.milestones = fixPoint4Obj(layers.adv.milestones);
