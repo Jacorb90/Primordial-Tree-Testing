@@ -72,6 +72,7 @@ const layer = createLayer("adv", () => {
         7.2e41,
         1.33e45,
         3.5e46,
+        5e46,
         Decimal.dInf
     ];
 
@@ -279,6 +280,10 @@ const layer = createLayer("adv", () => {
         createAdvancement(
             44,
             "Gain 10% of Light Particle gain every second, and you can activate all Color Energy boosts at once if you have unlocked all seven Color Energy types."
+        ),
+        createAdvancement(
+            45,
+            "Unlock Void."
         )
     ];
 

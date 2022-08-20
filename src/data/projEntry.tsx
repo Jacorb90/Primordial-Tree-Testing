@@ -27,6 +27,7 @@ import { oneWayBranchedResetPropagation, versionGT, fixPoint4Obj, emptyTreeNode 
 import combinators from "./layers/row4/Combinators";
 import projInfo from "./projInfo.json";
 import lore from "./layers/side/Lore";
+import voidLayer from "./layers/side/Void";
 
 const customResetPropagation = function (tree: GenericTree, resettingNode: GenericTreeNode): void {
     if (advancements.milestones[12].earned.value)
@@ -110,6 +111,7 @@ export const main = createLayer("main", () => {
                 [combinators.treeNode]
             ],
             leftSideNodes: [advancements.treeNode, lore.treeNode],
+            rightSideNodes: [voidLayer.treeNode],
             branches: () => {
                 const b = [];
 
@@ -245,7 +247,8 @@ export const getInitialLayers = (
     earth,
     combinators,
     light,
-    sound
+    sound,
+    voidLayer
 ];
 
 export const hasWon = computed(() => {

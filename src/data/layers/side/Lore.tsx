@@ -335,6 +335,45 @@ const layer = createLayer("lore", () => {
                         color: "black"
                     }
                 } as InfoboxOptions)
+        ),
+
+        createInfobox(
+            () => ({
+                visibility: computed(() => showIf(advancements.milestones[44].earned.value)),
+                color: "#240040",
+                title: "All is Lost",
+                display: jsx(() => (
+                    <>
+                        Huh? What is that thing? Dark matter? I thought that was just something scientists
+                        made up to confuse teenagers!
+                        <br/><br/>
+                        I guess it's a real thing then, does that mean that this weird particle just...
+                        made its way into my universe?
+                        <br/>
+                        <br/>
+                        Yes it's my universe, we've been over this. Point is, we have a problem on our hands.
+                        I thought the Light Particles would be enough to deal with this, but I guess not.
+                        <br/><br/>
+                        I have no clue what this particle is going to do, but it seems... angry.
+                        I know that makes no sense, since particles can't be angry, but-
+                        <br/><br/>
+                        Oh, so now you think I'm crazy? Alright then, maybe I am, one particle can't
+                        do anything too bad, can it? There's clearly nothing to worry about.
+                        <br/><br/>
+                        Oh wait it just moved, oh no there's a lot to worry about.
+                        Time to delete this thing from my universe!
+                        <br/><br/>
+                        Why... won't... it... just... die!
+                        I'll need to find another way...
+                    </>
+                )), 
+                style: {
+                    color: "white"
+                },
+                titleStyle: {
+                    color: "white"
+                }
+            } as InfoboxOptions)
         )
     ];
 

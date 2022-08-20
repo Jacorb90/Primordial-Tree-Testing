@@ -5,6 +5,15 @@
         </template>
         <template v-slot:body>
             <details open>
+                <summary>v1.4 Void Decay - <time>2022-08-20</time></summary>
+                <ul>
+                    <li class="balancing">Balanced up to 5e46 Particles/s</li>
+                    <li class="feature">Implemented Advancements 45-??</li>
+                    <li class="feature">Implemented Void.</li>
+                    <li class="fix">Updated to Profectus 0.5.1</li>
+                </ul>
+            </details>
+            <details open>
                 <summary>v1.3 For the Senses - <time>2022-05-17</time></summary>
                 <ul>
                     <li class="balancing">Balanced up to 5e46 Particles/s</li>
