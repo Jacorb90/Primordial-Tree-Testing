@@ -17,6 +17,10 @@ import { DecimalSource, format, formatWhole } from "util/bignum";
 import advancements from "./Advancements";
 import { createUpgrade, Upgrade, UpgradeOptions } from "features/upgrades/upgrade";
 import { render } from "util/vue";
+import flame from "../row1/Flame";
+import life from "../row1/Life";
+import aqua from "../row1/Aqua";
+import { createClickable } from "features/clickables/clickable";
 
 type VoidDecayTypes = "flame" | "life" | "aqua";
 
@@ -29,12 +33,12 @@ const layer = createLayer("v", () => {
 
     const darkMatter = computed(() => {
         const particles = main.best.value;
-        return Decimal.div(particles, 5e46).root(10).floor().sub(spentDarkMatter.value);
+        return Decimal.div(particles, 1e45).root(10).floor().sub(spentDarkMatter.value).max(0);
     });
 
     const nextDarkMatter = computed(() => {
         const dm = Decimal.add(darkMatter.value, 1).plus(spentDarkMatter.value);
-        return dm.pow(10).times(5e46);
+        return dm.pow(10).times(1e45);
     })
 
     const reset = createReset(() => ({
@@ -53,6 +57,21 @@ const layer = createLayer("v", () => {
         ["flame", "life", "aqua"]
     ];
 
+    const resetVoidDecays = createClickable(() => ({
+        canClick: () => voidDecayCount.value > 0,
+        display: jsx(() => <div style="font-size: 1.33em; font-weight: bold;">Reset Void Decays</div>),
+        small: true,
+        onClick: _ => {
+            Object.values(voidDecays).forEach(decay => {
+                decay.bought.value = false;
+            });
+            spentDarkMatter.value = 0;
+        },
+        style: {
+            color: "white"
+        }
+    }));
+
     const voidDecays: Record<VoidDecayTypes, Upgrade<UpgradeOptions>> = {
         flame: createUpgrade(() => ({
             display: {
@@ -61,10 +80,11 @@ const layer = createLayer("v", () => {
                     <div>Cost: {formatWhole(unref(voidDecays.flame.cost) ?? "Infinity")} Dark Matter</div>
                 )
             },
-            cost: () => Decimal.pow(3, voidDecayCount.value - (voidDecays.flame.bought.value ? 1 : 0)),
+            cost: () => Decimal.pow(5, voidDecayCount.value - (voidDecays.flame.bought.value ? 1 : 0)),
             canAfford: () => Decimal.gte(darkMatter.value, unref(voidDecays.flame.cost) ?? "Infinity"),
             onPurchase: () => {
                 spentDarkMatter.value = Decimal.add(spentDarkMatter.value, unref(voidDecays.flame.cost) ?? 0);
+                flame.treeNode.reset.reset();
             },
             style: {
                 color: "white"
@@ -77,10 +97,11 @@ const layer = createLayer("v", () => {
                     <div>Cost: {formatWhole(unref(voidDecays.life.cost) ?? "Infinity")} Dark Matter</div>
                 )
             },
-            cost: () => Decimal.pow(3, voidDecayCount.value - (voidDecays.life.bought.value ? 1 : 0)),
+            cost: () => Decimal.pow(5, voidDecayCount.value - (voidDecays.life.bought.value ? 1 : 0)),
             canAfford: () => Decimal.gte(darkMatter.value, unref(voidDecays.life.cost) ?? "Infinity"),
             onPurchase: () => {
                 spentDarkMatter.value = Decimal.add(spentDarkMatter.value, unref(voidDecays.life.cost) ?? 0);
+                life.treeNode.reset.reset();
             },
             style: {
                 color: "white"
@@ -93,10 +114,11 @@ const layer = createLayer("v", () => {
                     <div>Cost: {formatWhole(unref(voidDecays.aqua.cost) ?? "Infinity")} Dark Matter</div>
                 )
             },
-            cost: () => Decimal.pow(3, voidDecayCount.value - (voidDecays.aqua.bought.value ? 1 : 0)),
+            cost: () => Decimal.pow(5, voidDecayCount.value - (voidDecays.aqua.bought.value ? 1 : 0)),
             canAfford: () => Decimal.gte(darkMatter.value, unref(voidDecays.aqua.cost) ?? "Infinity"),
             onPurchase: () => {
                 spentDarkMatter.value = Decimal.add(spentDarkMatter.value, unref(voidDecays.aqua.cost) ?? 0);
+                aqua.treeNode.reset.reset();
             },
             style: {
                 color: "white"
@@ -119,10 +141,11 @@ const layer = createLayer("v", () => {
                 There are <span style={"color: " + color+"; font-size: 40px; font-weight: bold;"}>{formatWhole(voidDecayCount.value)}</span> Void-Decayed Particle types.<br/><br/>
                 There is <span style={"color: " + color+"; font-size: 40px; font-weight: bold;"}>{formatWhole(darkMatter.value)}</span> Dark Matter (next at {format(nextDarkMatter.value)} Particles)<br/><br/>
 
-                Void-Decaying a type of Particle will reset that layer entirely and drastically nerf that layer, however its particle type will gain a Void Boost.<br/><br/>
+                Void-Decaying a type of Particle will reset that layer entirely, and drastically nerf that layer, however all boosts it gives are much stronger, and any layers that are dependent on its particle scale much slower.<br/><br/>
 
-                Not implemented yet ;)
-                {/*<table>
+                {render(resetVoidDecays)}
+
+                <table>
                     {voidDecayRows.map(row => (
                         <tr>
                             {row.map(upgId => (
@@ -130,7 +153,7 @@ const layer = createLayer("v", () => {
                             ))}
                         </tr>
                     ))}
-                </table>*/}
+                </table>
             </>
         ))
     }

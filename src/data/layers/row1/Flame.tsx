@@ -35,14 +35,18 @@ import { Direction } from "util/common";
 import {
     createSequentialModifier,
     createMultiplicativeModifier,
+    createExponentialModifier,
     Modifier,
     createModifierSection
 } from "game/modifiers";
+import voidLayer from "../side/Void";
 
 const layer = createLayer("f", () => {
     const id = "f";
     const name = "Flame";
     const color = "#fc3b00";
+
+    const voidDecayed = computed(() => voidLayer.voidDecays.flame.bought.value);
 
     const flame = createResource<DecimalSource>(0, "Flame Particles");
     const best = trackBest(flame);
@@ -50,7 +54,7 @@ const layer = createLayer("f", () => {
     const time = createResource<number>(0);
     const autoDone = createResource<boolean>(false);
 
-    const baseReq = computed(() => (cryo.challenges[0].active.value ? Decimal.dInf : 10));
+    const baseReq = computed(() => (cryo.challenges[0].active.value ? Decimal.dInf : (voidDecayed.value ? "1e40" : 10)));
 
     const conversion: Conversion<ConversionOptions & { gainModifier: Required<Modifier> }> =
         createCumulativeConversion(() => ({
@@ -90,6 +94,11 @@ const layer = createLayer("f", () => {
                     sound.upgradeEffects[4],
                     "Sound Upgrade 5",
                     sound.upgrades[4].bought
+                ),
+                createExponentialModifier(
+                    1 / 7,
+                    "Void Decay",
+                    voidDecayed
                 )
             )
         }));
@@ -120,7 +129,7 @@ const layer = createLayer("f", () => {
             return ret.pow(cryo.challenge3Data.reward.value);
         }),
         1: computed(() => {
-            let ret = Decimal.add(flame.value, 1).log(20).plus(1);
+            let ret = Decimal.add(flame.value, 1).log(voidDecayed.value ? 1.4 : 20).plus(1);
 
             if (Decimal.gte(combinators.best.value, 4))
                 ret = ret.pow(combinators.multiBuyableEffects[4].value);
@@ -129,13 +138,13 @@ const layer = createLayer("f", () => {
         }),
         2: computed(() => {
             return Decimal.add(flame.value, 1)
-                .log(5)
+                .log(voidDecayed.value ? 1.1 : 5)
                 .plus(1)
                 .pow(advancements.milestones[29].earned.value ? 2 : 1);
         }),
         3: computed(() => {
             return Decimal.add(flame.value, 1)
-                .log10()
+                .log(voidDecayed.value ? 1.2 : 10)
                 .pow(advancements.milestones[29].earned.value ? 1 : 0.5);
         }),
         4: computed(() => {
@@ -147,7 +156,7 @@ const layer = createLayer("f", () => {
                 .pow(advancements.milestones[29].earned.value ? 2 : 1);
         }),
         5: computed(() => {
-            return Decimal.add(flame.value, 1).log10().sqrt().times(3);
+            return Decimal.add(flame.value, 1).log(voidDecayed.value ? 1.2 : 10).sqrt().times(3);
         })
     };
 
@@ -155,6 +164,7 @@ const layer = createLayer("f", () => {
         let exp = Decimal.dOne;
 
         if (cryo.challenges[2].active.value) exp = exp.times(cryo.challenge3Data.exp.value);
+        
 
         return exp;
     });
@@ -169,7 +179,7 @@ const layer = createLayer("f", () => {
     > = [
         createUpgrade(() => ({
             visibility: () => (Decimal.gt(best.value, 0) ? Visibility.Visible : Visibility.None),
-            cost: 1,
+            cost: () => voidDecayed.value ? 100 : 1,
             resource: flame,
             display: jsx(() => (
                 <div>
@@ -189,7 +199,7 @@ const layer = createLayer("f", () => {
         })),
         createUpgrade(() => ({
             visibility: () => (upgradesR1[0].bought.value ? Visibility.Visible : Visibility.None),
-            cost: () => Decimal.pow(5, upgCostExp.value),
+            cost: () => Decimal.pow(voidDecayed.value ? 250 : 5, upgCostExp.value),
             resource: flame,
             display: jsx(() => (
                 <div>
@@ -205,7 +215,7 @@ const layer = createLayer("f", () => {
         })),
         createUpgrade(() => ({
             visibility: () => (upgradesR1[1].bought.value ? Visibility.Visible : Visibility.None),
-            cost: () => Decimal.pow(30, upgCostExp.value),
+            cost: () => Decimal.pow(voidDecayed.value ? 600 : 30, upgCostExp.value),
             resource: flame,
             display: jsx(() => (
                 <div>
@@ -232,7 +242,7 @@ const layer = createLayer("f", () => {
         createUpgrade(() => ({
             visibility: () =>
                 advancements.milestones[1].earned.value ? Visibility.Visible : Visibility.None,
-            cost: () => Decimal.pow(100, upgCostExp.value),
+            cost: () => Decimal.pow(voidDecayed.value ? 1e3 : 100, upgCostExp.value),
             resource: flame,
             display: jsx(() => (
                 <div>
@@ -249,7 +259,7 @@ const layer = createLayer("f", () => {
         })),
         createUpgrade(() => ({
             visibility: () => (upgradesR2[0].bought.value ? Visibility.Visible : Visibility.None),
-            cost: () => Decimal.pow(1e3, upgCostExp.value),
+            cost: () => Decimal.pow(voidDecayed.value ? 1e5 : 1e3, upgCostExp.value),
             resource: flame,
             display: jsx(() => (
                 <div>
@@ -265,7 +275,7 @@ const layer = createLayer("f", () => {
         })),
         createUpgrade(() => ({
             visibility: () => (upgradesR2[1].bought.value ? Visibility.Visible : Visibility.None),
-            cost: () => Decimal.pow(1e4, upgCostExp.value),
+            cost: () => Decimal.pow(voidDecayed.value ? 1e9 : 1e4, upgCostExp.value),
             resource: flame,
             display: jsx(() => (
                 <div>
@@ -288,7 +298,7 @@ const layer = createLayer("f", () => {
 
     const treeNode = createLayerTreeNode(() => ({
         layerID: id,
-        display: jsx(() => <img src="./nodes/flame.png" />),
+        display: jsx(() => <img src={"./nodes/"+(voidDecayed.value ? "void_" : "")+"flame.png"} />),
         color,
         reset,
         glowColor: () =>
@@ -329,6 +339,7 @@ const layer = createLayer("f", () => {
         time,
         autoDone,
         upgradeEffects,
+        voidDecayed,
         display: jsx(() => (
             <>
                 <MainDisplay resource={flame} color={color} />

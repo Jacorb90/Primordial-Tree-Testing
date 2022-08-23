@@ -35,16 +35,20 @@ import { addTooltip } from "features/tooltips/tooltip";
 import { Direction } from "util/common";
 import { createResourceTooltip } from "features/trees/tree";
 import {
+createExponentialModifier,
     createModifierSection,
     createMultiplicativeModifier,
     createSequentialModifier,
     Modifier
 } from "game/modifiers";
+import voidLayer from "../side/Void";
 
 const layer = createLayer("l", () => {
     const id = "l";
     const name = "Life";
     const color = "#32a85e";
+
+    const voidDecayed = computed(() => voidLayer.voidDecays.life.bought.value);
 
     const life = createResource<DecimalSource>(0, "Life Particles");
     const best = trackBest(life);
@@ -53,7 +57,7 @@ const layer = createLayer("l", () => {
     const autoTime = createResource<number>(0);
 
     const baseReq = computed(() => {
-        let base: DecimalSource = 10;
+        let base: DecimalSource = voidDecayed.value ? "1e40" : 10;
 
         if (cryo.challenges[1].active.value) base = Decimal.dInf;
 
@@ -93,6 +97,11 @@ const layer = createLayer("l", () => {
                     combinators.mainEff,
                     "Particle Combinator Effect",
                     advancements.milestones[31].earned
+                ),
+                createExponentialModifier(
+                    1 / 7,
+                    "Void Decay",
+                    voidDecayed
                 )
             )
         }));
@@ -148,7 +157,7 @@ const layer = createLayer("l", () => {
         ),
         1: computed(() =>
             Decimal.pow(
-                2,
+                voidDecayed.value ? 3.75 : 2,
                 Decimal.add(buyables[1].amount.value, extraBuyableLevels[1].value).times(
                     buyablePower.value
                 )
@@ -156,7 +165,7 @@ const layer = createLayer("l", () => {
         ),
         2: computed(() =>
             Decimal.mul(
-                2,
+                voidDecayed.value ? 3 : 2,
                 Decimal.add(buyables[2].amount.value, extraBuyableLevels[2].value).times(
                     buyablePower.value
                 )
@@ -164,7 +173,7 @@ const layer = createLayer("l", () => {
         ),
         3: computed(() =>
             Decimal.pow(
-                1.15,
+                voidDecayed.value ? 1.3 : 1.15,
                 Decimal.add(buyables[3].amount.value, extraBuyableLevels[3].value).times(
                     buyablePower.value
                 )
@@ -172,7 +181,7 @@ const layer = createLayer("l", () => {
         ),
         4: computed(() =>
             Decimal.pow(
-                2.25,
+                voidDecayed.value ? 3.5 : 2.25,
                 Decimal.add(buyables[4].amount.value, extraBuyableLevels[4].value).times(
                     buyablePower.value
                 )
@@ -180,7 +189,7 @@ const layer = createLayer("l", () => {
         ),
         5: computed(() =>
             Decimal.add(main.particleGain.value, 1)
-                .log10()
+                .log(voidDecayed.value ? 5 : 10)
                 .times(
                     Decimal.add(buyables[5].amount.value, extraBuyableLevels[5].value).times(
                         buyablePower.value
@@ -408,7 +417,7 @@ const layer = createLayer("l", () => {
 
     const treeNode = createLayerTreeNode(() => ({
         layerID: id,
-        display: jsx(() => <img src="./nodes/life.png" />),
+        display: jsx(() => <img src={"./nodes/"+(voidDecayed.value ? "void_" : "")+"life.png"} />),
         color,
         reset,
         glowColor: () => (buyables.some(b => b.canPurchase.value) ? "red" : "")
@@ -446,6 +455,7 @@ const layer = createLayer("l", () => {
         time,
         autoTime,
         buyableEffects,
+        voidDecayed,
         display: jsx(() => (
             <>
                 <MainDisplay resource={life} color={color} />

@@ -25,15 +25,18 @@ import earth from "../row2/Earth";
 import { addTooltip } from "features/tooltips/tooltip";
 import { Direction } from "util/common";
 import { createResourceTooltip } from "features/trees/tree";
-import { createMultiplicativeModifier, createSequentialModifier, createModifierSection, Modifier } from "game/modifiers";
+import { createMultiplicativeModifier, createSequentialModifier, createModifierSection, Modifier, createExponentialModifier } from "game/modifiers";
 import combinators from "../row4/Combinators";
 import light from "../row3/Light";
 import sound from "../row3/Sound";
+import voidLayer from "../side/Void";
 
 const layer = createLayer("a", () => {
     const id = "a";
     const name = "Aqua";
     const color = "#2197eb";
+
+    const voidDecayed = computed(() => voidLayer.voidDecays.aqua.bought.value);
 
     const aqua = createResource<DecimalSource>(0, "Aqua Particles");
     const best = trackBest(aqua);
@@ -124,7 +127,7 @@ const layer = createLayer("a", () => {
     const baseAquaParticleReq = computed(() => {
         if (cryo.challenges[2].active.value) return Decimal.dInf;
 
-        let req = new Decimal(10);
+        let req = new Decimal(voidDecayed.value ? "1e40" : 10);
 
         req = req.div(Decimal.pow(2, Decimal.floor(waves.value)));
 
@@ -163,6 +166,11 @@ const layer = createLayer("a", () => {
                 combinators.mainEff,
                 "Particle Combinator Effect",
                 advancements.milestones[31].earned
+            ),
+            createExponentialModifier(
+                1 / 7,
+                "Void Decay",
+                voidDecayed
             )
         )
     }));
@@ -183,6 +191,8 @@ const layer = createLayer("a", () => {
             speed = speed.times(light.lightBuyableEffects[4][1].value);
 
         if (sound.upgrades[5].bought.value) speed = speed.times(sound.upgradeEffects[5].value);
+
+        if (voidDecayed.value) speed = speed.times(Decimal.add(aqua.value, 1).sqrt())
 
         return speed;
     });
@@ -218,7 +228,7 @@ const layer = createLayer("a", () => {
 
     const treeNode = createLayerTreeNode(() => ({
         layerID: id,
-        display: jsx(() => <img src="./nodes/aqua.png" />),
+        display: jsx(() => <img src={"./nodes/"+(voidDecayed.value ? "void_" : "")+"aqua.png"} />),
         color,
         reset
     }));
@@ -255,6 +265,7 @@ const layer = createLayer("a", () => {
         torrentEff,
         floodTime,
         floods,
+        voidDecayed,
         display: jsx(() => (
             <>
                 <MainDisplay resource={aqua} color={color} />

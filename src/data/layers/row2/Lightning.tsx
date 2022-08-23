@@ -90,7 +90,7 @@ const layer = createLayer("li", () => {
     };
 
     const lightningSelLimit = computed(() => {
-        return advancements.milestones[18].earned.value ? 2 : 1;
+        return advancements.milestones[45].earned.value ? 3 : (advancements.milestones[18].earned.value ? 2 : 1);
     });
 
     const clickables = [

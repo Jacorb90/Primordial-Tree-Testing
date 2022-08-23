@@ -103,6 +103,9 @@ const layer = createLayer("ai", () => {
         }
     });
 
+    const convBaseReq = computed(() => life.voidDecayed.value ? 1 : 1e4);
+    const convReqExp = computed(() => life.voidDecayed.value ? 4 / 7 : 4);
+
     const conversion: Conversion<{
         scaling: ScalingFunction;
         baseResource: Resource<DecimalSource>;
@@ -113,17 +116,17 @@ const layer = createLayer("ai", () => {
     }> = createCumulativeConversion(() => ({
         scaling: {
             currentGain: conv => {
-                if (Decimal.lt(conv.baseResource.value, 1e4)) return 0;
+                if (Decimal.lt(conv.baseResource.value, convBaseReq.value)) return 0;
 
                 if (advancements.milestones[10].earned.value)
-                    return Decimal.div(conv.baseResource.value, 1e4)
-                        .pow(1 / 4)
+                    return Decimal.div(conv.baseResource.value, convBaseReq.value)
+                        .root(convReqExp.value)
                         .times(3)
                         .sub(2)
                         .floor();
                 else
-                    return Decimal.div(conv.baseResource.value, 5e3)
-                        .log2()
+                    return Decimal.div(conv.baseResource.value, convBaseReq.value / 2)
+                        .log(life.voidDecayed.value ? 1.5 : 2)
                         .root(1.4)
                         .floor()
                         .sub(conv.gainResource.value);
@@ -136,11 +139,11 @@ const layer = createLayer("ai", () => {
                     }
                     return Decimal.div(current, 3)
                         .plus(2 / 3)
-                        .pow(4)
-                        .times(1e4);
+                        .pow(convReqExp.value)
+                        .times(convBaseReq.value);
                 } else
-                    return Decimal.pow(2, Decimal.add(conv.gainResource.value, 1).pow(1.4)).times(
-                        5e3
+                    return Decimal.pow(life.voidDecayed.value ? 1.5 : 2, Decimal.add(conv.gainResource.value, 1).pow(1.4)).times(
+                        convBaseReq.value / 2
                     );
             },
             nextAt: conv => {
@@ -151,11 +154,11 @@ const layer = createLayer("ai", () => {
                     }
                     return Decimal.div(current, 3)
                         .plus(2 / 3)
-                        .pow(4)
-                        .times(1e4);
+                        .pow(convReqExp.value)
+                        .times(convBaseReq.value);
                 } else
-                    return Decimal.pow(2, Decimal.add(conv.gainResource.value, 1).pow(1.4)).times(
-                        5e3
+                    return Decimal.pow(life.voidDecayed.value ? 1.5 : 2, Decimal.add(conv.gainResource.value, 1).pow(1.4)).times(
+                        convBaseReq.value / 2
                     );
             }
         } as ScalingFunction,
@@ -168,6 +171,11 @@ const layer = createLayer("ai", () => {
                 combinators.mainEff,
                 "Particle Combinator Effect",
                 advancements.milestones[15].earned
+            ),
+            createMultiplicativeModifier(
+                100,
+                "Void-Decayed Life",
+                life.voidDecayed
             )
         )
     }));

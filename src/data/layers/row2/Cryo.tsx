@@ -40,7 +40,7 @@ const layer = createLayer("c", () => {
     const best = trackBest(cryo);
 
     const conversion = createCumulativeConversion(() => ({
-        scaling: createPolynomialScaling(1e3, 3 / 4),
+        scaling: createPolynomialScaling(computed(() => aqua.voidDecayed.value ? 0.1 : 1e3), computed(() => aqua.voidDecayed.value ? 15 / 4 : 3 / 4)),
         baseResource: aqua.aqua,
         gainResource: cryo,
         roundUpCost: true,
@@ -49,6 +49,11 @@ const layer = createLayer("c", () => {
                 combinators.mainEff,
                 "Particle Combinator Effect",
                 advancements.milestones[15].earned
+            ),
+            createMultiplicativeModifier(
+                1e10,
+                "Void-Decayed Aqua",
+                aqua.voidDecayed
             )
         )
     }));

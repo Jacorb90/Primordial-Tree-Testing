@@ -73,6 +73,7 @@ const layer = createLayer("adv", () => {
         1.33e45,
         3.5e46,
         5e46,
+        1e49,
         Decimal.dInf
     ];
 
@@ -284,6 +285,10 @@ const layer = createLayer("adv", () => {
         createAdvancement(
             45,
             "Unlock Void."
+        ),
+        createAdvancement(
+            46,
+            "You can activate three Lightning modes at once."
         )
     ];
 

@@ -107,7 +107,7 @@ const layer = createLayer("e", () => {
     });
 
     const conversion = createCumulativeConversion(() => ({
-        scaling: createPolynomialScaling(1.5e5, 1 / 2),
+        scaling: createPolynomialScaling(computed(() => flame.voidDecayed.value ? 15 : 1.5e5), computed(() => flame.voidDecayed.value ? 7 / 2 : 1 / 2)),
         baseResource: flame.flame,
         gainResource: earth,
         roundUpCost: true,
@@ -116,6 +116,11 @@ const layer = createLayer("e", () => {
                 combinators.mainEff,
                 "Particle Combinator Effect",
                 advancements.milestones[15].earned
+            ),
+            createMultiplicativeModifier(
+                1e7,
+                "Void-Decayed Flame",
+                flame.voidDecayed
             )
         )
     }));

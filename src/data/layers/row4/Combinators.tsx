@@ -26,6 +26,7 @@ import earth from "../row2/Earth";
 import air from "../row2/Air";
 import cryo from "../row2/Cryo";
 import light from "../row3/Light";
+import sound from "../row3/Sound";
 import {
     createMultiBuyable,
     MultiBuyable,
@@ -191,6 +192,12 @@ const layer = createLayer("comb", () => {
                 ),
                 1
             )
+        ),
+        8: computed(() =>
+            Decimal.add(
+                attractionPower.value,
+                1
+            ).log10().times(multiBuyables[8].amount.value).times(attractionEff.value).plus(1).log10().div(2).plus(1)
         )
     };
 
@@ -396,6 +403,25 @@ const layer = createLayer("comb", () => {
                 effectDisplay: format(multiBuyableEffects[7].value) + "x"
             }),
             purchaseLimit: moleculeLimit
+        })),
+        createMultiBuyable(() => ({
+            visibility: () => showIf(Decimal.gte(best.value, 8)),
+            costSets: [
+                {
+                    cost: 1e4,
+                    resource: light.light
+                },
+                {
+                    cost: 100,
+                    resource: sound.sound
+                }
+            ],
+            display: () => ({
+                title: "Plastic Molecule",
+                description: "Boost Ionic Bond strength based on Attraction Power.",
+                effectDisplay: "+" + format(Decimal.sub(multiBuyableEffects[8].value, 1).times(100)) + "%"
+            }),
+            purchaseLimit: moleculeLimit
         }))
     ];
 
@@ -510,7 +536,7 @@ const layer = createLayer("comb", () => {
         })
     }));
     const ionicBoostEff = computed(() => {
-        return Decimal.div(ionicBoost.amount.value, 2).plus(1);
+        return Decimal.div(ionicBoost.amount.value, 2).plus(Decimal.gte(combinators.value, 8) ? multiBuyableEffects[8].value : 1);
     });
 
     const metallicPower = createResource<DecimalSource>(0);
