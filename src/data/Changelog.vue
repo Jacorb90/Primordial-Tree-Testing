@@ -5,7 +5,7 @@
         </template>
         <template v-slot:body>
             <details open>
-                <summary>v1.4 Void Decay - <time>2022-08-20</time></summary>
+                <summary>v1.4 Void Decay - <time>2022-08-24</time></summary>
                 <ul>
                     <li class="balancing">Balanced up to 4e50 Particles/s</li>
                     <li class="feature">Implemented Advancements 45-46</li>

@@ -6,9 +6,8 @@
 import { computed } from "@vue/reactivity";
 import { unref } from "vue";
 import { main } from "data/projEntry";
-import { jsx, showIf } from "features/feature";
+import { jsx, showIf, Visibility } from "features/feature";
 import { createReset } from "features/reset";
-import MainDisplay from "features/resources/MainDisplay.vue";
 import { createResource } from "features/resources/resource";
 import { createLayerTreeNode } from "../../common";
 import { createLayer } from "game/layers";
@@ -21,6 +20,8 @@ import flame from "../row1/Flame";
 import life from "../row1/Life";
 import aqua from "../row1/Aqua";
 import { createClickable } from "features/clickables/clickable";
+import { addTooltip } from "features/tooltips/tooltip";
+import { Direction } from "util/common";
 
 type VoidDecayTypes = "flame" | "life" | "aqua";
 
@@ -33,7 +34,7 @@ const layer = createLayer("v", () => {
 
     const darkMatter = computed(() => {
         const particles = main.best.value;
-        return Decimal.div(particles, 1e45).root(10).floor().sub(spentDarkMatter.value).max(0);
+        return Decimal.div(particles, 1e45).root(10).sub(spentDarkMatter.value).floor().max(0);
     });
 
     const nextDarkMatter = computed(() => {
@@ -52,6 +53,12 @@ const layer = createLayer("v", () => {
         color,
         reset
     }));
+    addTooltip(treeNode, {
+        display: computed(() => `${formatWhole(darkMatter.value)} Dark Matter`),
+        pinnable: true,
+        direction: Direction.Left,
+        style: () => (treeNode.visibility.value === Visibility.Visible ? "" : "display: none")
+    });
 
     const voidDecayRows: VoidDecayTypes[][] = [
         ["flame", "life", "aqua"]

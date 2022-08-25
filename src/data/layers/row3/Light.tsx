@@ -18,7 +18,7 @@ import {
     createConversion,
     createPolynomialScaling
 } from "features/conversion";
-import { Visibility, jsx, JSXFunction, showIf } from "features/feature";
+import { Visibility, jsx, JSXFunction, showIf, CoercableComponent } from "features/feature";
 import { createReset, Reset, ResetOptions } from "features/reset";
 import { createResource, Resource, trackBest } from "features/resources/resource";
 import { addTooltip } from "features/tooltips/tooltip";
@@ -32,8 +32,8 @@ import { render } from "util/vue";
 import sound from "./Sound";
 import { createTab, Tab, TabOptions } from "features/tabs/tab";
 import { Buyable, BuyableDisplay, BuyableOptions, createBuyable } from "features/buyable";
-import { Computable } from "util/computed";
-import { computed, ComputedRef } from "vue";
+import { Computable, processComputable, ProcessedComputable } from "util/computed";
+import { computed, ComputedRef, unref } from "vue";
 import { format } from "util/bignum";
 import { globalBus } from "game/events";
 import {
@@ -46,6 +46,9 @@ import cryo from "../row2/Cryo";
 import combinators from "../row4/Combinators";
 import { Clickable, ClickableOptions, createClickable } from "features/clickables/clickable";
 import { formatTime } from "util/break_eternity";
+import { createModifierSection, createMultiplicativeModifier, createSequentialModifier } from "game/modifiers";
+import { Direction } from "util/common";
+import { Modifier } from "../../../game/modifiers";
 
 interface LightData {
     energy: Resource<DecimalSource>;
@@ -58,6 +61,14 @@ interface LightSpell {
     time: Resource<DecimalSource>;
     spell: Clickable<ClickableOptions>;
 }
+
+interface ExtendedBuyableDisplay {
+    title?: CoercableComponent;
+    description?: CoercableComponent;
+    effectDisplay?: CoercableComponent;
+    showAmount?: boolean;
+    unlocked?: boolean;
+};
 
 const colorNames = ["Red", "Orange", "Yellow", "Green", "Blue", "Indigo", "Violet"];
 const lighterColors = ["#FF4444", "#FFBF44", "#FFFF44", "#44FF44", "#4444FF", "#8F44B6", "#D844F7"];
@@ -72,10 +83,17 @@ const layer = createLayer("light", () => {
     const light = createResource<DecimalSource>(0, "Light Particles");
     const best = trackBest(light);
 
-    const conversion: Conversion<ConversionOptions> = createConversion(() => ({
+    const conversion: Conversion<ConversionOptions & { gainModifier: Required<Modifier> }> = createConversion(() => ({
         scaling: createPolynomialScaling(() => 1e9, 1 / 3),
         baseResource: lightning.lightning,
-        gainResource: light
+        gainResource: light,
+        gainModifier: createSequentialModifier(
+            createMultiplicativeModifier(
+                advancements.adv48eff,
+                "Advancement 48",
+                advancements.milestones[47].earned
+            )
+        )
     }));
 
     const reset = createReset(() => ({
@@ -107,6 +125,19 @@ const layer = createLayer("light", () => {
         tree: main.tree,
         treeNode
     }));
+    addTooltip(resetButton, {
+        display: jsx(() =>
+            createModifierSection(
+                "Modifiers",
+                "",
+                conversion.gainModifier,
+                conversion.scaling.currentGain(conversion)
+            )
+        ),
+        pinnable: true,
+        direction: Direction.Down,
+        style: "width: 400px; text-align: left"
+    });
 
     const lightBuyableEffects: ComputedRef<DecimalSource>[][] = [
         [
@@ -117,6 +148,14 @@ const layer = createLayer("light", () => {
                     .div(10)
                     .plus(1)
                     .pow(Decimal.add(lights[0].buyables[1].amount.value, 1).log2())
+            ),
+            computed(() =>
+                Decimal.add(lights[0].energy.value, 1)
+                .log10()
+                .sqrt()
+                .times(lights[0].buyables[2].amount.value)
+                .div(8)
+                .plus(1)
             )
         ],
         [
@@ -275,7 +314,7 @@ const layer = createLayer("light", () => {
         ]
     ];
 
-    const lightBuyableData: Computable<BuyableDisplay>[][] = [
+    const lightBuyableData: Computable<ExtendedBuyableDisplay>[][] = [
         [
             () => ({
                 title: "Passion Bright",
@@ -286,6 +325,12 @@ const layer = createLayer("light", () => {
                 title: "Blinding Light",
                 description: "Red Energy boosts Particle gain.",
                 effectDisplay: format(lightBuyableEffects[0][1].value) + "x"
+            }),
+            () => ({
+                unlocked: advancements.milestones[46].earned.value,
+                title: "Circle of Light",
+                description: "Red Energy boosts the gain of all Color Energy types at a very reduced rate.",
+                effectDisplay: format(lightBuyableEffects[0][2].value) + "x"
             })
         ],
         [
@@ -503,6 +548,7 @@ const layer = createLayer("light", () => {
             if (advancements.milestones[41].earned.value) mult = mult.times(4);
 
             if (index < 6) mult = mult.times(lightBuyableEffects[index + 1][2].value);
+            if (advancements.milestones[46].earned.value) mult = mult.times(lightBuyableEffects[0][2].value);
 
             if (Decimal.gt(lightSpells[index].time.value, 0)) mult = mult.times(3);
 
@@ -511,12 +557,15 @@ const layer = createLayer("light", () => {
 
         const buyables: Buyable<BuyableOptions & { visibility: () => Visibility }>[] = [
             ...new Array(lightBuyableData[index].length)
-        ].map((_, bIndex) =>
-            createBuyable(() => ({
+        ].map((_, bIndex) => {
+            processComputable(lightBuyableData[index], bIndex);
+            const processedBuyableData = lightBuyableData[index][bIndex] as ProcessedComputable<ExtendedBuyableDisplay>;
+            const shift = index == 1 && bIndex == 0 ? 2 : 1;
+            return createBuyable(() => ({
                 visibility: () =>
                     bIndex == 0
                         ? Visibility.Visible
-                        : showIf(Decimal.gte(buyables[bIndex - 1].amount.value, 1)),
+                        : showIf(Decimal.gte(buyables[bIndex - shift].amount.value, 1) && (unref(processedBuyableData).unlocked ?? true)),
                 cost: () =>
                     Decimal.pow(
                         index / 4 + bIndex / 2 + 2,
@@ -526,8 +575,8 @@ const layer = createLayer("light", () => {
                         ).plus((Math.sqrt(index) / 4 + Math.sqrt(bIndex)) * 3)
                     ),
                 resource: bIndex == 0 ? light : energy,
-                display: lightBuyableData[index][bIndex]
-            }))
+                display: processedBuyableData
+            }))}
         );
 
         const tab = createTab(() => ({
@@ -569,9 +618,9 @@ const layer = createLayer("light", () => {
                                 ? Visibility.Visible
                                 : showIf(
                                       lights[index].buyables.length > 0 &&
-                                          lights[index - 1].buyables.every(bbl =>
-                                              Decimal.gte(bbl.amount.value, 1)
-                                          )
+                                          (index == 1 ? Decimal.gte(lights[0].buyables[0].amount.value, 1) && Decimal.gte(lights[0].buyables[1].amount.value, 1) : lights[index - 1].buyables.every(bbl =>
+                                                Decimal.gte(bbl.amount.value, 1)
+                                            ))
                                   ),
                         tab: lights[index].tab,
                         display: colorNames[index],

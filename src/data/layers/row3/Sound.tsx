@@ -32,6 +32,9 @@ import { globalBus } from "game/events";
 import { createUpgrade, Upgrade, UpgradeOptions } from "features/upgrades/upgrade";
 import { computed } from "vue";
 import { format } from "util/break_eternity";
+import { createSequentialModifier, createMultiplicativeModifier, createModifierSection } from "game/modifiers";
+import { Modifier } from "../../../game/modifiers";
+import { Direction } from "util/common";
 
 const layer = createLayer("sound", () => {
     const id = "sound";
@@ -41,10 +44,17 @@ const layer = createLayer("sound", () => {
     const sound = createResource<DecimalSource>(0, "Sound Particles");
     const best = trackBest(sound);
 
-    const conversion: Conversion<ConversionOptions> = createConversion(() => ({
+    const conversion: Conversion<ConversionOptions & { gainModifier: Required<Modifier> }> = createConversion(() => ({
         scaling: createPolynomialScaling(() => 1e7, 1 / 3),
         baseResource: air.air,
-        gainResource: sound
+        gainResource: sound,
+        gainModifier: createSequentialModifier(
+            createMultiplicativeModifier(
+                advancements.adv48eff,
+                "Advancement 48",
+                advancements.milestones[47].earned
+            )
+        )
     }));
 
     const reset = createReset(() => ({
@@ -70,6 +80,20 @@ const layer = createLayer("sound", () => {
         tree: main.tree,
         treeNode
     }));
+    addTooltip(resetButton, {
+        display: jsx(() =>
+            createModifierSection(
+                "Modifiers",
+                "",
+                conversion.gainModifier,
+                conversion.scaling.currentGain(conversion)
+            )
+        ),
+        pinnable: true,
+        direction: Direction.Down,
+        style: "width: 400px; text-align: left"
+    });
+
 
     const ultrasound = createResource<DecimalSource>(0, "Ultrasound");
 

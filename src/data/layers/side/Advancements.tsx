@@ -21,6 +21,7 @@ import { formatWhole } from "util/break_eternity";
 import { coerceComponent, render } from "util/vue";
 import { computed, ComputedRef } from "vue";
 import earth from "../row2/Earth";
+import voidLayer from "./Void";
 
 const layer = createLayer("adv", () => {
     const id = "adv";
@@ -74,6 +75,8 @@ const layer = createLayer("adv", () => {
         3.5e46,
         5e46,
         1e49,
+        4e50,
+        6.75e51,
         Decimal.dInf
     ];
 
@@ -137,6 +140,8 @@ const layer = createLayer("adv", () => {
     });
 
     const adv37eff = computed(() => Decimal.pow(1.2, Decimal.sub(advancements.value, 35)));
+
+    const adv48eff: ComputedRef<Decimal> = computed(() => Decimal.add(voidLayer.darkMatter.value, 1).log10().plus(1));
 
     function createAdvancement(adv: DecimalSource, desc: CoercableComponent) {
         const Display = coerceComponent(desc);
@@ -289,6 +294,18 @@ const layer = createLayer("adv", () => {
         createAdvancement(
             46,
             "You can activate three Lightning modes at once."
+        ),
+        createAdvancement(
+            47,
+            "Unlock a third Red Energy Upgrade."
+        ),
+        createAdvancement(
+            48,
+            jsx(() => (
+                <>
+                    Unspent Dark Matter boosts Light and Sound Particle gain at a reduced rate ({format(adv48eff.value)}x)
+                </>
+            ))
         )
     ];
 
@@ -300,6 +317,7 @@ const layer = createLayer("adv", () => {
         adv5time,
         adv15eff,
         adv37eff,
+        adv48eff,
         display: jsx(() => (
             <>
                 <MainDisplay resource={advancements} color={color} />

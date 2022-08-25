@@ -154,11 +154,13 @@ export function createBuyable<T extends BuyableOptions>(
                 }
                 const cost = unref(genericBuyable.cost);
                 if (genericBuyable.cost != null && genericBuyable.resource != null) {
-                    genericBuyable.resource.value = Decimal.sub(
-                        genericBuyable.resource.value,
-                        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                        cost!
-                    );
+                    if (!unref(keepRes)) {
+                        genericBuyable.resource.value = Decimal.sub(
+                            genericBuyable.resource.value,
+                            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                            cost!
+                        );
+                    }
                     genericBuyable.amount.value = Decimal.add(genericBuyable.amount.value, 1);
                 }
                 this.onPurchase?.(cost);
