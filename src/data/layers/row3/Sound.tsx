@@ -106,7 +106,7 @@ const layer = createLayer("sound", () => {
         if (upgrades[3].bought.value) mult = mult.times(upgradeEffects[3].value);
         if (advancements.milestones[37].earned.value) mult = mult.times(2);
 
-        for (let i=0; i<6; i++) {
+        for (let i=0; i<5; i++) {
             if (row2upgrades[i].bought.value) mult = mult.times(i == 2 ? upgradeEffects[i].value.plus(1) : upgradeEffects[i].value);
         }
 
@@ -248,7 +248,7 @@ const layer = createLayer("sound", () => {
             display: () => ({
                 title: "Location II",
                 description:
-                    "Sound Particles boost the above upgrade's effect, which now also boosts Ultrasound gain.",
+                    "Sound Particles boost the above upgrade's effect.",
                 effectDisplay: format(row2upgradeEffects[5].value) + "x"
             }),
             cost: 1e12,
