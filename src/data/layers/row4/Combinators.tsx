@@ -418,7 +418,7 @@ const layer = createLayer("comb", () => {
             ],
             display: () => ({
                 title: "Plastic Molecule",
-                description: "Boost Ionic Bond strength based on Attraction Power.",
+                description: "Boost Ionic " + (advancements.milestones[49].earned.value ? "& Metallic" : "") + " Bond strength based on Attraction Power.",
                 effectDisplay: "+" + format(Decimal.sub(multiBuyableEffects[8].value, 1).times(100)) + "%"
             }),
             purchaseLimit: moleculeLimit
@@ -455,6 +455,7 @@ const layer = createLayer("comb", () => {
         if (Decimal.gte(combinators.value, 7)) mult = multiBuyableEffects[7].value;
         if (Decimal.gte(light.lights[5].buyables[1].amount.value, 1))
             mult = Decimal.mul(mult, light.lightBuyableEffects[5][1].value);
+        if (advancements.milestones[48].earned.value) mult = Decimal.mul(mult, 3);
 
         return mult;
     });
@@ -542,7 +543,7 @@ const layer = createLayer("comb", () => {
     const metallicPower = createResource<DecimalSource>(0);
     const metallicBonds: Buyable<BuyableOptions> = createBuyable(() => ({
         cost: () =>
-            Decimal.pow(7e3, Decimal.pow(Decimal.div(metallicBonds.amount.value, 3), 2)).times(1e8),
+            Decimal.pow(7e3, Decimal.pow(Decimal.div(metallicBonds.amount.value, 3), 2)).times(1e8).div(advancements.milestones[48].earned.value ? 1e7 : 1),
         resource: attractionPower,
         display: () => ({
             title: "Metallic Bonds",
@@ -556,7 +557,7 @@ const layer = createLayer("comb", () => {
     });
 
     const metallicBoost: Buyable<BuyableOptions> = createBuyable(() => ({
-        cost: () => Decimal.pow(65, Decimal.pow(metallicBoost.amount.value, 3)).times(1e9),
+        cost: () => Decimal.pow(65, Decimal.pow(metallicBoost.amount.value, 3)).times(1e9).div(advancements.milestones[48].earned.value ? 1e7 : 1),
         resource: attractionPower,
         display: () => ({
             title: "Metallic Boosts",
@@ -567,7 +568,7 @@ const layer = createLayer("comb", () => {
         })
     }));
     const metallicBoostEff = computed(() => {
-        return Decimal.div(metallicBoost.amount.value, 2).plus(1);
+        return Decimal.div(metallicBoost.amount.value, 2).plus((advancements.milestones[49].earned.value && Decimal.gte(combinators.value, 8)) ? multiBuyableEffects[8].value : 1);
     });
 
     const moleculeTab = createTab(() => ({

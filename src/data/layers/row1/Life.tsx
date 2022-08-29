@@ -157,7 +157,7 @@ const layer = createLayer("l", () => {
         ),
         1: computed(() =>
             Decimal.pow(
-                voidDecayed.value ? 3.75 : 2,
+                voidDecayed.value ? 3.5 : 2,
                 Decimal.add(buyables[1].amount.value, extraBuyableLevels[1].value).times(
                     buyablePower.value
                 )

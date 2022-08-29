@@ -94,6 +94,9 @@ export const main = createLayer("main", () => {
         if (advancements.milestones[32].earned.value)
             gain = gain.times(light.lightBuyableEffects[0][1].value);
 
+        if (advancements.milestones[50].earned.value)
+            gain = gain.times(advancements.adv51eff.value);
+
         return gain;
     });
 

@@ -141,10 +141,11 @@ const layer = createLayer("c", () => {
                     ? Visibility.Visible
                     : Visibility.None,
             reset: challengeReset,
-            completionLimit: computed(() => (advancements.milestones[26].earned.value ? 20 : 10)),
+            completionLimit: computed(() => (advancements.milestones[26].earned.value ? 20 : 10) + (advancements.milestones[48].earned.value ? 10 : 0)),
             resource: aqua.aqua,
             goal: () => {
                 let comps: DecimalSource = challenges[0].completions.value;
+                if (Decimal.gte(comps, 20)) comps = Decimal.pow(comps, 2).div(20).plus(5);
                 if (Decimal.gte(comps, 10)) comps = Decimal.pow(comps, 2).div(10).plus(5);
                 return Decimal.pow(2, comps).times(100);
             },

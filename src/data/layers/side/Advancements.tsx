@@ -77,6 +77,9 @@ const layer = createLayer("adv", () => {
         1e49,
         4e50,
         6.75e51,
+        2e53,
+        2.5e53,
+        1.5e55,
         Decimal.dInf
     ];
 
@@ -142,6 +145,8 @@ const layer = createLayer("adv", () => {
     const adv37eff = computed(() => Decimal.pow(1.2, Decimal.sub(advancements.value, 35)));
 
     const adv48eff: ComputedRef<Decimal> = computed(() => Decimal.add(voidLayer.darkMatter.value, 1).log10().plus(1));
+
+    const adv51eff: ComputedRef<Decimal> = computed(() => Decimal.pow(1.5, voidLayer.voidDecayCount.value));
 
     function createAdvancement(adv: DecimalSource, desc: CoercableComponent) {
         const Display = coerceComponent(desc);
@@ -306,6 +311,22 @@ const layer = createLayer("adv", () => {
                     Unspent Dark Matter boosts Light and Sound Particle gain at a reduced rate ({format(adv48eff.value)}x)
                 </>
             ))
+        ),
+        createAdvancement(
+            49,
+            "Divide Metallic Bond & Boost costs by 10,000,000, triple Attraction Power gain, and increase the 'Temperature Decrease' completion limit by 10."
+        ),
+        createAdvancement(
+            50,
+            "The Plastic Molecule effect also affects Metallic Bond strength, and unlock a new row of Sound Upgrades."
+        ),
+        createAdvancement(
+            51,
+            jsx(() => (
+                <>
+                    Each active Void-Decayed Particle type increases Particle gain by 50% ({format(adv51eff.value)}x)
+                </>
+            ))
         )
     ];
 
@@ -318,6 +339,7 @@ const layer = createLayer("adv", () => {
         adv15eff,
         adv37eff,
         adv48eff,
+        adv51eff,
         display: jsx(() => (
             <>
                 <MainDisplay resource={advancements} color={color} />

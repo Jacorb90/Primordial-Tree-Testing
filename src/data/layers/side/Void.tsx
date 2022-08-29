@@ -141,6 +141,7 @@ const layer = createLayer("v", () => {
         color,
         darkMatter,
         nextDarkMatter,
+        voidDecayCount,
         voidDecays,
         treeNode,
         display: jsx(() => (

@@ -16,7 +16,7 @@ import {
     createConversion,
     createPolynomialScaling
 } from "features/conversion";
-import { Visibility, jsx } from "features/feature";
+import { Visibility, jsx, showIf } from "features/feature";
 import { createReset } from "features/reset";
 import { createResource, trackBest } from "features/resources/resource";
 import { addTooltip } from "features/tooltips/tooltip";
@@ -106,21 +106,34 @@ const layer = createLayer("sound", () => {
         if (upgrades[3].bought.value) mult = mult.times(upgradeEffects[3].value);
         if (advancements.milestones[37].earned.value) mult = mult.times(2);
 
+        for (let i=0; i<6; i++) {
+            if (row2upgrades[i].bought.value) mult = mult.times(i == 2 ? upgradeEffects[i].value.plus(1) : upgradeEffects[i].value);
+        }
+
         return mult;
     });
 
     const upgradeEffects = [
-        computed(() => Decimal.add(ultrasound.value, 1).log10().plus(1).log10().plus(1)),
-        computed(() => Decimal.add(ultrasound.value, 1).log10().plus(1).sqrt()),
+        computed(() => Decimal.add(ultrasound.value, 1).log10().plus(1).log10().plus(1).times(row2upgrades[0].bought.value ? row2upgradeEffects[0].value : 1)),
+        computed(() => Decimal.add(ultrasound.value, 1).log10().plus(1).sqrt().times(row2upgrades[1].bought.value ? row2upgradeEffects[1].value : 1)),
         computed(() => {
-            let ret = Decimal.add(ultrasound.value, 1).log10().div(20);
+            let ret = Decimal.add(ultrasound.value, 1).times(row2upgrades[2].bought.value ? row2upgradeEffects[2].value : 1).log10().div(20);
             if (ret.gte(0.5)) ret = ret.plus(0.5).log10().plus(0.5);
             return ret;
         }),
-        computed(() => Decimal.add(ultrasound.value, 1).log10().plus(1).sqrt()),
-        computed(() => Decimal.add(ultrasound.value, 1).log10().plus(1)),
-        computed(() => Decimal.div(ultrasound.value, 100).plus(1))
+        computed(() => Decimal.add(ultrasound.value, 1).log10().plus(1).sqrt().times(row2upgrades[3].bought.value ? row2upgradeEffects[3].value : 1)),
+        computed(() => Decimal.add(ultrasound.value, 1).log10().plus(1).times(row2upgrades[4].bought.value ? row2upgradeEffects[4].value : 1)),
+        computed(() => Decimal.div(ultrasound.value, 100).plus(1).times(row2upgrades[5].bought.value ? row2upgradeEffects[5].value : 1))
     ];
+
+    const row2upgradeEffects = [
+        computed(() => Decimal.add(sound.value, 1).log10().plus(1).log10().plus(1).root(1.5)),
+        computed(() => Decimal.add(sound.value, 1).log10().plus(1).cbrt()),
+        computed(() => Decimal.add(sound.value, 1).sqrt()),
+        computed(() => Decimal.add(sound.value, 1).log10().plus(1).cbrt()),
+        computed(() => Decimal.add(sound.value, 1).log10().plus(1).root(1.5)),
+        computed(() => Decimal.div(sound.value, 100).plus(1).root(1.5))
+    ]
 
     const upgrades: Upgrade<UpgradeOptions>[] = [
         createUpgrade(() => ({
@@ -180,6 +193,69 @@ const layer = createLayer("sound", () => {
         }))
     ];
 
+    const row2upgrades: Upgrade<UpgradeOptions>[] = [
+        createUpgrade(() => ({
+            display: () => ({
+                title: "Pitch II",
+                description:
+                    "Sound Particles boost the above upgrade's effect, which now also boosts Ultrasound gain.",
+                effectDisplay: format(row2upgradeEffects[0].value) + "x"
+            }),
+            cost: 1e6,
+            resource: ultrasound
+        })),
+        createUpgrade(() => ({
+            display: () => ({
+                title: "Duration II",
+                description:
+                    "Sound Particles boost the above upgrade's effect, which now also boosts Ultrasound gain.",
+                effectDisplay: format(row2upgradeEffects[1].value) + "x"
+            }),
+            cost: 5e6,
+            resource: ultrasound
+        })),
+        createUpgrade(() => ({
+            display: () => ({
+                title: "Volume II",
+                description:
+                    "Sound Particles boost effective Ultrasound in the above upgrade, which now also boosts Ultrasound gain.",
+                effectDisplay: format(row2upgradeEffects[2].value) + "x"
+            }),
+            cost: 4e7,
+            resource: ultrasound
+        })),
+        createUpgrade(() => ({
+            display: () => ({
+                title: "Timbre II",
+                description:
+                    "Sound Particles boost the above upgrade's effect, which now also boosts Ultrasound gain.",
+                effectDisplay: format(row2upgradeEffects[3].value) + "x"
+            }),
+            cost: 6e8,
+            resource: ultrasound
+        })),
+        createUpgrade(() => ({
+            display: () => ({
+                title: "Texture II",
+                description:
+                    "Sound Particles boost the above upgrade's effect, which now also boosts Ultrasound gain.",
+                effectDisplay: format(row2upgradeEffects[4].value) + "x"
+            }),
+            cost: 1e10,
+            resource: ultrasound
+        })),
+        createUpgrade(() => ({
+            display: () => ({
+                title: "Location II",
+                description:
+                    "Sound Particles boost the above upgrade's effect, which now also boosts Ultrasound gain.",
+                effectDisplay: format(row2upgradeEffects[5].value) + "x"
+            }),
+            cost: 1e12,
+            resource: ultrasound
+        }))
+    ]
+
     globalBus.on("update", diff => {
         ultrasound.value = Decimal.add(
             ultrasound.value,
@@ -196,6 +272,8 @@ const layer = createLayer("sound", () => {
         ultrasound,
         upgrades,
         upgradeEffects,
+        row2upgrades,
+        row2upgradeEffects,
         display: jsx(() => (
             <>
                 <MainDisplay resource={sound} color={color} />
@@ -205,6 +283,8 @@ const layer = createLayer("sound", () => {
                 <br />
                 <br />
                 {upgrades.map(render)}
+                <br />
+                {advancements.milestones[49].earned.value ? row2upgrades.map(render) : []}
             </>
         )),
         treeNode
