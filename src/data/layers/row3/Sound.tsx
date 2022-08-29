@@ -132,7 +132,7 @@ const layer = createLayer("sound", () => {
         computed(() => Decimal.add(sound.value, 1).sqrt()),
         computed(() => Decimal.add(sound.value, 1).log10().plus(1).cbrt()),
         computed(() => Decimal.add(sound.value, 1).log10().plus(1).root(1.5)),
-        computed(() => Decimal.div(sound.value, 100).plus(1).root(1.5))
+        computed(() => Decimal.div(sound.value, 100).plus(1).log10().plus(1))
     ]
 
     const upgrades: Upgrade<UpgradeOptions>[] = [
