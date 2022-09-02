@@ -19,11 +19,13 @@ import { render } from "util/vue";
 import flame from "../row1/Flame";
 import life from "../row1/Life";
 import aqua from "../row1/Aqua";
+import lightning from "../row2/Lightning";
 import { createClickable } from "features/clickables/clickable";
 import { addTooltip } from "features/tooltips/tooltip";
 import { Direction } from "util/common";
+import { Computable } from "util/computed";
 
-type VoidDecayTypes = "flame" | "life" | "aqua";
+type VoidDecayTypes = "flame" | "life" | "aqua" | "lightning";
 
 const layer = createLayer("v", () => {
     const id = "v";
@@ -61,7 +63,8 @@ const layer = createLayer("v", () => {
     });
 
     const voidDecayRows: VoidDecayTypes[][] = [
-        ["flame", "life", "aqua"]
+        ["flame", "life", "aqua"],
+        ["lightning"]
     ];
 
     const resetVoidDecays = createClickable(() => ({
@@ -79,7 +82,7 @@ const layer = createLayer("v", () => {
         }
     }));
 
-    const voidDecays: Record<VoidDecayTypes, Upgrade<UpgradeOptions>> = {
+    const voidDecays: Record<VoidDecayTypes, Upgrade<UpgradeOptions & { baseCost: DecimalSource }>> = {
         flame: createUpgrade(() => ({
             display: {
                 title: "Flame Decay",
@@ -87,10 +90,11 @@ const layer = createLayer("v", () => {
                     <div>Cost: {formatWhole(unref(voidDecays.flame.cost) ?? "Infinity")} Dark Matter</div>
                 )
             },
-            cost: () => Decimal.pow(5, voidDecayCount.value - (voidDecays.flame.bought.value ? 1 : 0)),
+            baseCost: 5,
+            cost: () => voidDecayCostMult.value,
             canAfford: () => Decimal.gte(darkMatter.value, unref(voidDecays.flame.cost) ?? "Infinity"),
             onPurchase: () => {
-                spentDarkMatter.value = Decimal.add(spentDarkMatter.value, unref(voidDecays.flame.cost) ?? 0);
+                spentDarkMatter.value = Decimal.add(spentDarkMatter.value, Decimal.div(unref(voidDecays.flame.cost) ?? 0, voidDecays.flame.baseCost));
                 flame.treeNode.reset.reset();
             },
             style: {
@@ -104,10 +108,11 @@ const layer = createLayer("v", () => {
                     <div>Cost: {formatWhole(unref(voidDecays.life.cost) ?? "Infinity")} Dark Matter</div>
                 )
             },
-            cost: () => Decimal.pow(5, voidDecayCount.value - (voidDecays.life.bought.value ? 1 : 0)),
+            baseCost: 5,
+            cost: () => voidDecayCostMult.value,
             canAfford: () => Decimal.gte(darkMatter.value, unref(voidDecays.life.cost) ?? "Infinity"),
             onPurchase: () => {
-                spentDarkMatter.value = Decimal.add(spentDarkMatter.value, unref(voidDecays.life.cost) ?? 0);
+                spentDarkMatter.value = Decimal.add(spentDarkMatter.value, Decimal.div(unref(voidDecays.life.cost) ?? 0, voidDecays.life.baseCost));
                 life.treeNode.reset.reset();
             },
             style: {
@@ -121,19 +126,40 @@ const layer = createLayer("v", () => {
                     <div>Cost: {formatWhole(unref(voidDecays.aqua.cost) ?? "Infinity")} Dark Matter</div>
                 )
             },
-            cost: () => Decimal.pow(5, voidDecayCount.value - (voidDecays.aqua.bought.value ? 1 : 0)),
+            baseCost: 5,
+            cost: () => voidDecayCostMult.value,
             canAfford: () => Decimal.gte(darkMatter.value, unref(voidDecays.aqua.cost) ?? "Infinity"),
             onPurchase: () => {
-                spentDarkMatter.value = Decimal.add(spentDarkMatter.value, unref(voidDecays.aqua.cost) ?? 0);
+                spentDarkMatter.value = Decimal.add(spentDarkMatter.value, Decimal.div(unref(voidDecays.aqua.cost) ?? 0, voidDecays.aqua.baseCost));
                 aqua.treeNode.reset.reset();
             },
             style: {
                 color: "white"
             }
-        }))
+        })),
+        lightning: createUpgrade(() => ({
+            visibility: () => showIf(advancements.milestones[52].earned.value),
+            display: {
+                title: "Lightning Decay",
+                description: jsx(() =>
+                    <div>Cost: {formatWhole(unref(voidDecays.lightning.cost) ?? "Infinity")} Dark Matter</div>
+                )
+            },
+            baseCost: 500,
+            cost: () => voidDecayCostMult.value.times(500),
+            canAfford: () => Decimal.gte(darkMatter.value, unref(voidDecays.lightning.cost) ?? "Infinity"),
+            onPurchase: () => {
+                spentDarkMatter.value = Decimal.add(spentDarkMatter.value, Decimal.div(unref(voidDecays.lightning.cost) ?? 0, voidDecays.lightning.baseCost));
+                lightning.treeNode.reset.reset();
+            },
+            style: {
+                color: "white"
+            }
+        } as UpgradeOptions & { baseCost: DecimalSource }))
     }
 
     const voidDecayCount = computed(() => Object.values(voidDecays).filter(decay => decay.bought.value).length);
+    const voidDecayCostMult = computed(() => Object.values(voidDecays).filter(decay => decay.bought.value).reduce((a,c) => Decimal.mul(a, c.baseCost), Decimal.dOne));
 
     return {
         id,
@@ -142,12 +168,13 @@ const layer = createLayer("v", () => {
         darkMatter,
         nextDarkMatter,
         voidDecayCount,
+        voidDecayCostMult,
         voidDecays,
         treeNode,
         display: jsx(() => (
             <>
                 There are <span style={"color: " + color+"; font-size: 40px; font-weight: bold;"}>{formatWhole(voidDecayCount.value)}</span> Void-Decayed Particle types.<br/><br/>
-                There is <span style={"color: " + color+"; font-size: 40px; font-weight: bold;"}>{formatWhole(darkMatter.value)}</span> Dark Matter (next at {format(nextDarkMatter.value)} Particles)<br/><br/>
+                There is <span style={"color: " + color+"; font-size: 40px; font-weight: bold;"}>{formatWhole(darkMatter.value)}</span> Dark Matter {darkMatter.value.gte(1000) ? <></> : <span>(next at {format(nextDarkMatter.value)} Particles)</span>}<br/><br/>
 
                 Void-Decaying a type of Particle will reset that layer entirely, and drastically nerf that layer, however all boosts it gives are much stronger, and any layers that are dependent on its particle scale much slower.<br/><br/>
 

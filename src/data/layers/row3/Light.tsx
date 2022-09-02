@@ -84,7 +84,7 @@ const layer = createLayer("light", () => {
     const best = trackBest(light);
 
     const conversion: Conversion<ConversionOptions & { gainModifier: Required<Modifier> }> = createConversion(() => ({
-        scaling: createPolynomialScaling(() => 1e9, 1 / 3),
+        scaling: createPolynomialScaling(() => lightning.voidDecayed.value ? 100 : 1e9, () => lightning.voidDecayed.value ? 5 / 3 : 1 / 3),
         baseResource: lightning.lightning,
         gainResource: light,
         gainModifier: createSequentialModifier(
@@ -92,6 +92,11 @@ const layer = createLayer("light", () => {
                 advancements.adv48eff,
                 "Advancement 48",
                 advancements.milestones[47].earned
+            ),
+            createMultiplicativeModifier(
+                1e3,
+                "Void-Decayed Lightning",
+                lightning.voidDecayed
             )
         )
     }));

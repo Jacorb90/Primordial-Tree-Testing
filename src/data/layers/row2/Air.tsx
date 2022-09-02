@@ -77,15 +77,22 @@ const layer = createLayer("ai", () => {
         return Decimal.add(tornado.value, 1).log10().plus(1).log(3).plus(1).sqrt();
     });
 
+    const partialExp = computed(() => {
+        let exp = 0.5;
+        if (advancements.milestones[51].earned.value) exp = 0.6;
+
+        return exp;
+    })
+
     globalBus.on("update", diff => {
         if (advancements.milestones[14].earned.value) {
-            wind.value = Decimal.mul(Decimal.pow(10, Decimal.sqrt(windMul.value)), diff)
+            wind.value = Decimal.mul(Decimal.pow(10, Decimal.pow(windMul.value, partialExp.value)), diff)
                 .plus(Decimal.pow(10, wind.value))
                 .log10();
-            zephyr.value = Decimal.mul(Decimal.pow(10, Decimal.sqrt(zephyrMul.value)), diff)
+            zephyr.value = Decimal.mul(Decimal.pow(10, Decimal.pow(zephyrMul.value, partialExp.value)), diff)
                 .plus(Decimal.pow(10, zephyr.value))
                 .log10();
-            tornado.value = Decimal.mul(Decimal.pow(10, Decimal.sqrt(tornadoMul.value)), diff)
+            tornado.value = Decimal.mul(Decimal.pow(10, Decimal.pow(tornadoMul.value, partialExp.value)), diff)
                 .plus(Decimal.pow(10, tornado.value))
                 .log10();
         } else {

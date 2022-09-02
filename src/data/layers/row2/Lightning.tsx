@@ -15,6 +15,7 @@ import { createResourceTooltip } from "features/trees/tree";
 import { globalBus } from "game/events";
 import { createLayer } from "game/layers";
 import {
+createExponentialModifier,
     createModifierSection,
     createMultiplicativeModifier,
     createSequentialModifier,
@@ -29,11 +30,14 @@ import { createLayerTreeNode, createResetButton } from "../../common";
 import advancements from "../side/Advancements";
 import combinators from "../row4/Combinators";
 import light from "../row3/Light";
+import voidLayer from "../side/Void";
 
 const layer = createLayer("li", () => {
     const id = "li";
     const name = "Lightning";
     const color = "#ffd500";
+
+    const voidDecayed = computed(() => voidLayer.voidDecays.lightning.bought.value);
 
     const lightning = createResource<DecimalSource>(0, "Lightning Particles");
     const best = trackBest(lightning);
@@ -45,7 +49,7 @@ const layer = createLayer("li", () => {
     };
 
     const conversion = createCumulativeConversion(() => ({
-        scaling: createPolynomialScaling(2.5e3, 1 / 4),
+        scaling: createPolynomialScaling(voidDecayed.value ? "1e70" : 2.5e3, 1 / 4),
         baseResource: main.particles,
         gainResource: lightning,
         roundUpCost: true,
@@ -59,6 +63,11 @@ const layer = createLayer("li", () => {
                 light.lightBuyableEffects[2][1],
                 "Yellow Energy Buyable 2",
                 () => Decimal.gte(light.lights[2].buyables[1].amount.value, 1)
+            ),
+            createExponentialModifier(
+                1 / 14,
+                "Void Decay",
+                voidDecayed
             )
         )
     }));
@@ -215,7 +224,7 @@ const layer = createLayer("li", () => {
         visibility: () =>
             advancements.milestones[0].earned.value ? Visibility.Visible : Visibility.Hidden,
         layerID: id,
-        display: jsx(() => <img src="./nodes/lightning.png" />),
+        display: jsx(() => <img src={"./nodes/"+(voidDecayed.value ? "void_" : "")+"lightning.png"} />),
         color,
         reset
     }));
@@ -268,6 +277,7 @@ const layer = createLayer("li", () => {
                 </table>
             </>
         )),
+        voidDecayed,
         treeNode,
         clickables,
         clickableEffects

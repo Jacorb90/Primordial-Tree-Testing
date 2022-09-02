@@ -75,11 +75,13 @@ const layer = createLayer("adv", () => {
         3.5e46,
         5e46,
         1e49,
-        4e50,
-        6.75e51,
-        2e53,
-        2.5e53,
-        1.5e55,
+        "4e50",
+        "6.75e51",
+        "2e53",
+        "2.5e53",
+        "1.5e55",
+        "2.5e57",
+        "1.2e71",
         Decimal.dInf
     ];
 
@@ -327,6 +329,14 @@ const layer = createLayer("adv", () => {
                     Each active Void-Decayed Particle type increases Particle gain by 50% ({format(adv51eff.value)}x)
                 </>
             ))
+        ),
+        createAdvancement(
+            52,
+            "Slightly increase the Wind/Zephyr/Tornado Speed exponent (0.5 -> 0.6)."
+        ),
+        createAdvancement(
+            53,
+            "Unlock Lightning Void Decay."
         )
     ];
 
