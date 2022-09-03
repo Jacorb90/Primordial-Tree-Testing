@@ -174,7 +174,7 @@ const layer = createLayer("v", () => {
         display: jsx(() => (
             <>
                 There are <span style={"color: " + color+"; font-size: 40px; font-weight: bold;"}>{formatWhole(voidDecayCount.value)}</span> Void-Decayed Particle types.<br/><br/>
-                There is <span style={"color: " + color+"; font-size: 40px; font-weight: bold;"}>{formatWhole(darkMatter.value)}</span> Dark Matter {darkMatter.value.gte(1000) ? <></> : <span>(next at {format(nextDarkMatter.value)} Particles)</span>}<br/><br/>
+                There is <span style={"color: " + color+"; font-size: 40px; font-weight: bold;"}>{formatWhole(darkMatter.value)}</span> Dark Matter {darkMatter.value.gte(1000) ? <span></span> : `(next at ${format(nextDarkMatter.value)} Particles`}<br/><br/>
 
                 Void-Decaying a type of Particle will reset that layer entirely, and drastically nerf that layer, however all boosts it gives are much stronger, and any layers that are dependent on its particle scale much slower.<br/><br/>
 
