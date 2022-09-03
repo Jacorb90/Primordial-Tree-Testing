@@ -31,7 +31,7 @@ export function commaFormat(num: DecimalSource, precision: number): string {
     }
     num = new Decimal(num);
     if (num.mag < 0.001) {
-        return (0).toFixed(precision);
+        return zero.toFixed(precision);
     }
     const init = num.toStringWithDecimalPlaces(precision);
     const portions = init.split(".");
@@ -46,7 +46,7 @@ export function regularFormat(num: DecimalSource, precision: number): string {
     }
     num = new Decimal(num);
     if (num.mag < 0.0001) {
-        return (0).toFixed(precision);
+        return zero.toFixed(precision);
     }
     if (num.mag < 0.1 && precision !== 0) {
         precision = Math.max(
@@ -101,7 +101,7 @@ export function format(num: DecimalSource, precision?: number, small?: boolean):
     } else if (num.gte(thousandth) || !small) {
         return regularFormat(num, precision);
     } else if (num.eq(zero)) {
-        return (0).toFixed(precision);
+        return zero.toFixed(precision);
     }
 
     num = invertOOM(num);
