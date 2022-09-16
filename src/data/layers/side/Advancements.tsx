@@ -82,6 +82,10 @@ const layer = createLayer("adv", () => {
         "1.5e55",
         "2.5e57",
         "1.2e71",
+        "4e73",
+        "1e76",
+        "1e82",
+        "2.5e83",
         Decimal.dInf
     ];
 
@@ -150,7 +154,11 @@ const layer = createLayer("adv", () => {
 
     const adv51eff: ComputedRef<Decimal> = computed(() => Decimal.pow(1.5, voidLayer.voidDecayCount.value));
 
-    function createAdvancement(adv: DecimalSource, desc: CoercableComponent) {
+    const adv56eff: ComputedRef<Decimal> = computed(() => Decimal.pow(1.02, earth.gridLevel.value));
+
+    const adv57eff: ComputedRef<Decimal> = computed(() => Decimal.add(2, Decimal.div(Decimal.sub(advancements.value, 57), 10)));
+
+    function createAdvancement(adv: DecimalSource, name: string, desc: CoercableComponent) {
         const Display = coerceComponent(desc);
         return createMilestone(() => ({
             visibility: () =>
@@ -161,7 +169,7 @@ const layer = createLayer("adv", () => {
             display: {
                 requirement: jsx(() => (
                     <>
-                        <h3>{formatWhole(adv)} Advancement</h3>
+                        <h3>{name} [{formatWhole(adv)}]</h3>
                         <br />
                         <Display />
                     </>
@@ -173,172 +181,67 @@ const layer = createLayer("adv", () => {
         }));
     }
 
-    const milestones = [
-        createAdvancement(1, "Unlock Lightning"),
-        createAdvancement(2, "Unlock a new row of Flame Upgrades"),
-        createAdvancement(3, "Unlock Cryo"),
-        createAdvancement(4, "Gain 100% of Flame, Life, and Aqua Particles every second."),
-        createAdvancement(
-            5,
-            jsx(() => (
-                <>
-                    Flame, Life, and Aqua Particle gain is tripled for the first{" "}
-                    {formatWhole(adv5time.value)} seconds of a run.
-                </>
-            ))
-        ),
-        createAdvancement(6, "Unlock a new row of Life Buyables"),
-        createAdvancement(7, "Unlock Air"),
-        createAdvancement(8, "Unlock a new Aqua Bar"),
-        createAdvancement(
-            9,
-            "The milestone at 5 Advancements lasts 30 seconds longer per Advancement after 7"
-        ),
-        createAdvancement(10, "Purchasing Life Buyables does not spend Life Particles"),
-        createAdvancement(
-            11,
-            "The Air requirement uses a more efficient formula, you can buy max Air, and you can buy all Life Buyables at once."
-        ),
-        createAdvancement(12, "Unlock Earth, and all Aqua Bars are twice as fast."),
-        createAdvancement(
-            13,
-            "Layers only reset along their branches, rather than by row (this does NOT affect Cryo Challenges)."
-        ),
-        createAdvancement(
-            14,
-            "After 1 second of a reset, all Flame Upgrades are automatically purchased if you can afford them."
-        ),
-        createAdvancement(
-            15,
-            jsx(() => (
-                <>
-                    Wind/Zephyr/Tornado Speeds work sublinearly (square root) rather than
-                    logarithmically, and Aqua Bars are faster based on your Earth Grid Level (
-                    {format(adv15eff.value)}x)
-                </>
-            ))
-        ),
-        createAdvancement(
-            16,
-            "Unlock Particle Combinators, gain 100% of Lightning Particle gain every second, and starting a Cryo Challenge only resets the Aqua layer."
-        ),
-        createAdvancement(17, "All Life Buyables are automatically purchased every second."),
-        createAdvancement(18, "The Spark Molecule effect is cubed."),
-        createAdvancement(19, "You can activate two Lightning Modes at once."),
-        createAdvancement(20, "Unlock a new Aqua Bar."),
-        createAdvancement(21, "Increase the Molecule limit by 20%."),
-        createAdvancement(22, "Gain 100% of Air Particle gain every second."),
-        createAdvancement(23, "Gain 100% of Cryo Particle gain every second."),
-        createAdvancement(24, "Unlock Intrabonds."),
-        createAdvancement(25, "Gain 100% of Earth Particle gain every second."),
-        createAdvancement(26, "You can fill the Earth Grid with a single button."),
-        createAdvancement(
-            27,
-            "Keep Cryo Challenge completions on all resets, and increase the completion limits of the first two Cryo Challenges by 10."
-        ),
-        createAdvancement(28, "The Wave requirement scales 50% slower."),
-        createAdvancement(29, "Multiply Zephyr Speed and Tornado Speed by 10."),
-        createAdvancement(
-            30,
-            'Square the effect of the "Liquid Fire", "Magma Spirit" and "Speed = Heat" upgrades.'
-        ),
-        createAdvancement(
-            31,
-            "The effect of the milestone at 5 Advancements is permanently active, and all Aqua bar requirements scale 10% slower."
-        ),
-        createAdvancement(
-            32,
-            "The main Combinator effect also affects the first row of Particles."
-        ),
-        createAdvancement(
-            33,
-            "Unlock Light & Sound, square the Particle Combinator effect, and Lightning Modes are never de-selected by resets."
-        ),
-        createAdvancement(
-            34,
-            "All Light Energy colors are generated twice as fast, and you can buy max Life Buyables."
-        ),
-        createAdvancement(
-            35,
-            "Increase the Molecule limit by 20%, and the Wood Molecule effect uses a better formula."
-        ),
-        createAdvancement(
-            36,
-            "Covalent/Ionic Bond costs scale 67% slower, and all Light Energy colors are generated 3x as fast."
-        ),
-        createAdvancement(
-            37,
-            jsx(() => (
-                <>
-                    Unlock Metallic Bonds, and all Light Energy colors are generated 20% faster for
-                    every Advancement after 35 ({format(adv37eff.value)}x)
-                </>
-            ))
-        ),
-        createAdvancement(
-            38,
-            "Automatically level up and fill the Earth Grid if both are possible every second, and double Ultrasound gain."
-        ),
-        createAdvancement(
-            39,
-            "Color Energy Boosts only use up half of your Light Particles when used, and they last 50% longer."
-        ),
-        createAdvancement(40, "The amount of Magma Molecules are effectively squared."),
-        createAdvancement(41, "You can max all Molecules at once."),
-        createAdvancement(42, "All Light Energy colors are generated 4x as fast."),
-        createAdvancement(
-            43,
-            "Color Energy boosts only use up 33% of your Light Particles when used, and they last 50% longer."
-        ),
-        createAdvancement(
-            44,
-            "Gain 10% of Light Particle gain every second, and you can activate all Color Energy boosts at once if you have unlocked all seven Color Energy types."
-        ),
-        createAdvancement(
-            45,
-            "Unlock Void."
-        ),
-        createAdvancement(
-            46,
-            "You can activate three Lightning modes at once."
-        ),
-        createAdvancement(
-            47,
-            "Unlock a third Red Energy Upgrade."
-        ),
-        createAdvancement(
-            48,
-            jsx(() => (
-                <>
-                    Unspent Dark Matter boosts Light and Sound Particle gain at a reduced rate ({format(adv48eff.value)}x)
-                </>
-            ))
-        ),
-        createAdvancement(
-            49,
-            "Divide Metallic Bond & Boost costs by 10,000,000, triple Attraction Power gain, and increase the 'Temperature Decrease' completion limit by 10."
-        ),
-        createAdvancement(
-            50,
-            "The Plastic Molecule effect also affects Metallic Bond strength, and unlock a new row of Sound Upgrades."
-        ),
-        createAdvancement(
-            51,
-            jsx(() => (
-                <>
-                    Each active Void-Decayed Particle type increases Particle gain by 50% ({format(adv51eff.value)}x)
-                </>
-            ))
-        ),
-        createAdvancement(
-            52,
-            "Slightly increase the Wind/Zephyr/Tornado Speed exponent (0.5 -> 0.6)."
-        ),
-        createAdvancement(
-            53,
-            "Unlock Lightning Void Decay."
-        )
-    ];
+    const milestoneData: [string, CoercableComponent][] = [
+        ["Energetic Creation", "Unlock Lightning."],
+        ["Heat Evolution", "Unlock a new row of Flame Upgrades."],
+        ["Glacial Creation", "Unlock Cryo."],
+        ["Elemental Automation", "Gain 100% of Flame, Life, and Aqua Particles every second."],
+        ["Temporary Velocity", jsx(() => <span>Flame, Life, and Aqua Particle gain is tripled for the first{" "}{formatWhole(adv5time.value)} seconds of a run.</span>)],
+        ["Tropical Evolution", "Unlock a new row of Life Buyables."],
+        ["Pressure Creation", "Unlock Air."],
+        ["Aquatic Evolution", "Unlock a new Aqua Bar."],
+        ["Temporary Velocity II", "\"Temporary Velocity [5]\" lasts 30 seconds longer per Advancement after 7."],
+        ["Complimentary Vines", "Purchasing Life Buyables does not spend Life Particles."],
+        ["Pollen Evolution", "The Air requirement uses a more efficient formula, you can buy max Air, and you can buy all Life Buyables at once."],
+        ["Monolith Creation", "Unlock Earth, and all Aqua Bars are twice as fast."],
+        ["Tree Efficiency", "Layers only reset along their branches, rather than by row (this does NOT affect Cryo Challenges)."],
+        ["Heat Automation", "After 1 second of a reset, all Flame Upgrades are automatically purchased if you can afford them."],
+        ["Pressure Evolution", jsx(() => <span>Wind/Zephyr/Tornado Speeds work sublinearly (square root) rather than logarithmically, and Aqua Bars are faster based on your Earth Grid Level ({format(adv15eff.value)}x)</span>)],
+        ["Particle Fusion", "Unlock Particle Combinators, gain 100% of Lightning Particle gain every second, and starting a Cryo Challenge only resets the Aqua layer."],
+        ["Tropical Automation", "All Life Buyables are automatically purchased every second."],
+        ["Molecular Boost", "The Spark Molecule effect is cubed."],
+        ["Multitude of Thunder", "You can activate two Lightning Modes at once."],
+        ["Aquatic Evolution II", "Unlock a new Aqua Bar."],
+        ["Molecular Boost II", "Increase the Molecule limit by 20%."],
+        ["Pressure Automation", "Gain 100% of Air Particle gain every second."],
+        ["Glacial Automation", "Gain 100% of Cryo Particle gain every second."],
+        ["Molecular Evolution", "Unlock Intrabonds."],
+        ["Monolith Automation", "Gain 100% of Earth Particle gain every second."],
+        ["Monolith Evolution", "You can fill the Earth Grid with a single button."],
+        ["Glacial Evolution", "Keep Cryo Challenge completions on all resets, and increase the completion limits of the first two Cryo Challenges by 10."],
+        ["Aquatic Boost", "The Wave requirement scales 50% slower."],
+        ["Pressure Boost", "Multiply Zephyr & Tornado Speeds by 10."],
+        ["Heat Boost", "Square the effect of the \"Liquid Fire\", \"Magma Spirit\", and \"Speed = Heat\" upgrades."],
+        ["Permanent Velocity", "\"Temporary Velocity [5]\" is permanently active, and all Aqua bar requirements scale 10% slower."],
+        ["Combinator Evolution", "The main Combinator effect also affects the first row of Particles."],
+        ["Sensational Creation", "Unlock Light & Sound, square the Particle Combinator effect, and Lightning Modes are never de-selected by resets."],
+        ["Radiant Boost", "All Light Energy colors are generated twice as fast, and you can buy max Life Buyables."],
+        ["Molecular Boost III", "Increase the Molecule limit by 20%, and the Wood Molecule effect uses a better formula."],
+        ["Radiant Boost II", "All Light Energy colors are generated thrice as fast, and Covalent/Ionic Bond costs scale 67% slower."],
+        ["Bond Evolution", jsx(() => <span>Unlock Metallic Bonds, and all Light Energy colors are generated 20% faster for every Advancement after 35 ({format(adv37eff.value)}x)</span>)],
+        ["Monolith Automation II", "Automatically level up and fill the Earth Grid if both are possible every second, and double Ultrasound gain."],
+        ["Glamorous Boost", "Color Energy Boosts only use up half of your Light Particles when used, and they last 50% longer."],
+        ["Molecular Boost IV", "The amount of Magma Molecules are effectively squared."],
+        ["Molecular Quality", "You can max all Molecules at once."],
+        ["Radiant Boost III", "All Light Energy colors are generated 4x as fast."],
+        ["Glamorous Boost II", "Color Energy boosts only use up 33% of your Light Particles when used, and they last 50% longer."],
+        ["Radiant Automation", "Gain 10% of Light Particle gain every second, and you can activate all Color Energy boosts at once if you have unlocked all seven Color Energy types."],
+        ["Void Creation", "Unlock Void."],
+        ["Multitude of Thunder II", "You can activate three Lightning modes at once."],
+        ["Radiant Evolution", "Unlock a third Red Energy Upgrade."],
+        ["Void Evolution", jsx(() => <span>Unspent Dark Matter boosts Light and Sound Particle gain at a reduced rate ({format(adv48eff.value)}x)</span>)],
+        ["Bond Boost", "Divide Metallic Bond & Boost costs by 10,000,000, triple Attraction Power gain, and increase the 'Temperature Decrease' completion limit by 10."],
+        ["Sonic Evolution", "Unlock a new row of Sound Upgrades, and the Plastic Molecule effect also affects Metallic Bond strength."],
+        ["Void Evolution II", jsx(() => <span>Each active Void-Decayed Particle type increases Particle gain by 50% ({format(adv51eff.value)}x)</span>)],
+        ["Pressure Boost II", "Slightly increase the Wind/Zephyr/Tornado Speed exponent (0.5 -> 0.6)."],
+        ["Void Expansion", "Unlock Lightning Void Decay."],
+        ["Sonic Automation", "Gain 1% of Sound Particle gain every second, and increase Light Particle gain/s (10%/s -> 100%/s)"],
+        ["Multitude of Thunder III", "You can activate all 4 Lightning modes at once, and Earth Grid Level automation is 5x faster."],
+        ["Monolith Boost", jsx(() => <span>Each Earth Grid Level increases Particle gain by 2% ({format(adv56eff.value)}x)</span>)],
+        ["Radiant Boost IV", jsx(() => <span>Raise the effect of the second Red Light Upgrade to an exponent starting at 2, and increasing by 0.1 for each Advancement below this (^{format(adv57eff.value)})</span>)]
+    ]
+
+    const milestones = milestoneData.map((data, index) => createAdvancement(index+1, data[0], data[1]));
 
     return {
         id,
@@ -350,6 +253,8 @@ const layer = createLayer("adv", () => {
         adv37eff,
         adv48eff,
         adv51eff,
+        adv56eff,
+        adv57eff,
         display: jsx(() => (
             <>
                 <MainDisplay resource={advancements} color={color} />

@@ -153,6 +153,7 @@ const layer = createLayer("light", () => {
                     .div(10)
                     .plus(1)
                     .pow(Decimal.add(lights[0].buyables[1].amount.value, 1).log2())
+                    .pow(advancements.milestones[56].earned.value ? advancements.adv57eff.value : 1)
             ),
             computed(() =>
                 Decimal.add(lights[0].energy.value, 1)
@@ -656,7 +657,7 @@ const layer = createLayer("light", () => {
         if (advancements.milestones[43].earned.value)
             light.value = Decimal.add(
                 light.value,
-                Decimal.mul(conversion.currentGain.value, diff).div(10)
+                Decimal.mul(conversion.currentGain.value, diff).div(advancements.milestones[53].earned.value ? 1 : 10)
             );
     });
 

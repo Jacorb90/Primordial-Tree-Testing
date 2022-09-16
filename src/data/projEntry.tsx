@@ -96,6 +96,9 @@ export const main = createLayer("main", () => {
 
         if (advancements.milestones[50].earned.value)
             gain = gain.times(advancements.adv51eff.value);
+        
+        if (advancements.milestones[55].earned.value)
+            gain = gain.times(advancements.adv56eff.value);
 
         return gain;
     });

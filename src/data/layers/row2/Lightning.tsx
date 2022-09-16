@@ -79,18 +79,19 @@ const layer = createLayer("li", () => {
     });
 
     const clickableEffects = {
-        0: computed(() => Decimal.add(lightning.value, 1).log2().times(2)),
+        0: computed(() => Decimal.add(lightning.value, 1).log2().times(voidDecayed.value ? 20 : 2)),
         1: computed(() => {
-            let ret = Decimal.add(lightning.value, 1).sqrt();
+            let ret = Decimal.add(lightning.value, 1).root(voidDecayed.value ? 1.2 : 2);
 
-            if (ret.gte(100)) ret = ret.log(100).times(100);
+            const scStart = voidDecayed.value ? 750 : 100;
+            if (ret.gte(scStart)) ret = ret.log(scStart).times(scStart);
 
             return ret;
         }),
-        2: computed(() => Decimal.add(lightning.value, 1).log(3).plus(1).sqrt()),
+        2: computed(() => Decimal.add(lightning.value, 1).log(voidDecayed.value ? 1.1 : 3).plus(1).sqrt()),
         3: computed(() =>
             Decimal.add(lightning.value, 1)
-                .log10()
+                .log(voidDecayed.value ? 1.3 : 10)
                 .times(Decimal.add(main.particles.value, 1).sqrt())
                 .plus(1)
                 .log10()
@@ -99,7 +100,7 @@ const layer = createLayer("li", () => {
     };
 
     const lightningSelLimit = computed(() => {
-        return advancements.milestones[45].earned.value ? 3 : (advancements.milestones[18].earned.value ? 2 : 1);
+        return advancements.milestones[54].earned.value ? 4 : (advancements.milestones[45].earned.value ? 3 : (advancements.milestones[18].earned.value ? 2 : 1));
     });
 
     const clickables = [

@@ -248,7 +248,7 @@ const layer = createLayer("e", () => {
 
         if (advancements.milestones[37].earned.value) {
             autoTime.value += diff;
-            if (autoTime.value >= 1) {
+            if (autoTime.value >= (advancements.milestones[54].earned.value ? 0.2 : 1)) {
                 autoTime.value = 0;
                 if (Decimal.gte(earth.value, Decimal.mul(gridCost.value, 100))) {
                     levelUp.onClick();

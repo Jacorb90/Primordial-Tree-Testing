@@ -261,6 +261,13 @@ const layer = createLayer("sound", () => {
             ultrasound.value,
             Decimal.mul(sound.value, diff).times(ultrasoundGainMult.value)
         );
+
+        if (advancements.milestones[53].earned.value) {
+            sound.value = Decimal.add(
+                sound.value,
+                Decimal.mul(conversion.currentGain.value, diff).div(100)
+            )
+        }
     });
 
     return {
