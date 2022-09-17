@@ -418,7 +418,7 @@ const layer = createLayer("comb", () => {
             ],
             display: () => ({
                 title: "Plastic Molecule",
-                description: "Boost Ionic " + (advancements.milestones[49].earned.value ? "& Metallic" : "") + " Bond strength based on Attraction Power.",
+                description: "Boost " + (advancements.milestones[62].earned.value ? "Covalent (40% power), " : "") + "Ionic " + (advancements.milestones[49].earned.value ? "& Metallic" : "") + " Bond strength based on Attraction Power.",
                 effectDisplay: "+" + format(Decimal.sub(multiBuyableEffects[8].value, 1).times(100)) + "%"
             }),
             purchaseLimit: moleculeLimit
@@ -497,7 +497,7 @@ const layer = createLayer("comb", () => {
         })
     }));
     const covalenceBoostEff = computed(() => {
-        return Decimal.div(covalenceBoost.amount.value, 2).plus(1);
+        return Decimal.div(covalenceBoost.amount.value, 2).plus(advancements.milestones[62].earned.value ? Decimal.sub(multiBuyableEffects[8].value, 1).times(0.4).plus(1) : 1);
     });
 
     const ionicPower = createResource<DecimalSource>(0);

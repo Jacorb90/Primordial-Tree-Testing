@@ -3,7 +3,7 @@
  * @hidden
  */
 
-import { computed } from "@vue/reactivity";
+import { computed, ComputedRef } from "@vue/reactivity";
 import { unref } from "vue";
 import { main } from "data/projEntry";
 import { jsx, showIf, Visibility } from "features/feature";
@@ -20,12 +20,12 @@ import flame from "../row1/Flame";
 import life from "../row1/Life";
 import aqua from "../row1/Aqua";
 import lightning from "../row2/Lightning";
+import cryo from "../row2/Cryo";
 import { createClickable } from "features/clickables/clickable";
 import { addTooltip } from "features/tooltips/tooltip";
 import { Direction } from "util/common";
-import { Computable } from "util/computed";
 
-type VoidDecayTypes = "flame" | "life" | "aqua" | "lightning";
+type VoidDecayTypes = "flame" | "life" | "aqua" | "lightning" | "cryo";
 
 const layer = createLayer("v", () => {
     const id = "v";
@@ -64,7 +64,7 @@ const layer = createLayer("v", () => {
 
     const voidDecayRows: VoidDecayTypes[][] = [
         ["flame", "life", "aqua"],
-        ["lightning"]
+        ["lightning", "cryo"]
     ];
 
     const resetVoidDecays = createClickable(() => ({
@@ -82,7 +82,7 @@ const layer = createLayer("v", () => {
         }
     }));
 
-    const voidDecays: Record<VoidDecayTypes, Upgrade<UpgradeOptions & { baseCost: DecimalSource }>> = {
+    const voidDecays: Record<VoidDecayTypes, Upgrade<UpgradeOptions & { baseCost: ComputedRef<DecimalSource> | DecimalSource }>> = {
         flame: createUpgrade(() => ({
             display: {
                 title: "Flame Decay",
@@ -90,11 +90,11 @@ const layer = createLayer("v", () => {
                     <div>Cost: {formatWhole(unref(voidDecays.flame.cost) ?? "Infinity")} Dark Matter</div>
                 )
             },
-            baseCost: 5,
-            cost: () => voidDecayCostMult.value,
+            baseCost: computed(() => advancements.milestones[61].earned.value ? 2 : 5),
+            cost: () => voidDecayCostMult.value.times(advancements.milestones[61].earned.value ? 2 : 1),
             canAfford: () => Decimal.gte(darkMatter.value, unref(voidDecays.flame.cost) ?? "Infinity"),
             onPurchase: () => {
-                spentDarkMatter.value = Decimal.add(spentDarkMatter.value, Decimal.div(unref(voidDecays.flame.cost) ?? 0, voidDecays.flame.baseCost));
+                spentDarkMatter.value = Decimal.add(spentDarkMatter.value, Decimal.div(unref(voidDecays.flame.cost) ?? 0, unref(voidDecays.flame.baseCost)));
                 flame.treeNode.reset.reset();
             },
             style: {
@@ -108,11 +108,11 @@ const layer = createLayer("v", () => {
                     <div>Cost: {formatWhole(unref(voidDecays.life.cost) ?? "Infinity")} Dark Matter</div>
                 )
             },
-            baseCost: 5,
-            cost: () => voidDecayCostMult.value,
+            baseCost: computed(() => advancements.milestones[61].earned.value ? 2 : 5),
+            cost: () => voidDecayCostMult.value.times(advancements.milestones[61].earned.value ? 2 : 1),
             canAfford: () => Decimal.gte(darkMatter.value, unref(voidDecays.life.cost) ?? "Infinity"),
             onPurchase: () => {
-                spentDarkMatter.value = Decimal.add(spentDarkMatter.value, Decimal.div(unref(voidDecays.life.cost) ?? 0, voidDecays.life.baseCost));
+                spentDarkMatter.value = Decimal.add(spentDarkMatter.value, Decimal.div(unref(voidDecays.life.cost) ?? 0, unref(voidDecays.life.baseCost)));
                 life.treeNode.reset.reset();
             },
             style: {
@@ -126,11 +126,11 @@ const layer = createLayer("v", () => {
                     <div>Cost: {formatWhole(unref(voidDecays.aqua.cost) ?? "Infinity")} Dark Matter</div>
                 )
             },
-            baseCost: 5,
-            cost: () => voidDecayCostMult.value,
+            baseCost: computed(() => advancements.milestones[61].earned.value ? 2 : 5),
+            cost: () => voidDecayCostMult.value.times(advancements.milestones[61].earned.value ? 2 : 1),
             canAfford: () => Decimal.gte(darkMatter.value, unref(voidDecays.aqua.cost) ?? "Infinity"),
             onPurchase: () => {
-                spentDarkMatter.value = Decimal.add(spentDarkMatter.value, Decimal.div(unref(voidDecays.aqua.cost) ?? 0, voidDecays.aqua.baseCost));
+                spentDarkMatter.value = Decimal.add(spentDarkMatter.value, Decimal.div(unref(voidDecays.aqua.cost) ?? 0, unref(voidDecays.aqua.baseCost)));
                 aqua.treeNode.reset.reset();
             },
             style: {
@@ -149,8 +149,27 @@ const layer = createLayer("v", () => {
             cost: () => voidDecayCostMult.value.times(500),
             canAfford: () => Decimal.gte(darkMatter.value, unref(voidDecays.lightning.cost) ?? "Infinity"),
             onPurchase: () => {
-                spentDarkMatter.value = Decimal.add(spentDarkMatter.value, Decimal.div(unref(voidDecays.lightning.cost) ?? 0, voidDecays.lightning.baseCost));
+                spentDarkMatter.value = Decimal.add(spentDarkMatter.value, Decimal.div(unref(voidDecays.lightning.cost) ?? 0, unref(voidDecays.lightning.baseCost)));
                 lightning.treeNode.reset.reset();
+            },
+            style: {
+                color: "white"
+            }
+        } as UpgradeOptions & { baseCost: DecimalSource })),
+        cryo: createUpgrade(() => ({
+            visibility: () => showIf(advancements.milestones[60].earned.value),
+            display: {
+                title: "Cryo Decay",
+                description: jsx(() =>
+                    <div>Cost: {formatWhole(unref(voidDecays.cryo.cost) ?? "Infinity")} Dark Matter</div>
+                )
+            },
+            baseCost: 500,
+            cost: () => voidDecayCostMult.value.times(500),
+            canAfford: () => Decimal.gte(darkMatter.value, unref(voidDecays.cryo.cost) ?? "Infinity"),
+            onPurchase: () => {
+                spentDarkMatter.value = Decimal.add(spentDarkMatter.value, Decimal.div(unref(voidDecays.cryo.cost) ?? 0, unref(voidDecays.cryo.baseCost)));
+                cryo.treeNode.reset.reset();
             },
             style: {
                 color: "white"
@@ -159,7 +178,7 @@ const layer = createLayer("v", () => {
     }
 
     const voidDecayCount = computed(() => Object.values(voidDecays).filter(decay => decay.bought.value).length);
-    const voidDecayCostMult = computed(() => Object.values(voidDecays).filter(decay => decay.bought.value).reduce((a,c) => Decimal.mul(a, c.baseCost), Decimal.dOne));
+    const voidDecayCostMult = computed(() => Object.values(voidDecays).filter(decay => decay.bought.value).reduce((a,c) => Decimal.mul(a, unref(c.baseCost)), Decimal.dOne));
 
     return {
         id,

@@ -86,6 +86,12 @@ const layer = createLayer("adv", () => {
         "1e76",
         "1e82",
         "2.5e83",
+        "1.5e86",
+        "2e87",
+        "1.4e89",
+        "9e89",
+        "4e91",
+        "1e94",
         Decimal.dInf
     ];
 
@@ -224,7 +230,7 @@ const layer = createLayer("adv", () => {
         ["Molecular Boost IV", "The amount of Magma Molecules are effectively squared."],
         ["Molecular Quality", "You can max all Molecules at once."],
         ["Radiant Boost III", "All Light Energy colors are generated 4x as fast."],
-        ["Glamorous Boost II", "Color Energy boosts only use up 33% of your Light Particles when used, and they last 50% longer."],
+        ["Glamorous Boost II", "Color Energy Boosts only use up 33% of your Light Particles when used, and they last 50% longer."],
         ["Radiant Automation", "Gain 10% of Light Particle gain every second, and you can activate all Color Energy boosts at once if you have unlocked all seven Color Energy types."],
         ["Void Creation", "Unlock Void."],
         ["Multitude of Thunder II", "You can activate three Lightning modes at once."],
@@ -238,7 +244,13 @@ const layer = createLayer("adv", () => {
         ["Sonic Automation", "Gain 1% of Sound Particle gain every second, and increase Light Particle gain/s (10%/s -> 100%/s)"],
         ["Multitude of Thunder III", "You can activate all 4 Lightning modes at once, and Earth Grid Level automation is 5x faster."],
         ["Monolith Boost", jsx(() => <span>Each Earth Grid Level increases Particle gain by 2% ({format(adv56eff.value)}x)</span>)],
-        ["Radiant Boost IV", jsx(() => <span>Raise the effect of the second Red Light Upgrade to an exponent starting at 2, and increasing by 0.1 for each Advancement below this (^{format(adv57eff.value)})</span>)]
+        ["Radiant Boost IV", jsx(() => <span>Raise the effect of the second Red Light Upgrade to an exponent starting at 2, and increasing by 0.1 for each Advancement after this (^{format(adv57eff.value)})</span>)],
+        ["Glacial Reduction", "The first two Cryo Challenges have much weaker challenge effects & much smaller goals when Aqua is Void-Decayed."],
+        ["Radiant Evolution II", "Unlock White Light."],
+        ["Glamorous Quality", "Color Energy Boosts do not use up Light Particles when used."],
+        ["Void Expansion II", "Unlock Cryo Void Decay."],
+        ["Void Boost", "The first row of Void Decays increase Void Decay costs less (5x -> 2x), however their starting costs are increased by 1."],
+        ["Bond Boost II", "The Plastic Molecule effect also affects Covalent Bond strength, but only at 40% efficiency."]
     ]
 
     const milestones = milestoneData.map((data, index) => createAdvancement(index+1, data[0], data[1]));

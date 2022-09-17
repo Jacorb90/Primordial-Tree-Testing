@@ -7,8 +7,8 @@
             <details open>
                 <summary>v1.4 Void Decay - <time>2022-09-16</time></summary>
                 <ul>
-                    <li class="balancing">Balanced up to 1e86 Particles/s</li>
-                    <li class="feature">Implemented Advancements 45-57</li>
+                    <li class="balancing">Balanced up to 5e94 Particles/s</li>
+                    <li class="feature">Implemented Advancements 45-63</li>
                     <li class="feature">Implemented Void.</li>
                     <li class="feature">Gave Advancements names.</li>
                     <li class="fix">Updated to Profectus 0.5.1</li>

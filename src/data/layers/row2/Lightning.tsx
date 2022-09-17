@@ -48,8 +48,10 @@ const layer = createLayer("li", () => {
         3: createResource<boolean>(false)
     };
 
+    const baseReq = computed(() => voidDecayed.value ? "1e70" : 2.5e3);
+
     const conversion = createCumulativeConversion(() => ({
-        scaling: createPolynomialScaling(voidDecayed.value ? "1e70" : 2.5e3, 1 / 4),
+        scaling: createPolynomialScaling(baseReq, 1 / 4),
         baseResource: main.particles,
         gainResource: lightning,
         roundUpCost: true,
@@ -65,9 +67,14 @@ const layer = createLayer("li", () => {
                 () => Decimal.gte(light.lights[2].buyables[1].amount.value, 1)
             ),
             createExponentialModifier(
-                1 / 14,
+                1 / 7,
                 "Void Decay",
                 voidDecayed
+            ),
+            createMultiplicativeModifier(
+                light.lightBuyableEffects[7][1],
+                "White Energy Buyable 2",
+                () => Decimal.gte(light.lights[7].buyables[1].amount.value, 1)
             )
         )
     }));

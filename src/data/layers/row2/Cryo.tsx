@@ -30,17 +30,29 @@ import {
 Modifier
 } from "game/modifiers";
 import { globalBus } from "game/events";
+import voidLayer from "../side/Void";
+import { createExponentialModifier } from "game/modifiers";
 
 const layer = createLayer("c", () => {
     const id = "c";
     const name = "Cryo";
     const color = "#03f4fc";
 
+    const voidDecayed = computed(() => voidLayer.voidDecays.cryo.bought.value);
+
     const cryo = createResource<DecimalSource>(0, "Cryo Particles");
     const best = trackBest(cryo);
 
+    const baseReq = computed(() => {
+        let req: DecimalSource = aqua.voidDecayed.value ? 0.1 : 1e3;
+
+        if (voidDecayed.value) req = aqua.voidDecayed.value ? 1e5 : "1e45";
+
+        return req;
+    });
+
     const conversion = createCumulativeConversion(() => ({
-        scaling: createPolynomialScaling(computed(() => aqua.voidDecayed.value ? 0.1 : 1e3), computed(() => aqua.voidDecayed.value ? 15 / 4 : 3 / 4)),
+        scaling: createPolynomialScaling(baseReq, computed(() => aqua.voidDecayed.value ? 15 / 4 : 3 / 4)),
         baseResource: aqua.aqua,
         gainResource: cryo,
         roundUpCost: true,
@@ -54,6 +66,11 @@ const layer = createLayer("c", () => {
                 1e10,
                 "Void-Decayed Aqua",
                 aqua.voidDecayed
+            ),
+            createExponentialModifier(
+                1 / 7,
+                "Void Decay",
+                voidDecayed
             )
         )
     }));
@@ -66,20 +83,20 @@ const layer = createLayer("c", () => {
 
     const challenge1Data = {
         lifeBuyableCosts: computed(() =>
-            Decimal.div(challenges[0].completions.value, 4).plus(1.25)
+            Decimal.div(challenges[0].completions.value, (advancements.milestones[57].earned.value && aqua.voidDecayed.value) ? 16 : 4).plus(1.25)
         ),
-        aquaParticleCost: computed(() => Decimal.div(challenges[0].completions.value, 5).plus(1.2)),
+        aquaParticleCost: computed(() => Decimal.div(challenges[0].completions.value, (advancements.milestones[57].earned.value && aqua.voidDecayed.value) ? 40 : 5).plus(1.2)),
         reward: computed(() => {
             let comps = challenges[0].completions.value;
             if (Decimal.gte(comps, 11)) comps = Decimal.pow(comps, 2).div(11).plus(5);
 
             let reward = Decimal.add(cryo.value, 1)
-                .sqrt()
+                .pow(voidDecayed.value ? 2 : 0.5)
                 .times(comps)
                 .times(Decimal.pow(1.1, comps))
                 .plus(1);
 
-            const scs = Decimal.add(20, comps);
+            const scs = Decimal.add(voidDecayed.value ? 1e3 : 20, comps);
             if (reward.gte(scs)) reward = reward.log(scs.sqrt()).pow(2).times(scs).div(4);
 
             if (Decimal.gte(combinators.best.value, 6))
@@ -90,16 +107,18 @@ const layer = createLayer("c", () => {
     };
 
     const challenge2Data = {
-        aquaBarDiv: computed(() => Decimal.pow(1.5, challenges[1].completions.value).times(10)),
+        aquaBarDiv: computed(() => Decimal.pow(1.5, challenges[1].completions.value).times((advancements.milestones[57].earned.value && aqua.voidDecayed.value) ? 2.5 : 10)),
         reward: computed(() => {
             let comps = challenges[1].completions.value;
             if (Decimal.gte(comps, 11)) comps = Decimal.pow(comps, 2).div(11).plus(5);
 
             let eff = Decimal.mul(cryo.value, comps)
                 .plus(1)
-                .log10()
+                .log(voidDecayed.value ? 2 : 10)
                 .times(Decimal.gte(comps, 11) ? Decimal.sub(comps, 9).log10().plus(1).cbrt() : 1)
                 .plus(1);
+            
+            if (voidDecayed.value) eff = eff.times(5);
 
             if (Decimal.gte(combinators.best.value, 3))
                 eff = eff.pow(combinators.multiBuyableEffects[3].value);
@@ -114,7 +133,7 @@ const layer = createLayer("c", () => {
             let comps = challenges[2].completions.value;
             if (Decimal.gte(comps, 11)) comps = Decimal.pow(comps, 2).div(11).plus(5);
 
-            return Decimal.sqrt(comps).div(10).plus(1);
+            return Decimal.sqrt(comps).div(voidDecayed.value ? 8 : 10).plus(1);
         })
     };
 
@@ -147,7 +166,7 @@ const layer = createLayer("c", () => {
                 let comps: DecimalSource = challenges[0].completions.value;
                 if (Decimal.gte(comps, 20)) comps = Decimal.pow(comps, 2).div(20).plus(5);
                 if (Decimal.gte(comps, 10)) comps = Decimal.pow(comps, 2).div(10).plus(5);
-                return Decimal.pow(2, comps).times(100);
+                return Decimal.pow(2, comps).times(100).root((advancements.milestones[57].earned.value && aqua.voidDecayed.value) ? 7 : 1);
             },
             display: () => ({
                 title:
@@ -179,7 +198,7 @@ const layer = createLayer("c", () => {
             goal: () => {
                 let comps: DecimalSource = challenges[1].completions.value;
                 if (Decimal.gte(comps, 10)) comps = Decimal.pow(comps, 2).div(10).plus(5);
-                return Decimal.pow(2.5, comps).times(150);
+                return Decimal.pow(2.5, comps).times(150).root((advancements.milestones[57].earned.value && aqua.voidDecayed.value) ? 7 : 1);
             },
             display: () => ({
                 title:
@@ -267,7 +286,7 @@ const layer = createLayer("c", () => {
         visibility: () =>
             advancements.milestones[2].earned.value ? Visibility.Visible : Visibility.Hidden,
         layerID: id,
-        display: jsx(() => <img src="./nodes/cryo.png" />),
+        display: jsx(() => <img src={"./nodes/"+(voidDecayed.value ? "void_" : "")+"cryo.png"} />),
         color,
         reset,
         glowColor: () => (challenges.some(c => c.canComplete.value) ? "red" : "")
@@ -303,6 +322,7 @@ const layer = createLayer("c", () => {
         color,
         cryo,
         best,
+        voidDecayed,
         display: jsx(() => (
             <>
                 <MainDisplay resource={cryo} color={color} />

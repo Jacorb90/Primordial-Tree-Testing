@@ -70,10 +70,10 @@ interface ExtendedBuyableDisplay {
     unlocked?: boolean;
 };
 
-const colorNames = ["Red", "Orange", "Yellow", "Green", "Blue", "Indigo", "Violet"];
-const lighterColors = ["#FF4444", "#FFBF44", "#FFFF44", "#44FF44", "#4444FF", "#8F44B6", "#D844F7"];
-const lightColors = ["#FF0000", "#FF7F00", "#FFFF00", "#00FF00", "#0000FF", "#4B0082", "#9400D3"];
-const darkColors = ["#770000", "#773700", "#777700", "#007700", "#000077", "#250041", "#420061"];
+const colorNames = ["Red", "Orange", "Yellow", "Green", "Blue", "Indigo", "Violet", "White"];
+const lighterColors = ["#FF4444", "#FFBF44", "#FFFF44", "#44FF44", "#4444FF", "#8F44B6", "#D844F7", "#FFFFFF"];
+const lightColors = ["#FF0000", "#FF7F00", "#FFFF00", "#00FF00", "#0000FF", "#4B0082", "#9400D3", "#EEDDEE"];
+const darkColors = ["#770000", "#773700", "#777700", "#007700", "#000077", "#250041", "#420061", "#997799"];
 
 const layer = createLayer("light", () => {
     const id = "light";
@@ -317,6 +317,26 @@ const layer = createLayer("light", () => {
                     .div(6)
                     .plus(1)
             )
+        ],
+        [
+            computed(() =>
+                Decimal.div(lights[7].buyables[0].amount.value, 1e3)
+            ),
+            computed(() =>
+                Decimal.add(lights[7].energy.value, 1)
+                .log10()
+                .times(Decimal.sqrt(lights[7].buyables[1].amount.value))
+                .plus(1)
+                .sqrt()
+            ),
+            computed(() =>
+                Decimal.add(lights[7].energy.value, 1)
+                .log10()
+                .sqrt()
+                .times(lights[7].buyables[2].amount.value)
+                .div(7)
+                .plus(1)
+            )
         ]
     ];
 
@@ -442,6 +462,23 @@ const layer = createLayer("light", () => {
                 description: "Violet Energy boosts Indigo Energy gain at a reduced rate.",
                 effectDisplay: format(lightBuyableEffects[6][2].value) + "x"
             })
+        ],
+        [
+            () => ({
+                title: "Blinding Blight",
+                description: "Generate White Energy over time.",
+                effectDisplay: format(lightBuyableEffects[7][0].value) + "/s"
+            }),
+            () => ({
+                title: "Blacklight Inverted",
+                description: "White Energy boosts the gain of Lightning Particles at a reduced rate while it is Void-Decayed (unaffected by Void-Decay nerfs)",
+                effectDisplay: format(lightBuyableEffects[7][1].value) + "x"
+            }),
+            () => ({
+                title: "Ascension Incarnate",
+                description: "White Energy boosts Violet Energy gain at a reduced rate.",
+                effectDisplay: format(lightBuyableEffects[7][2].value) + "x"
+            })
         ]
     ];
 
@@ -459,13 +496,13 @@ const layer = createLayer("light", () => {
                 display: () => ({
                     title: "All Energy Boosts",
                     description:
-                        "Triples all Color Energy gain for " +
+                        "Activates all Color Energy Boosts at once [" +
                         formatTime(totalTime.value) +
-                        ", but sacrifices all Light Particles."
+                        "]"
                 }),
                 onClick: () => {
-                    lightSpells.forEach(spell => {
-                        spell.spell.onClick?.();
+                    lightSpells.forEach((spell, index) => {
+                        if (index < 7 || advancements.milestones[58].earned.value) spell.spell.onClick?.();
                     });
                 }
             } as ClickableOptions)
@@ -485,7 +522,7 @@ const layer = createLayer("light", () => {
         return t;
     });
 
-    const lightSpells: LightSpell[] = [...new Array(7)].map((_, index) => {
+    const lightSpells: LightSpell[] = [...new Array(8)].map((_, index) => {
         const time = createResource<DecimalSource>(0);
 
         const spell: Clickable<ClickableOptions> = createClickable(
@@ -502,6 +539,7 @@ const layer = createLayer("light", () => {
                             colorNames[index] +
                             " Energy gain for " +
                             formatTime(Decimal.eq(time.value, 0) ? totalTime.value : time.value) +
+                            (advancements.milestones[59].earned.value ? "" : (
                             ", but sacrifices " +
                             (advancements.milestones[42].earned.value
                                 ? "33% of"
@@ -509,10 +547,11 @@ const layer = createLayer("light", () => {
                                 ? "50% of"
                                 : "all") +
                             " Light Particles."
+                            ))
                     }),
                     onClick: () => {
                         time.value = totalTime.value;
-                        light.value = advancements.milestones[42].earned.value
+                        if (!advancements.milestones[59].earned.value) light.value = advancements.milestones[42].earned.value
                             ? Decimal.div(light.value, 1.5)
                             : advancements.milestones[38].earned.value
                             ? Decimal.div(light.value, 2)
@@ -540,7 +579,7 @@ const layer = createLayer("light", () => {
         };
     });
 
-    const lights: LightData[] = [...new Array(7)].map((_, index) => {
+    const lights: LightData[] = [...new Array(8)].map((_, index) => {
         const energy = createResource<DecimalSource>(0, colorNames[index] + " Energy");
 
         const gainMult = computed(() => {
@@ -553,7 +592,7 @@ const layer = createLayer("light", () => {
                 mult = mult.times(advancements.adv37eff.value);
             if (advancements.milestones[41].earned.value) mult = mult.times(4);
 
-            if (index < 6) mult = mult.times(lightBuyableEffects[index + 1][2].value);
+            if (index < 7) mult = mult.times(lightBuyableEffects[index + 1][2].value);
             if (advancements.milestones[46].earned.value) mult = mult.times(lightBuyableEffects[0][2].value);
 
             if (Decimal.gt(lightSpells[index].time.value, 0)) mult = mult.times(3);
@@ -576,9 +615,9 @@ const layer = createLayer("light", () => {
                     Decimal.pow(
                         index / 4 + bIndex / 2 + 2,
                         Decimal.pow(
-                            buyables[bIndex].amount.value,
+                            Decimal.add(buyables[bIndex].amount.value, (index == 7 && bIndex == 0) ? 5 : 0),
                             1 + (Math.sqrt(index) + bIndex) / 10
-                        ).plus((Math.sqrt(index) / 4 + Math.sqrt(bIndex)) * 3)
+                        ).plus((Math.sqrt(index) / 4 + Math.sqrt(bIndex)) * 3 + (index == 7 ? 2 + (bIndex == 0 ? 4 : 0) : 0))
                     ),
                 resource: bIndex == 0 ? light : energy,
                 display: processedBuyableData
@@ -614,7 +653,7 @@ const layer = createLayer("light", () => {
     });
 
     const tabFamily: TabFamily<TabFamilyOptions> = createTabFamily(
-        [...new Array(7)]
+        [...new Array(8)]
             .map<[string, () => TabButtonOptions]>((_, index) => [
                 colorNames[index],
                 () =>
@@ -623,7 +662,7 @@ const layer = createLayer("light", () => {
                             index == 0
                                 ? Visibility.Visible
                                 : showIf(
-                                      lights[index].buyables.length > 0 &&
+                                      lights[index].buyables.length > 0 && (index < 7 || advancements.milestones[58].earned.value) &&
                                           (index == 1 ? Decimal.gte(lights[0].buyables[0].amount.value, 1) && Decimal.gte(lights[0].buyables[1].amount.value, 1) : lights[index - 1].buyables.every(bbl =>
                                                 Decimal.gte(bbl.amount.value, 1)
                                             ))
@@ -642,7 +681,7 @@ const layer = createLayer("light", () => {
     );
 
     globalBus.on("update", diff => {
-        for (let i = 0; i < 7; i++) {
+        for (let i = 0; i < 8; i++) {
             lights[i].energy.value = Decimal.add(
                 lights[i].energy.value,
                 Decimal.mul(lightBuyableEffects[i][0].value, diff).times(lights[i].gainMult.value)
