@@ -36,7 +36,7 @@ const layer = createLayer("v", () => {
 
     const darkMatter = computed(() => {
         const particles = main.best.value;
-        return Decimal.div(particles, 1e45).root(10).sub(spentDarkMatter.value).floor().max(0);
+        return Decimal.div(particles, advancements.milestones[64].earned.value ? 1e39 : 1e45).root(10).sub(spentDarkMatter.value).floor().max(0);
     });
 
     const nextDarkMatter = computed(() => {

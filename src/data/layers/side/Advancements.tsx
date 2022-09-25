@@ -92,6 +92,8 @@ const layer = createLayer("adv", () => {
         "9e89",
         "4e91",
         "1e94",
+        "1.5e95",
+        "4e97",
         Decimal.dInf
     ];
 
@@ -250,7 +252,9 @@ const layer = createLayer("adv", () => {
         ["Glamorous Quality", "Color Energy Boosts do not use up Light Particles when used."],
         ["Void Expansion II", "Unlock Cryo Void Decay."],
         ["Void Boost", "The first row of Void Decays increase Void Decay costs less (5x -> 2x), however their starting costs are increased by 1."],
-        ["Bond Boost II", "The Plastic Molecule effect also affects Covalent Bond strength, but only at 40% efficiency."]
+        ["Bond Boost II", "The Plastic Molecule effect also affects Covalent Bond strength, but only at 40% efficiency."],
+        ["Monolith Evolution II", "Remove the Earth Grid from existence (but keep Earth Grid Levels, which now solely improve Earth Grid effects). Also, Earth Grid effects use a stronger base formula."],
+        ["Void Boost II", "Divide the Dark Matter starting requirement by 1,000,000."]
     ]
 
     const milestones = milestoneData.map((data, index) => createAdvancement(index+1, data[0], data[1]));

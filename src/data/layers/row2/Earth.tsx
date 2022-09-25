@@ -56,27 +56,34 @@ const layer = createLayer("e", () => {
     });
 
     const flameMult = computed(() => {
-        const rowFactors: { [key: number]: DecimalSource } = {};
-        const colFactors: { [key: number]: DecimalSource } = {};
+        let mult: Decimal;
 
-        for (let r = 1; r <= grid.rows; r++) {
-            for (let c = 1; c <= grid.cols; c++) {
-                if (grid.cells[r * 100 + c].state) {
-                    rowFactors[r] = Decimal.add(rowFactors[r] || 1, gridCellMult.value);
+        if (advancements.milestones[63].earned.value) {
+            mult = gridCellMult.value.times(25).plus(1).pow(2).pow(gridMultExp.value);
+        } else {
+            const rowFactors: { [key: number]: DecimalSource } = {};
+            const colFactors: { [key: number]: DecimalSource } = {};
 
-                    colFactors[c] = Decimal.add(colFactors[c] || 1, gridCellMult.value);
+            for (let r = 1; r <= grid.rows; r++) {
+                for (let c = 1; c <= grid.cols; c++) {
+                    if (grid.cells[r * 100 + c].state) {
+                        rowFactors[r] = Decimal.add(rowFactors[r] || 1, gridCellMult.value);
+
+                        colFactors[c] = Decimal.add(colFactors[c] || 1, gridCellMult.value);
+                    }
                 }
             }
+
+            const rowValues = Object.values(rowFactors);
+            const colValues = Object.values(colFactors);
+
+            const rowMult = rowValues.length == 0 ? 1 : rowValues.reduce((a, c) => Decimal.mul(a, c));
+            const colMult = colValues.length == 0 ? 1 : colValues.reduce((a, c) => Decimal.mul(a, c));
+
+            mult = Decimal.mul(rowMult, colMult).pow(gridMultExp.value);
+            if (mult.gte(10)) mult = Decimal.pow(10, mult.log10().sqrt());
         }
 
-        const rowValues = Object.values(rowFactors);
-        const colValues = Object.values(colFactors);
-
-        const rowMult = rowValues.length == 0 ? 1 : rowValues.reduce((a, c) => Decimal.mul(a, c));
-        const colMult = colValues.length == 0 ? 1 : colValues.reduce((a, c) => Decimal.mul(a, c));
-
-        let mult = Decimal.mul(rowMult, colMult).pow(gridMultExp.value);
-        if (mult.gte(10)) mult = Decimal.pow(10, mult.log10().sqrt());
         if (mult.gte(100)) mult = Decimal.pow(100, mult.log(100).cbrt());
 
         return mult;
@@ -133,9 +140,12 @@ const layer = createLayer("e", () => {
             customDisplay="WARNING: This will reset your Earth Grid!"
             forceOnClick={() => {
                 gridLevel.value = Decimal.sub(gridLevel.value, 1);
-                for (let r = 1; r <= grid.rows; r++) {
-                    for (let c = 1; c <= grid.cols; c++) {
-                        grid.setState(r * 100 + c, true);
+
+                if (!advancements.milestones[63].earned.value) {
+                    for (let r = 1; r <= grid.rows; r++) {
+                        for (let c = 1; c <= grid.cols; c++) {
+                            grid.setState(r * 100 + c, true);
+                        }
                     }
                 }
             }}
@@ -145,9 +155,9 @@ const layer = createLayer("e", () => {
     ));
 
     const levelUp = createClickable(() => ({
-        canClick: () => Object.values(grid.cells).every(cell => cell.state),
+        canClick: () => advancements.milestones[63].earned.value ? Decimal.gte(earth.value, Decimal.mul(gridCost.value, 50)) : Object.values(grid.cells).every(cell => cell.state),
         onClick: () => {
-            if (Decimal.gte(gridLevel.value, Decimal.sub(bestGridLevel.value, 1))) {
+            if (!advancements.milestones[63].earned.value && Decimal.gte(gridLevel.value, Decimal.sub(bestGridLevel.value, 1))) {
                 for (let r = 1; r <= grid.rows; r++) {
                     for (let c = 1; c <= grid.cols; c++) {
                         grid.setState(r * 100 + c, false);
@@ -158,12 +168,12 @@ const layer = createLayer("e", () => {
         },
         display: () => ({
             title: "Level Up",
-            description: "Levels up the Earth Grid, but resets it. Requires all grid cells filled."
+            description: advancements.milestones[63].earned.value ? ("Levels up the Earth Grid. Requirement: " + formatWhole(Decimal.mul(gridCost.value, 50)) + " Earth Particles.") : "Levels up the Earth Grid, but resets it. Requires all grid cells filled."
         })
     }));
 
     const fillGrid = createClickable(() => ({
-        visibility: () => showIf(advancements.milestones[25].earned.value),
+        visibility: () => showIf(advancements.milestones[25].earned.value && !advancements.milestones[63].earned.value),
         canClick: () =>
             Decimal.gte(earth.value, Decimal.mul(gridCost.value, 50)) &&
             !Object.values(grid.cells).every(cell => cell.state),
@@ -183,6 +193,7 @@ const layer = createLayer("e", () => {
     }));
 
     const grid = createGrid(() => ({
+        visibility: () => showIf(!advancements.milestones[63].earned.value),
         rows: 5,
         cols: 5,
         getStartState: () => false,
@@ -250,9 +261,9 @@ const layer = createLayer("e", () => {
             autoTime.value += diff;
             if (autoTime.value >= (advancements.milestones[54].earned.value ? 0.2 : 1)) {
                 autoTime.value = 0;
-                if (Decimal.gte(earth.value, Decimal.mul(gridCost.value, 100))) {
+                if (Decimal.gte(earth.value, Decimal.mul(gridCost.value, advancements.milestones[63].earned.value ? 50 : 100))) {
                     levelUp.onClick();
-                    fillGrid.onClick();
+                    if (!advancements.milestones[63].earned.value) fillGrid.onClick();
                 }
             }
         }
@@ -278,8 +289,7 @@ const layer = createLayer("e", () => {
                         <div>
                             Grid Level: {formatWhole(gridLevel.value)}
                             <br />
-                            Grid Cost: {formatWhole(gridCost.value)} Earth Particles
-                            <br />
+                            <span v-show={!advancements.milestones[63].earned.value}>Grid Cost: {formatWhole(gridCost.value)} Earth Particles<br/></span>
                             <br />
                             Flame Particle Multiplier: {format(flameMult.value)}x<br />
                             <span v-show={Decimal.gte(gridLevel.value, 1)}>
@@ -297,12 +307,14 @@ const layer = createLayer("e", () => {
                                 Particle Gain Mult: {format(particleGainMult.value, 2)}x<br />
                             </span>
                             <br />
-                            {render(fillGrid)}
-                            <br />
-                            {render(grid)}
-                            <br />
+                            <div v-show={!advancements.milestones[63].earned.value}>
+                                {render(fillGrid)}
+                                <br />
+                                {render(grid)}
+                                <br />
+                            </div>
                             <table>
-                                <tr>
+                                <tr v-show={!advancements.milestones[63].earned.value}>
                                     <td>{render(levelDown)}</td>
                                 </tr>
                                 <tr>
